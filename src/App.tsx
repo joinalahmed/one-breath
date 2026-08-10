@@ -8,10 +8,13 @@ import { CanvasGame } from './components/CanvasGame';
 import { SurfaceScreen } from './components/SurfaceScreen';
 import { TuningOverlay } from './components/TuningOverlay';
 import { TelemetryViewModal } from './components/TelemetryViewModal';
+import { SplashScreen } from './components/SplashScreen';
+import { OnboardingScreen } from './components/OnboardingScreen';
 import { soundManager } from './audioAndHaptics';
 
 const STATS_STORAGE_KEY = 'one_breath_player_stats_v1';
 const CHALLENGES_STORAGE_KEY = 'one_breath_daily_challenges_v1';
+const ONBOARDING_STORAGE_KEY = 'one_breath_onboarding_completed_v1';
 
 const DEFAULT_DAILY_CHALLENGES: DailyChallenge[] = [
   {
@@ -74,6 +77,14 @@ const DEFAULT_DAILY_CHALLENGES: DailyChallenge[] = [
 export default function App() {
   const [config, setConfig] = useState<GameConfig>(loadSavedConfig);
   const [phase, setPhase] = useState<GamePhase>('SURFACE');
+
+  // Onboarding/Splash State
+  const [showSplash, setShowSplash] = useState(() => {
+    return !localStorage.getItem(ONBOARDING_STORAGE_KEY);
+  });
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem(ONBOARDING_STORAGE_KEY);
+  });
 
   // Player Stats
   const [stats, setStats] = useState<PlayerStats>(() => {
@@ -183,6 +194,16 @@ export default function App() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [phase]);
+
+  // Onboarding handlers
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
+  };
 
   // Start Dive Handler (< 1 Second execution)
   const handleStartDive = () => {
@@ -347,47 +368,61 @@ export default function App() {
     <div className="w-full h-screen bg-slate-950 flex items-center justify-center font-sans antialiased">
       {/* Mobile Portrait Device Frame Container (aspect ratio 9:19.5 with max constraints) */}
       <div className="relative w-full max-w-md h-full max-h-[920px] bg-slate-900 shadow-2xl overflow-hidden md:rounded-3xl border-0 md:border-4 md:border-slate-800 flex flex-col">
+        {/* Splash Screen */}
+        <AnimatePresence>
+          {showSplash && <SplashScreen key="splash" onComplete={handleSplashComplete} />}
+        </AnimatePresence>
+
+        {/* Onboarding Screen */}
+        <AnimatePresence>
+          {showOnboarding && !showSplash && (
+            <OnboardingScreen key="onboarding" onComplete={handleOnboardingComplete} />
+          )}
+        </AnimatePresence>
+
         <AnimatePresence mode="wait">
-          {phase === 'SURFACE' ? (
-            <motion.div
-              key="surface"
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.04, filter: 'blur(4px)' }}
-              transition={{ duration: 0.28, ease: 'easeInOut' }}
-              className="w-full h-full flex flex-col"
-            >
-              <SurfaceScreen
-                stats={stats}
-                bots={INITIAL_BOTS}
-                dailyChallenges={dailyChallenges}
-                onClaimChallengeReward={handleClaimChallengeReward}
-                lastDiveResult={lastDiveResult}
-                onStartDive={handleStartDive}
-                onBuyUpgrade={handleBuyUpgrade}
-                onTradeFishForPearls={handleTradeFishForPearls}
-                onAddPearls={handleAddPearls}
-                onOpenTelemetryModal={() => setShowTelemetryModal(true)}
-                onOpenDebug={() => setShowTuningOverlay(true)}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="diving"
-              initial={{ opacity: 0, scale: 1.06, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="w-full h-full flex flex-col"
-            >
-              <CanvasGame
-                config={config}
-                upgrades={stats.upgrades}
-                streak={stats.streak}
-                onDiveComplete={handleDiveComplete}
-                onOpenDebug={() => setShowTuningOverlay(true)}
-              />
-            </motion.div>
+          {!showOnboarding && !showSplash && (
+            phase === 'SURFACE' ? (
+              <motion.div
+                key="surface"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.04, filter: 'blur(4px)' }}
+                transition={{ duration: 0.28, ease: 'easeInOut' }}
+                className="w-full h-full flex flex-col"
+              >
+                <SurfaceScreen
+                  stats={stats}
+                  bots={INITIAL_BOTS}
+                  dailyChallenges={dailyChallenges}
+                  onClaimChallengeReward={handleClaimChallengeReward}
+                  lastDiveResult={lastDiveResult}
+                  onStartDive={handleStartDive}
+                  onBuyUpgrade={handleBuyUpgrade}
+                  onTradeFishForPearls={handleTradeFishForPearls}
+                  onAddPearls={handleAddPearls}
+                  onOpenTelemetryModal={() => setShowTelemetryModal(true)}
+                  onOpenDebug={() => setShowTuningOverlay(true)}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="diving"
+                initial={{ opacity: 0, scale: 1.06, filter: 'blur(6px)' }}
+                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, scale: 0.96 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="w-full h-full flex flex-col"
+              >
+                <CanvasGame
+                  config={config}
+                  upgrades={stats.upgrades}
+                  streak={stats.streak}
+                  onDiveComplete={handleDiveComplete}
+                  onOpenDebug={() => setShowTuningOverlay(true)}
+                />
+              </motion.div>
+            )
           )}
         </AnimatePresence>
 
