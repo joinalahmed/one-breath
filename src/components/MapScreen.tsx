@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React from 'react';
+import { motion } from 'motion/react';
 import { PlayerStats } from '../types';
-import { DiveResultsSummary } from './DiveResultsSummary';
 
 interface DivingBank {
   id: string;
@@ -38,62 +37,9 @@ const DIVING_BANKS: DivingBank[] = [
   { id: 'aden', position: { x: 43, y: 72 }, width: 18, height: 12, locked: true, offsetX: 26, offsetY: 19, lockOffsetY: -12 },
 ];
 
-export const MapScreen: React.FC<MapScreenProps> = ({ stats, lastDiveResult, onSelectBank, onGoToVillage }) => {
-  const [showResults, setShowResults] = useState(!!lastDiveResult);
-
+export const MapScreen: React.FC<MapScreenProps> = ({ onSelectBank, onGoToVillage }) => {
   return (
     <div className="relative w-full h-full text-slate-100">
-      {/* DIVE RESULTS MODAL */}
-      <AnimatePresence>
-        {showResults && lastDiveResult && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm z-40"
-              onClick={() => setShowResults(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.7, y: 50 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.7, y: 50 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
-            >
-              <div className="pointer-events-auto w-11/12 max-w-sm">
-                <div
-                  className="bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 rounded-3xl border-2 border-cyan-400/40 shadow-2xl p-6 space-y-4"
-                  style={{ boxShadow: '0 0 40px rgba(34, 211, 238, 0.3), inset 0 1px 0 rgba(255,255,255,0.1)' }}
-                >
-                  <button
-                    onClick={() => setShowResults(false)}
-                    className="absolute top-3 right-3 w-7 h-7 rounded-full bg-slate-700/60 hover:bg-slate-600 flex items-center justify-center text-slate-300 hover:text-white transition-all"
-                  >
-                    X
-                  </button>
-                  <DiveResultsSummary
-                    outcome={lastDiveResult.outcome}
-                    maxDepth={lastDiveResult.maxDepth}
-                    diveDuration={lastDiveResult.diveDuration}
-                    coinsEarned={lastDiveResult.coinsEarned}
-                    foodEarned={lastDiveResult.foodEarned}
-                    shellsCollected={lastDiveResult.shellsCollected}
-                    rareCollected={lastDiveResult.rareCollected}
-                  />
-                  <button
-                    onClick={() => setShowResults(false)}
-                    className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-black uppercase tracking-wider rounded-xl shadow-lg"
-                  >
-                    Continue
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
       {/* Clickable areas over the image's existing buttons */}
       {DIVING_BANKS.map((bank) => (
         <motion.div

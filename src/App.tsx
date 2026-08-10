@@ -10,7 +10,7 @@ import { TuningOverlay } from './components/TuningOverlay';
 import { TelemetryViewModal } from './components/TelemetryViewModal';
 import { SplashScreen } from './components/SplashScreen';
 import { OnboardingScreen } from './components/OnboardingScreen';
-import { RescueModal } from './components/RescueModal';
+import { DiveReportModal } from './components/DiveReportModal';
 import { soundManager } from './audioAndHaptics';
 
 const STATS_STORAGE_KEY = 'one_breath_player_stats_v1';
@@ -74,6 +74,23 @@ const DEFAULT_DAILY_CHALLENGES: DailyChallenge[] = [
     icon: '🐙',
   },
 ];
+
+/** The result payload emitted by CanvasGame at the end of a dive. */
+type DiveResultPayload = {
+  outcome: 'surfaced' | 'shark' | 'drowned';
+  maxDepth: number;
+  diveDuration: number;
+  shellsCollected: number;
+  fishCollected: number;
+  shellsLost: number;
+  coinsEarned: number;
+  foodEarned: number;
+  potentialCoins: number;
+  potentialFood: number;
+  stoneCutAtDepth: number | null;
+  airAtSurfacing: number;
+  rareCollected?: number;
+};
 
 export default function App() {
   const [config, setConfig] = useState<GameConfig>(loadSavedConfig);
@@ -169,12 +186,15 @@ export default function App() {
   // Overlays
   const [showTuningOverlay, setShowTuningOverlay] = useState(false);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
-  const [showRescueModal, setShowRescueModal] = useState(false);
-  const [pendingRescue, setPendingRescue] = useState<{
-    outcome: 'drowned' | 'shark';
-    treasureValue: number;
-    result: any;
+
+  // The single end-of-dive report (replaces the old rescue + defeat + summary popups).
+  const [diveReport, setDiveReport] = useState<{
+    result: DiveResultPayload;
+    rescueOffered: boolean;
+    rescueCost: number;
   } | null>(null);
+  // Bumped on retry to force a fresh CanvasGame mount without leaving the dive view.
+  const [diveKey, setDiveKey] = useState(0);
 
   // Save Stats & Challenges to LocalStorage
   useEffect(() => {
@@ -215,11 +235,9 @@ export default function App() {
     localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
   };
 
-  // Test rescue modal (for debugging)
+  // Preview the end-of-dive report (for debugging)
   const testRescueModal = () => {
-    setPendingRescue({
-      outcome: 'shark',
-      treasureValue: 50,
+    setDiveReport({
       result: {
         outcome: 'shark',
         maxDepth: 25,
@@ -227,14 +245,17 @@ export default function App() {
         shellsCollected: 5,
         fishCollected: 1,
         shellsLost: 2,
-        coinsEarned: 50,
-        foodEarned: 1,
+        coinsEarned: 0,
+        foodEarned: 0,
+        potentialCoins: 80,
+        potentialFood: 1,
         stoneCutAtDepth: null,
         airAtSurfacing: 0,
         rareCollected: 0,
       },
+      rescueOffered: true,
+      rescueCost: 20,
     });
-    setShowRescueModal(true);
   };
 
   // Start Dive Handler — plays boat departure video then enters dive
@@ -301,31 +322,9 @@ export default function App() {
     }));
   };
 
-  // Handle Rescue Modal
-  const handleRescue = () => {
-    if (pendingRescue && stats.coins >= Math.ceil(pendingRescue.treasureValue * 0.25)) {
-      const rescueCost = Math.ceil(pendingRescue.treasureValue * 0.25);
-      // Deduct rescue cost but keep the treasure
-      setStats((prev) => ({
-        ...prev,
-        coins: prev.coins - rescueCost,
-      }));
-      soundManager.playCoinPickup();
-      processRescuedDiveResult(pendingRescue.result);
-      setShowRescueModal(false);
-      setPendingRescue(null);
-    }
-  };
-
-  const handleAcceptLoss = () => {
-    if (pendingRescue) {
-      processRescuedDiveResult({ ...pendingRescue.result, coinsEarned: 0, foodEarned: 0 });
-      setShowRescueModal(false);
-      setPendingRescue(null);
-    }
-  };
-
-  const processRescuedDiveResult = (result: any) => {
+  // Commit a finished dive to stats, challenges, telemetry, and lastDiveResult.
+  // Phase/music transitions are handled by the caller (report actions below).
+  const commitDiveResult = (result: DiveResultPayload) => {
     // 1. Calculate new stats
     setStats((prev) => {
       const nextStreak = result.outcome === 'surfaced' ? prev.streak + 1 : 0;
@@ -403,48 +402,62 @@ export default function App() {
       backgroundedMidDive: false,
     };
     appendTelemetryLog(logEntry);
+  };
 
-    // 4. Return to surface screen
+  // Dive Resolution Callback — open the single end-of-dive report (no stats are
+  // committed until the player acts on it, so a rescue can restore the haul).
+  const handleDiveComplete = useCallback(
+    (result: DiveResultPayload) => {
+      const failed = result.outcome !== 'surfaced';
+      const treasure = result.potentialCoins || 0;
+      // Offer a rescue only when there's a haul worth saving or a streak on the line.
+      const rescueOffered = failed && (treasure >= 30 || stats.streak > 0);
+      setDiveReport({
+        result,
+        rescueOffered,
+        rescueCost: Math.max(1, Math.ceil(treasure * 0.25)),
+      });
+      // Phase stays 'DIVING' so the report overlays the frozen final frame.
+    },
+    [stats.streak]
+  );
+
+  // Accept the result as-is: keep earnings on success, forfeit the haul on failure.
+  const settledResult = (r: DiveResultPayload): DiveResultPayload =>
+    r.outcome === 'surfaced' ? r : { ...r, coinsEarned: 0, foodEarned: 0 };
+
+  const handleReportContinue = () => {
+    if (!diveReport) return;
+    commitDiveResult(settledResult(diveReport.result));
+    setDiveReport(null);
     soundManager.restoreBgMusic();
     setPhase('SURFACE');
   };
 
-  // Dive Resolution Callback
-  const handleDiveComplete = useCallback(
-    (result: {
-      outcome: 'surfaced' | 'shark' | 'drowned';
-      maxDepth: number;
-      diveDuration: number;
-      shellsCollected: number;
-      fishCollected: number;
-      shellsLost: number;
-      coinsEarned: number;
-      foodEarned: number;
-      stoneCutAtDepth: number | null;
-      airAtSurfacing: number;
-      rareCollected?: number;
-    }) => {
-      // Only show rescue modal on FAILED dives with large catch OR at-risk streak
-      const isFailed = result.outcome !== 'surfaced';
-      const hasLargeCatch = result.coinsEarned >= 50; // Large haul worth saving
-      const hasStreakAtRisk = stats.streak > 0; // Losing streak is painful
+  const handleReportRetry = () => {
+    if (!diveReport) return;
+    commitDiveResult(settledResult(diveReport.result));
+    setDiveReport(null);
+    setDiveKey((k) => k + 1); // force a fresh CanvasGame mount
+    soundManager.dimBgMusic();
+    setPhase('DIVING');
+  };
 
-      if (isFailed && (hasLargeCatch || hasStreakAtRisk)) {
-        // Show rescue modal for important failures
-        setPendingRescue({
-          outcome: result.outcome,
-          treasureValue: result.coinsEarned,
-          result,
-        });
-        setShowRescueModal(true);
-        return;
-      }
-
-      // Otherwise process immediately (success or unimportant failure)
-      processRescuedDiveResult(result);
-    },
-    [config.DEPTH_MULTIPLIER_DIVISOR, stats.streak]
-  );
+  const handleReportRescue = () => {
+    if (!diveReport || stats.coins < diveReport.rescueCost) return;
+    const { result, rescueCost } = diveReport;
+    soundManager.playCoinPickup();
+    // Pay the fee, then bank the full would-be haul.
+    setStats((prev) => ({ ...prev, coins: prev.coins - rescueCost }));
+    commitDiveResult({
+      ...result,
+      coinsEarned: result.potentialCoins || 0,
+      foodEarned: result.potentialFood || 0,
+    });
+    setDiveReport(null);
+    soundManager.restoreBgMusic();
+    setPhase('SURFACE');
+  };
 
   return (
     <div className="w-full h-screen bg-slate-950 flex items-center justify-center font-sans antialiased">
@@ -517,6 +530,7 @@ export default function App() {
               className="w-full h-full flex flex-col"
             >
               <CanvasGame
+                key={diveKey}
                 config={config}
                 upgrades={stats.upgrades}
                 streak={stats.streak}
@@ -529,16 +543,26 @@ export default function App() {
 
         {/* OVERLAYS */}
         <AnimatePresence>
-          {/* Rescue Modal - Shows when dive fails with treasure */}
-          {showRescueModal && pendingRescue && (
-            <RescueModal
-              key="rescue-modal"
-              outcome={pendingRescue.outcome}
-              treasureValue={pendingRescue.treasureValue}
-              rescueCost={Math.ceil(pendingRescue.treasureValue * 0.25)}
+          {/* Unified end-of-dive report — outcome, stats, and inline rescue offer */}
+          {diveReport && (
+            <DiveReportModal
+              key="dive-report"
+              outcome={diveReport.result.outcome}
+              maxDepth={diveReport.result.maxDepth}
+              diveDuration={diveReport.result.diveDuration}
+              shellsCollected={diveReport.result.shellsCollected}
+              rareCollected={diveReport.result.rareCollected || 0}
+              coinsEarned={diveReport.result.coinsEarned}
+              foodEarned={diveReport.result.foodEarned}
+              potentialCoins={diveReport.result.potentialCoins || 0}
+              potentialFood={diveReport.result.potentialFood || 0}
+              previousStreak={stats.streak}
+              rescueOffered={diveReport.rescueOffered}
+              rescueCost={diveReport.rescueCost}
               playerCoins={stats.coins}
-              onRescue={handleRescue}
-              onAcceptLoss={handleAcceptLoss}
+              onRescue={handleReportRescue}
+              onContinue={handleReportContinue}
+              onRetry={handleReportRetry}
             />
           )}
 

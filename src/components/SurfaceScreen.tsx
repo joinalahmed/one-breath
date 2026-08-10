@@ -4,11 +4,10 @@ import { PlayerStats, UpgradesState, BotDiver, DailyChallenge } from '../types';
 import { simulateBotActivity } from '../bots';
 import { soundManager } from '../audioAndHaptics';
 import { getPlayerRank, getNextRank, DiverRankInfo } from '../ranks';
-import { RankUpModal, StreakComboBanner, DefeatModal } from './AnimatedOverlayEffects';
+import { RankUpModal, StreakComboBanner } from './AnimatedOverlayEffects';
 import { HavenVillageScreen } from './HavenVillageScreen';
 import { MapScreen } from './MapScreen';
 import { BubbleOverlay } from './BubbleOverlay';
-import { DiveResultsSummary } from './DiveResultsSummary';
 import { UpgradeImpactInfo } from './UpgradeImpactInfo';
 
 interface SurfaceScreenProps {
@@ -126,21 +125,6 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   }, [stats.streak]);
 
   const prevRankLevelRef = useRef(currentRank.level);
-  const [showDefeatModal, setShowDefeatModal] = useState(false);
-  const prevDiveResultRef = useRef<typeof lastDiveResult>(null);
-
-  // Only show defeat modal ONCE when dive result changes to a failed outcome
-  useEffect(() => {
-    if (lastDiveResult && lastDiveResult !== prevDiveResultRef.current) {
-      prevDiveResultRef.current = lastDiveResult;
-
-      if (lastDiveResult.outcome !== 'surfaced') {
-        setShowDefeatModal(true);
-      } else {
-        setShowDefeatModal(false);
-      }
-    }
-  }, [lastDiveResult]);
 
   useEffect(() => {
     if (currentRank.level > prevRankLevelRef.current) {
@@ -843,21 +827,6 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
           <RankUpModal
             rank={unlockedRankModal}
             onClose={() => setUnlockedRankModal(null)}
-          />
-        )}
-
-        {showDefeatModal && lastDiveResult && (
-          <DefeatModal
-            outcome={lastDiveResult.outcome}
-            maxDepth={lastDiveResult.maxDepth}
-            previousStreak={stats.streak}
-            onRetry={() => {
-              setShowDefeatModal(false);
-              onStartDive();
-            }}
-            onReturnToVillage={() => {
-              setShowDefeatModal(false);
-            }}
           />
         )}
       </AnimatePresence>
