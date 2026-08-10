@@ -10,6 +10,7 @@ import { TuningOverlay } from './components/TuningOverlay';
 import { TelemetryViewModal } from './components/TelemetryViewModal';
 import { SplashScreen } from './components/SplashScreen';
 import { OnboardingScreen } from './components/OnboardingScreen';
+import { RescueModal } from './components/RescueModal';
 import { soundManager } from './audioAndHaptics';
 
 const STATS_STORAGE_KEY = 'one_breath_player_stats_v1';
@@ -168,6 +169,12 @@ export default function App() {
   // Overlays
   const [showTuningOverlay, setShowTuningOverlay] = useState(false);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
+  const [showRescueModal, setShowRescueModal] = useState(false);
+  const [pendingRescue, setPendingRescue] = useState<{
+    outcome: 'drowned' | 'shark';
+    treasureValue: number;
+    result: any;
+  } | null>(null);
 
   // Save Stats & Challenges to LocalStorage
   useEffect(() => {
@@ -271,6 +278,113 @@ export default function App() {
     }));
   };
 
+  // Handle Rescue Modal
+  const handleRescue = () => {
+    if (pendingRescue && stats.coins >= Math.ceil(pendingRescue.treasureValue * 0.25)) {
+      const rescueCost = Math.ceil(pendingRescue.treasureValue * 0.25);
+      // Deduct rescue cost but keep the treasure
+      setStats((prev) => ({
+        ...prev,
+        coins: prev.coins - rescueCost,
+      }));
+      soundManager.playCoinPickup();
+      processRescuedDiveResult(pendingRescue.result);
+      setShowRescueModal(false);
+      setPendingRescue(null);
+    }
+  };
+
+  const handleAcceptLoss = () => {
+    if (pendingRescue) {
+      processRescuedDiveResult({ ...pendingRescue.result, coinsEarned: 0, foodEarned: 0 });
+      setShowRescueModal(false);
+      setPendingRescue(null);
+    }
+  };
+
+  const processRescuedDiveResult = (result: any) => {
+    // 1. Calculate new stats
+    setStats((prev) => {
+      const nextStreak = result.outcome === 'surfaced' ? prev.streak + 1 : 0;
+      const newTotalCoins = prev.coins + result.coinsEarned;
+      const newTotalFood = prev.food + result.foodEarned;
+
+      return {
+        ...prev,
+        coins: newTotalCoins,
+        food: newTotalFood,
+        streak: nextStreak,
+        totalDives: prev.totalDives + 1,
+        bestDepth: Math.max(prev.bestDepth, result.maxDepth),
+        bestScore: Math.max(prev.bestScore, result.coinsEarned),
+      };
+    });
+
+    // 2. Progress Daily Challenges
+    setDailyChallenges((prevChallenges) =>
+      prevChallenges.map((ch) => {
+        if (ch.completed) return ch;
+        let newProgress = ch.current;
+
+        if (ch.id === 'pearl_collector') {
+          newProgress += result.coinsEarned;
+        } else if (ch.id === 'reef_fisherman') {
+          newProgress += result.foodEarned;
+        } else if (ch.id === 'trench_explorer') {
+          newProgress = Math.max(newProgress, result.maxDepth);
+        } else if (ch.id === 'safe_freediver') {
+          if (result.outcome === 'surfaced') newProgress += 1;
+        } else if (ch.id === 'abyssal_fauna') {
+          newProgress += result.rareCollected || 0;
+        }
+
+        const isNowCompleted = newProgress >= ch.target;
+        return {
+          ...ch,
+          current: Math.min(newProgress, ch.target),
+          completed: isNowCompleted,
+        };
+      })
+    );
+
+    setLastDiveResult({
+      outcome: result.outcome,
+      maxDepth: result.maxDepth,
+      diveDuration: result.diveDuration,
+      coinsEarned: result.coinsEarned,
+      foodEarned: result.foodEarned,
+      shellsCollected: result.shellsCollected,
+      rareCollected: result.rareCollected || 0,
+      stoneCutAtDepth: result.stoneCutAtDepth,
+    });
+
+    // 3. Log Telemetry
+    const logs = loadTelemetryLogs();
+    const logEntry: DiveTelemetryLog = {
+      id: `dive_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      sessionId: getOrCreateSessionId(),
+      deviceClass: window.innerWidth < 640 ? 'mobile' : 'desktop',
+      diveIndex: logs.length + 1,
+      maxDepth: result.maxDepth,
+      diveDuration: result.diveDuration,
+      outcome: result.outcome,
+      shellsCollected: result.shellsCollected,
+      fishCollected: result.fishCollected,
+      shellsLost: result.shellsLost,
+      scoreBanked: result.coinsEarned,
+      depthMultiplier: 1 + result.maxDepth / config.DEPTH_MULTIPLIER_DIVISOR,
+      streakAtStart: stats.streak,
+      stoneCutAtDepth: result.stoneCutAtDepth,
+      airAtSurfacing: result.airAtSurfacing,
+      backgroundedMidDive: false,
+    };
+    appendTelemetryLog(logEntry);
+
+    // 4. Return to surface screen
+    setPhase('SURFACE');
+  };
+
   // Dive Resolution Callback
   const handleDiveComplete = useCallback(
     (result: {
@@ -286,86 +400,19 @@ export default function App() {
       airAtSurfacing: number;
       rareCollected?: number;
     }) => {
-      // 1. Calculate new stats
-      setStats((prev) => {
-        const nextStreak = result.outcome === 'surfaced' ? prev.streak + 1 : 0;
-        const newTotalCoins = prev.coins + result.coinsEarned;
-        const newTotalFood = prev.food + result.foodEarned;
+      // If dive failed, show rescue modal first
+      if (result.outcome !== 'surfaced' && result.coinsEarned > 0) {
+        setPendingRescue({
+          outcome: result.outcome,
+          treasureValue: result.coinsEarned,
+          result,
+        });
+        setShowRescueModal(true);
+        return;
+      }
 
-        return {
-          ...prev,
-          coins: newTotalCoins,
-          food: newTotalFood,
-          streak: nextStreak,
-          totalDives: prev.totalDives + 1,
-          bestDepth: Math.max(prev.bestDepth, result.maxDepth),
-          bestScore: Math.max(prev.bestScore, result.coinsEarned),
-        };
-      });
-
-      // 2. Progress Daily Challenges
-      setDailyChallenges((prevChallenges) =>
-        prevChallenges.map((ch) => {
-          if (ch.completed) return ch;
-          let newProgress = ch.current;
-
-          if (ch.id === 'pearl_collector') {
-            newProgress += result.coinsEarned;
-          } else if (ch.id === 'reef_fisherman') {
-            newProgress += result.foodEarned;
-          } else if (ch.id === 'trench_explorer') {
-            newProgress = Math.max(newProgress, result.maxDepth);
-          } else if (ch.id === 'safe_freediver') {
-            if (result.outcome === 'surfaced') newProgress += 1;
-          } else if (ch.id === 'abyssal_fauna') {
-            newProgress += result.rareCollected || 0;
-          }
-
-          const isNowCompleted = newProgress >= ch.target;
-          return {
-            ...ch,
-            current: Math.min(newProgress, ch.target),
-            completed: isNowCompleted,
-          };
-        })
-      );
-
-      setLastDiveResult({
-        outcome: result.outcome,
-        maxDepth: result.maxDepth,
-        diveDuration: result.diveDuration,
-        coinsEarned: result.coinsEarned,
-        foodEarned: result.foodEarned,
-        shellsCollected: result.shellsCollected,
-        rareCollected: result.rareCollected || 0,
-        stoneCutAtDepth: result.stoneCutAtDepth,
-      });
-
-      // 2. Log Telemetry
-      const logs = loadTelemetryLogs();
-      const logEntry: DiveTelemetryLog = {
-        id: `dive_${Date.now()}`,
-        timestamp: new Date().toISOString(),
-        sessionId: getOrCreateSessionId(),
-        deviceClass: window.innerWidth < 640 ? 'mobile' : 'desktop',
-        diveIndex: logs.length + 1,
-        maxDepth: result.maxDepth,
-        diveDuration: result.diveDuration,
-        outcome: result.outcome,
-        shellsCollected: result.shellsCollected,
-        fishCollected: result.fishCollected,
-        shellsLost: result.shellsLost,
-        scoreBanked: result.coinsEarned,
-        depthMultiplier: 1 + result.maxDepth / config.DEPTH_MULTIPLIER_DIVISOR,
-        streakAtStart: stats.streak,
-        stoneCutAtDepth: result.stoneCutAtDepth,
-        airAtSurfacing: result.airAtSurfacing,
-        backgroundedMidDive: false,
-      };
-      appendTelemetryLog(logEntry);
-
-      // 3. Return to surface screen
-      setPhase('SURFACE');
+      // Otherwise process immediately
+      processRescuedDiveResult(result);
     },
     [config.DEPTH_MULTIPLIER_DIVISOR, stats.streak]
   );
@@ -434,6 +481,19 @@ export default function App() {
 
         {/* OVERLAYS */}
         <AnimatePresence>
+          {/* Rescue Modal - Shows when dive fails with treasure */}
+          {showRescueModal && pendingRescue && (
+            <RescueModal
+              key="rescue-modal"
+              outcome={pendingRescue.outcome}
+              treasureValue={pendingRescue.treasureValue}
+              rescueCost={Math.ceil(pendingRescue.treasureValue * 0.25)}
+              playerCoins={stats.coins}
+              onRescue={handleRescue}
+              onAcceptLoss={handleAcceptLoss}
+            />
+          )}
+
           {showTuningOverlay && (
             <TuningOverlay
               key="tuning-modal"
