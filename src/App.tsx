@@ -422,8 +422,9 @@ export default function App() {
       airAtSurfacing: number;
       rareCollected?: number;
     }) => {
-      // If dive failed, show rescue modal first
-      if (result.outcome !== 'surfaced' && result.coinsEarned > 0) {
+      // If dive failed, show rescue modal to offer saving treasure
+      // Shows even with 0 treasure (player can't rescue but sees the option)
+      if (result.outcome !== 'surfaced') {
         setPendingRescue({
           outcome: result.outcome,
           treasureValue: result.coinsEarned,
