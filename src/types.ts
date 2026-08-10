@@ -1,4 +1,4 @@
-export type GamePhase = 'SURFACE' | 'DIVING' | 'RESULTS' | 'TELEMETRY';
+export type GamePhase = 'SURFACE' | 'DIVE_TRANSITION' | 'DIVING' | 'RESULTS' | 'TELEMETRY';
 
 export type DiveOutcome = 'surfaced' | 'shark' | 'drowned';
 
