@@ -1,0 +1,416 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { GameConfig, PlayerStats, GamePhase, DiveTelemetryLog, DailyChallenge } from './types';
+import { loadSavedConfig } from './config';
+import { getOrCreateSessionId, appendTelemetryLog, loadTelemetryLogs } from './telemetry';
+import { INITIAL_BOTS } from './bots';
+import { CanvasGame } from './components/CanvasGame';
+import { SurfaceScreen } from './components/SurfaceScreen';
+import { TuningOverlay } from './components/TuningOverlay';
+import { TelemetryViewModal } from './components/TelemetryViewModal';
+import { soundManager } from './audioAndHaptics';
+
+const STATS_STORAGE_KEY = 'one_breath_player_stats_v1';
+const CHALLENGES_STORAGE_KEY = 'one_breath_daily_challenges_v1';
+
+const DEFAULT_DAILY_CHALLENGES: DailyChallenge[] = [
+  {
+    id: 'pearl_collector',
+    title: 'Pearl Collector',
+    description: 'Gather 80 Pearls from deep sea shells',
+    target: 80,
+    current: 0,
+    rewardCoins: 120,
+    completed: false,
+    claimed: false,
+    icon: '💎',
+  },
+  {
+    id: 'reef_fisherman',
+    title: 'Reef Fisherman',
+    description: 'Catch 5 Fish or Eels on your dives',
+    target: 5,
+    current: 0,
+    rewardCoins: 100,
+    completed: false,
+    claimed: false,
+    icon: '🐟',
+  },
+  {
+    id: 'trench_explorer',
+    title: 'Trench Explorer',
+    description: 'Reach a depth of at least 25 meters',
+    target: 25,
+    current: 0,
+    rewardCoins: 150,
+    completed: false,
+    claimed: false,
+    icon: '🌊',
+  },
+  {
+    id: 'safe_freediver',
+    title: 'Master Freediver',
+    description: 'Complete 3 dives and surface safely',
+    target: 3,
+    current: 0,
+    rewardCoins: 110,
+    completed: false,
+    claimed: false,
+    icon: '🤿',
+  },
+  {
+    id: 'abyssal_fauna',
+    title: 'Rare Species Hunter',
+    description: 'Catch 2 rare creatures (Seahorse, Crab, Eel, Octopus)',
+    target: 2,
+    current: 0,
+    rewardCoins: 200,
+    completed: false,
+    claimed: false,
+    icon: '🐙',
+  },
+];
+
+export default function App() {
+  const [config, setConfig] = useState<GameConfig>(loadSavedConfig);
+  const [phase, setPhase] = useState<GamePhase>('SURFACE');
+
+  // Player Stats
+  const [stats, setStats] = useState<PlayerStats>(() => {
+    try {
+      const raw = localStorage.getItem(STATS_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const rawUpgrades = parsed.upgrades || {};
+        const normalize = (val: any) => (typeof val === 'number' ? val : val ? 1 : 0);
+
+        return {
+          ...parsed,
+          upgrades: {
+            heavierStone: normalize(rawUpgrades.heavierStone),
+            largerBasket: normalize(rawUpgrades.largerBasket),
+            betterRope: normalize(rawUpgrades.betterRope),
+            lungTraining: normalize(rawUpgrades.lungTraining),
+            fastFins: normalize(rawUpgrades.fastFins),
+            pearlGoggles: normalize(rawUpgrades.pearlGoggles),
+            sharkRepellent: normalize(rawUpgrades.sharkRepellent),
+            moraySuit: normalize(rawUpgrades.moraySuit),
+            seahorseCharm: normalize(rawUpgrades.seahorseCharm),
+            octopusNet: normalize(rawUpgrades.octopusNet),
+            sonarRadar: normalize(rawUpgrades.sonarRadar),
+            bioluminescentLamp: normalize(rawUpgrades.bioluminescentLamp),
+          },
+        };
+      }
+    } catch (e) {
+      console.warn('Failed to load stats', e);
+    }
+    return {
+      coins: 0,
+      food: 0,
+      streak: 0,
+      totalDives: 0,
+      bestDepth: 0,
+      bestScore: 0,
+      upgrades: {
+        heavierStone: 0,
+        largerBasket: 0,
+        betterRope: 0,
+        lungTraining: 0,
+        fastFins: 0,
+        pearlGoggles: 0,
+        sharkRepellent: 0,
+        moraySuit: 0,
+        seahorseCharm: 0,
+        octopusNet: 0,
+        sonarRadar: 0,
+        bioluminescentLamp: 0,
+      },
+      dailyFoodRequirementMet: false,
+    };
+  });
+
+  // Daily Challenges State
+  const [dailyChallenges, setDailyChallenges] = useState<DailyChallenge[]>(() => {
+    try {
+      const raw = localStorage.getItem(CHALLENGES_STORAGE_KEY);
+      if (raw) {
+        return JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn('Failed to load daily challenges', e);
+    }
+    return DEFAULT_DAILY_CHALLENGES;
+  });
+
+  const [lastDiveResult, setLastDiveResult] = useState<{
+    outcome: 'surfaced' | 'shark' | 'drowned';
+    maxDepth: number;
+    coinsEarned: number;
+    foodEarned: number;
+    stoneCutAtDepth: number | null;
+  } | null>(null);
+
+  // Overlays
+  const [showTuningOverlay, setShowTuningOverlay] = useState(false);
+  const [showTelemetryModal, setShowTelemetryModal] = useState(false);
+
+  // Save Stats & Challenges to LocalStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(stats));
+    } catch (e) {
+      console.warn('Failed to save stats', e);
+    }
+  }, [stats]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CHALLENGES_STORAGE_KEY, JSON.stringify(dailyChallenges));
+    } catch (e) {
+      console.warn('Failed to save daily challenges', e);
+    }
+  }, [dailyChallenges]);
+
+  // Handle Visibility Change (Backgrounding mid-dive requirement)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && phase === 'DIVING') {
+        // Automatically surface safely with no progress lost
+        setPhase('SURFACE');
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [phase]);
+
+  // Start Dive Handler (< 1 Second execution)
+  const handleStartDive = () => {
+    setPhase('DIVING');
+  };
+
+  // Claim Daily Challenge Reward
+  const handleClaimChallengeReward = (challengeId: string) => {
+    setDailyChallenges((prev) =>
+      prev.map((ch) => {
+        if (ch.id === challengeId && ch.completed && !ch.claimed) {
+          setStats((s) => ({
+            ...s,
+            coins: s.coins + ch.rewardCoins,
+          }));
+          soundManager.playCoinPickup();
+          return { ...ch, claimed: true };
+        }
+        return ch;
+      })
+    );
+  };
+
+  // Buy Upgrade Handler
+  const handleBuyUpgrade = (type: keyof typeof stats.upgrades, cost: number) => {
+    setStats((prev) => {
+      if (prev.coins >= cost) {
+        const currentLevel = typeof prev.upgrades[type] === 'number'
+          ? (prev.upgrades[type] as number)
+          : (prev.upgrades[type] ? 1 : 0);
+
+        soundManager.playLevelUp();
+        return {
+          ...prev,
+          coins: prev.coins - cost,
+          upgrades: {
+            ...prev.upgrades,
+            [type]: currentLevel + 1,
+          },
+        };
+      }
+      return prev;
+    });
+  };
+
+  // Trade Fish for Pearls
+  const handleTradeFishForPearls = (fishCost: number, pearlsEarned: number) => {
+    if (stats.food >= fishCost) {
+      setStats((prev) => ({
+        ...prev,
+        food: prev.food - fishCost,
+        coins: prev.coins + pearlsEarned,
+      }));
+    }
+  };
+
+  // Add Pearls (Grant / Merchant Contract)
+  const handleAddPearls = (amount: number) => {
+    setStats((prev) => ({
+      ...prev,
+      coins: prev.coins + amount,
+    }));
+  };
+
+  // Dive Resolution Callback
+  const handleDiveComplete = useCallback(
+    (result: {
+      outcome: 'surfaced' | 'shark' | 'drowned';
+      maxDepth: number;
+      diveDuration: number;
+      shellsCollected: number;
+      fishCollected: number;
+      shellsLost: number;
+      coinsEarned: number;
+      foodEarned: number;
+      stoneCutAtDepth: number | null;
+      airAtSurfacing: number;
+      rareCollected?: number;
+    }) => {
+      // 1. Calculate new stats
+      setStats((prev) => {
+        const nextStreak = result.outcome === 'surfaced' ? prev.streak + 1 : 0;
+        const newTotalCoins = prev.coins + result.coinsEarned;
+        const newTotalFood = prev.food + result.foodEarned;
+
+        return {
+          ...prev,
+          coins: newTotalCoins,
+          food: newTotalFood,
+          streak: nextStreak,
+          totalDives: prev.totalDives + 1,
+          bestDepth: Math.max(prev.bestDepth, result.maxDepth),
+          bestScore: Math.max(prev.bestScore, result.coinsEarned),
+        };
+      });
+
+      // 2. Progress Daily Challenges
+      setDailyChallenges((prevChallenges) =>
+        prevChallenges.map((ch) => {
+          if (ch.completed) return ch;
+          let newProgress = ch.current;
+
+          if (ch.id === 'pearl_collector') {
+            newProgress += result.coinsEarned;
+          } else if (ch.id === 'reef_fisherman') {
+            newProgress += result.foodEarned;
+          } else if (ch.id === 'trench_explorer') {
+            newProgress = Math.max(newProgress, result.maxDepth);
+          } else if (ch.id === 'safe_freediver') {
+            if (result.outcome === 'surfaced') newProgress += 1;
+          } else if (ch.id === 'abyssal_fauna') {
+            newProgress += result.rareCollected || 0;
+          }
+
+          const isNowCompleted = newProgress >= ch.target;
+          return {
+            ...ch,
+            current: Math.min(newProgress, ch.target),
+            completed: isNowCompleted,
+          };
+        })
+      );
+
+      setLastDiveResult({
+        outcome: result.outcome,
+        maxDepth: result.maxDepth,
+        coinsEarned: result.coinsEarned,
+        foodEarned: result.foodEarned,
+        stoneCutAtDepth: result.stoneCutAtDepth,
+      });
+
+      // 2. Log Telemetry
+      const logs = loadTelemetryLogs();
+      const logEntry: DiveTelemetryLog = {
+        id: `dive_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        sessionId: getOrCreateSessionId(),
+        deviceClass: window.innerWidth < 640 ? 'mobile' : 'desktop',
+        diveIndex: logs.length + 1,
+        maxDepth: result.maxDepth,
+        diveDuration: result.diveDuration,
+        outcome: result.outcome,
+        shellsCollected: result.shellsCollected,
+        fishCollected: result.fishCollected,
+        shellsLost: result.shellsLost,
+        scoreBanked: result.coinsEarned,
+        depthMultiplier: 1 + result.maxDepth / config.DEPTH_MULTIPLIER_DIVISOR,
+        streakAtStart: stats.streak,
+        stoneCutAtDepth: result.stoneCutAtDepth,
+        airAtSurfacing: result.airAtSurfacing,
+        backgroundedMidDive: false,
+      };
+      appendTelemetryLog(logEntry);
+
+      // 3. Return to surface screen
+      setPhase('SURFACE');
+    },
+    [config.DEPTH_MULTIPLIER_DIVISOR, stats.streak]
+  );
+
+  return (
+    <div className="w-full h-screen bg-slate-950 flex items-center justify-center font-sans antialiased">
+      {/* Mobile Portrait Device Frame Container (aspect ratio 9:19.5 with max constraints) */}
+      <div className="relative w-full max-w-md h-full max-h-[920px] bg-slate-900 shadow-2xl overflow-hidden md:rounded-3xl border-0 md:border-4 md:border-slate-800 flex flex-col">
+        <AnimatePresence mode="wait">
+          {phase === 'SURFACE' ? (
+            <motion.div
+              key="surface"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.04, filter: 'blur(4px)' }}
+              transition={{ duration: 0.28, ease: 'easeInOut' }}
+              className="w-full h-full flex flex-col"
+            >
+              <SurfaceScreen
+                stats={stats}
+                bots={INITIAL_BOTS}
+                dailyChallenges={dailyChallenges}
+                onClaimChallengeReward={handleClaimChallengeReward}
+                lastDiveResult={lastDiveResult}
+                onStartDive={handleStartDive}
+                onBuyUpgrade={handleBuyUpgrade}
+                onTradeFishForPearls={handleTradeFishForPearls}
+                onAddPearls={handleAddPearls}
+                onOpenTelemetryModal={() => setShowTelemetryModal(true)}
+                onOpenDebug={() => setShowTuningOverlay(true)}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="diving"
+              initial={{ opacity: 0, scale: 1.06, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="w-full h-full flex flex-col"
+            >
+              <CanvasGame
+                config={config}
+                upgrades={stats.upgrades}
+                streak={stats.streak}
+                onDiveComplete={handleDiveComplete}
+                onOpenDebug={() => setShowTuningOverlay(true)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* OVERLAYS */}
+        <AnimatePresence>
+          {showTuningOverlay && (
+            <TuningOverlay
+              key="tuning-modal"
+              config={config}
+              onUpdateConfig={setConfig}
+              onClose={() => setShowTuningOverlay(false)}
+              onOpenTelemetryModal={() => setShowTelemetryModal(true)}
+            />
+          )}
+
+          {showTelemetryModal && (
+            <TelemetryViewModal
+              key="telemetry-modal"
+              onClose={() => setShowTelemetryModal(false)}
+            />
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}

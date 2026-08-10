@@ -1,0 +1,6 @@
+{
+  "name": "One Breath",
+  "description": "A portrait one-thumb free-diving game prototype with depth scaling, air management, weight stone, and village food mechanics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
