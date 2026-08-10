@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { PhotoLibrary } from '../types';
+import { PhotoLibrary, DiscoveredItem } from '../types';
 
 interface PhotoLibraryModalProps {
   photoLibrary: PhotoLibrary;
@@ -86,7 +86,7 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [hoveredType, setHoveredType] = useState<string | null>(null);
 
-  const discoveredItems = Object.entries(photoLibrary).sort(
+  const discoveredItems = (Object.entries(photoLibrary) as [string, DiscoveredItem][]).sort(
     (a, b) => new Date(b[1].discoveredAt).getTime() - new Date(a[1].discoveredAt).getTime()
   );
 
@@ -109,35 +109,37 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex sm:items-center sm:justify-center bg-black/60 backdrop-blur-md"
     >
       <motion.div
-        initial={{ scale: 0.85, opacity: 0, rotateX: -20 }}
-        animate={{ scale: 1, opacity: 1, rotateX: 0 }}
-        exit={{ scale: 0.85, opacity: 0, rotateX: -20 }}
+        initial={{ scale: 0.96, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.96, opacity: 0 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-4xl max-h-[95vh] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-3xl border border-cyan-500/20 shadow-2xl flex flex-col overflow-hidden"
+        /* Mobile-first: fill the whole viewport (no centered margins). Becomes a
+           centered card only from `sm` up. */
+        className="w-full h-full sm:h-auto sm:max-h-[95vh] sm:max-w-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border-0 sm:border sm:border-cyan-500/20 sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden"
         style={{
           boxShadow: '0 25px 50px rgba(0, 188, 212, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
         {/* Header */}
-        <div className="flex-shrink-0 p-6 border-b border-cyan-500/20 bg-gradient-to-b from-slate-900 to-slate-950">
-          <div className="flex justify-between items-start mb-4">
-            <div>
+        <div className="flex-shrink-0 p-4 sm:p-6 border-b border-cyan-500/20 bg-gradient-to-b from-slate-900 to-slate-950">
+          <div className="flex justify-between items-start gap-3">
+            <div className="min-w-0">
               <motion.h2
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 uppercase tracking-widest"
+                className="text-lg sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 uppercase tracking-wide sm:tracking-widest"
               >
                 📷 Species Compendium
               </motion.h2>
-              <p className="text-sm text-slate-400 mt-2">Your underwater discoveries • {discoveredItems.length} species catalogued</p>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1">Your underwater discoveries • {discoveredItems.length} species catalogued</p>
             </div>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={onClose}
-              className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-all"
+              className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300 hover:text-white transition-all"
             >
               ✕
             </motion.button>
@@ -145,10 +147,10 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-4 lg:gap-6 p-3 lg:p-6">
-          {/* Left: 3D Card Grid */}
-          <div className={`${selectedType ? 'hidden lg:block' : 'flex-1'} overflow-y-auto no-scrollbar pr-2`}>
-            <motion.div layout className="grid grid-cols-2 gap-3 lg:gap-4">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col lg:flex-row gap-4 lg:gap-6 p-3 sm:p-4 lg:p-6">
+          {/* Left: Card Grid */}
+          <div className={`${selectedType ? 'hidden lg:block' : 'flex-1'} min-h-0 overflow-y-auto no-scrollbar pr-1`}>
+            <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-4">
               <AnimatePresence>
                 {discoveredItems.map(([type, item]) => {
                   const info = ITEM_INFO[type];
@@ -177,7 +179,7 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
                           rotateY: isHovered ? 5 : 0,
                           rotateX: isHovered ? -5 : 0,
                         }}
-                        className={`relative w-full aspect-[3/4] rounded-2xl overflow-hidden border-2 transition-all duration-300 ${
+                        className={`relative w-full aspect-[4/5] rounded-2xl overflow-hidden border-2 transition-all duration-300 ${
                           isSelected
                             ? `border-cyan-400 ${info.color.border}`
                             : 'border-slate-700/50 hover:border-slate-600'
@@ -256,8 +258,10 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
             </motion.div>
           </div>
 
-          {/* Right: Large Detail Card */}
-          <AnimatePresence mode="wait">
+          {/* Right: Large Detail Card. No `mode="wait"` — the detail must mount
+              immediately on selection (mobile hides the grid), not wait for the
+              placeholder's exit animation. */}
+          <AnimatePresence>
             {selectedItem && selectedInfo ? (
               <motion.div
                 key="details"
@@ -265,14 +269,23 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 50 }}
                 transition={{ duration: 0.3 }}
-                className="w-full lg:w-72 flex-shrink-0 flex flex-col overflow-y-auto"
+                className="w-full lg:w-72 flex-shrink-0 flex flex-col min-h-0 overflow-y-auto no-scrollbar"
               >
+                {/* Mobile-only: return to the species grid (grid is hidden on mobile
+                    once a card is selected). */}
+                <button
+                  onClick={() => setSelectedType(null)}
+                  className="lg:hidden self-start mb-3 flex items-center gap-1.5 text-xs font-bold text-cyan-300 bg-slate-800/70 hover:bg-slate-700/70 px-3 py-1.5 rounded-lg transition-colors"
+                >
+                  ← All species
+                </button>
+
                 {/* Large Immersive Card */}
                 <motion.div
                   animate={{
                     rotateY: selectedType ? 0 : 90,
                   }}
-                  className="relative w-full h-72 lg:h-80 rounded-3xl overflow-hidden mb-3 lg:mb-4 flex-shrink-0 group"
+                  className="relative w-full h-56 sm:h-72 lg:h-80 rounded-3xl overflow-hidden mb-3 lg:mb-4 flex-shrink-0 group"
                   style={{
                     background: `linear-gradient(135deg, ${selectedInfo.color.bg})`,
                     boxShadow: `0 25px 50px rgba(0, 0, 0, 0.4), 0 0 40px ${selectedInfo.color.glow}`,
@@ -381,7 +394,9 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-full lg:w-72 flex-shrink-0 flex items-center justify-center h-96"
+                /* Desktop-only right-pane placeholder. On mobile it's hidden so the
+                   card grid fills the panel instead of leaving a big dead gap. */
+                className="hidden lg:flex w-72 flex-shrink-0 items-center justify-center h-96"
               >
                 <div className="text-center">
                   <span className="text-6xl mb-3 block">🔍</span>

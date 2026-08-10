@@ -193,14 +193,16 @@ export const DiveReportModal: React.FC<DiveReportModalProps> = ({
             </div>
             <p className="text-[11px] text-slate-300 mb-2">Pay <span className="font-black text-amber-300">{rescueCost} 💎</span> to salvage your basket and keep the haul.</p>
             <motion.button
-              whileHover={canAffordRescue ? { scale: 1.02 } : {}}
+              animate={canAffordRescue ? { scale: [1, 1.06, 1] } : { scale: 1 }}
+              transition={canAffordRescue ? { repeat: Infinity, duration: 1.2, ease: 'easeInOut' } : {}}
+              whileHover={canAffordRescue ? { scale: 1.08 } : {}}
               whileTap={canAffordRescue ? { scale: 0.97 } : {}}
               onClick={canAffordRescue ? onRescue : undefined}
               disabled={!canAffordRescue}
               className={`w-full py-2.5 rounded-xl font-black text-sm uppercase tracking-wide transition-all ${
                 canAffordRescue
                   ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 shadow-lg cursor-pointer'
-                  : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                  : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
               }`}
             >
               {canAffordRescue ? `Rescue for ${rescueCost} 💎` : 'Not enough pearls'}

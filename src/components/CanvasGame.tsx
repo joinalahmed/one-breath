@@ -6,6 +6,8 @@ import { soundManager } from '../audioAndHaptics';
 import { BreathGauge } from './BreathGauge';
 import { BubbleOverlay } from './BubbleOverlay';
 import { DepthBandIndicator } from './DepthBandIndicator';
+import { RareCreatureDiscoveryModal } from './RareCreatureDiscoveryModal';
+import { TutorialTip } from './TutorialTip';
 import {
   drawVectorDiverCanvas,
   drawVectorPearlShellCanvas,
@@ -108,6 +110,9 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   // Track collected item types for photo library
   const itemTypesCollectedRef = useRef<Map<string, number>>(new Map());
 
+  // Track depth band announcements to avoid spam
+  const announcedDepthBandsRef = useRef<Set<string>>(new Set());
+
   // Touch & Keyboard tracking
   const touchStartPosRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const lastTapTimeRef = useRef<number>(0);
@@ -134,6 +139,19 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   const [grabProgress, setGrabProgress] = useState<{ targetId: string; progress: number } | null>(null);
   const [isMuted, setIsMuted] = useState(() => soundManager.getMuted());
   const [sonarDistance, setSonarDistance] = useState<number | null>(null);
+  const [currentDepthBand, setCurrentDepthBand] = useState<string | null>(null);
+  const [showZoneBanner, setShowZoneBanner] = useState(false);
+  const [rareDiscovery, setRareDiscovery] = useState<{
+    type: string;
+    name: string;
+    emoji: string;
+    rarity: string;
+    depth: number;
+    value: number;
+  } | null>(null);
+  const discoveredRareRef = useRef<Set<string>>(new Set());
+  const [showCutStoneTip, setShowCutStoneTip] = useState(false);
+  const depthReachedRef = useRef(0);
 
   // Floating text popups & Juice effects
   const floatingTextsRef = useRef<Array<{
@@ -527,7 +545,9 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   useEffect(() => {
     initCollectibles();
     announcedBandsRef.current.clear();
+    announcedDepthBandsRef.current.clear();
     itemTypesCollectedRef.current.clear();
+    discoveredRareRef.current.clear();
 
     let animFrameId: number;
     let lastTime = performance.now();
@@ -669,9 +689,9 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       const diverMargin = WALL_MARGIN_FRAC * config.WORLD_WIDTH * 0.6;
       diver.x = Math.max(diverMargin, Math.min(config.WORLD_WIDTH - diverMargin, diver.x));
 
-      // Sonar Radar Proximity Check
+      // Sonar Radar Proximity Check — extended range for earlier warning
       if (sonarLvl > 0 && diver.y > 5) {
-        const radarRange = 6 + sonarLvl * 3;
+        const radarRange = 15 + sonarLvl * 4; // Extended range for better warning
         const dxS = shark.x - diver.x;
         const dyS = shark.y - diver.y;
         const sDist = Math.sqrt(dxS * dxS + dyS * dyS);
@@ -687,6 +707,27 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       // Track max depth
       if (diver.y > diver.maxDepthReached) {
         diver.maxDepthReached = diver.y;
+        depthReachedRef.current = diver.y;
+        // Show cut stone tip when reaching ~15m depth
+        if (diver.y > 14 && !showCutStoneTip && diver.carryingStone) {
+          setShowCutStoneTip(true);
+        }
+      }
+
+      // Depth band transitions for zone announcements
+      let newBand: string | null = null;
+      if (diver.y < 15) newBand = '0-15';
+      else if (diver.y < 30) newBand = '15-30';
+      else if (diver.y < 45) newBand = '30-45';
+      else newBand = '45-60';
+
+      if (newBand && newBand !== currentDepthBand) {
+        if (!announcedDepthBandsRef.current.has(newBand)) {
+          setCurrentDepthBand(newBand);
+          setShowZoneBanner(true);
+          announcedDepthBandsRef.current.add(newBand);
+          setTimeout(() => setShowZoneBanner(false), 2500);
+        }
       }
 
       // 5. Automatic Grab Detection
@@ -759,6 +800,45 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                   photoType,
                   (itemTypesCollectedRef.current.get(photoType) || 0) + 1
                 );
+
+                // Check for rare creature discovery
+                const rareCreatures = ['seahorse', 'crab', 'eel', 'octopus', 'squid', 'angler'];
+                if (rareCreatures.includes(item.type) && !discoveredRareRef.current.has(item.type)) {
+                  discoveredRareRef.current.add(item.type);
+                  const rareNames: Record<string, string> = {
+                    seahorse: 'Seahorse',
+                    crab: 'Hermit Crab',
+                    eel: 'Electric Eel',
+                    octopus: 'Giant Octopus',
+                    squid: 'Bioluminescent Squid',
+                    angler: 'Deepsea Anglerfish',
+                  };
+                  const rareEmojis: Record<string, string> = {
+                    seahorse: '🐴',
+                    crab: '🦀',
+                    eel: '🐍',
+                    octopus: '🐙',
+                    squid: '🦑',
+                    angler: '🦑',
+                  };
+                  const rareRarities: Record<string, string> = {
+                    seahorse: 'Rare',
+                    crab: 'Rare',
+                    eel: 'Rare',
+                    octopus: 'Epic',
+                    squid: 'Epic',
+                    angler: 'Legendary',
+                  };
+                  setRareDiscovery({
+                    type: item.type,
+                    name: rareNames[item.type],
+                    emoji: rareEmojis[item.type],
+                    rarity: rareRarities[item.type],
+                    depth: Math.round(diver.y * 10) / 10,
+                    value: item.value,
+                  });
+                }
+
                 soundManager.playGrabConfirm(true);
 
                 let textStr = `+${item.value} 💎`;
@@ -927,7 +1007,8 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         upgrades,
         floatingTextsRef.current,
         screenShakeRef.current.intensity,
-        spritesRef.current
+        spritesRef.current,
+        diverRef.current.invulnerableTimer > 1.2 && diverRef.current.isPanicAscent
       );
 
       animFrameId = requestAnimationFrame(loop);
@@ -1114,6 +1195,66 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         </div>
       </div>
 
+      {/* CUT STONE TUTORIAL TIP */}
+      <AnimatePresence>
+        {showCutStoneTip && (
+          <TutorialTip
+            key="cut-stone-tip"
+            title="Quick Tip!"
+            description="Double-tap to cut your stone and ascend faster! Perfect for escaping sharks."
+            icon="✂️"
+            onDismiss={() => setShowCutStoneTip(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* RARE CREATURE DISCOVERY MODAL */}
+      <AnimatePresence>
+        {rareDiscovery && (
+          <RareCreatureDiscoveryModal
+            key={`rare-${rareDiscovery.type}`}
+            itemType={rareDiscovery.type}
+            itemName={rareDiscovery.name}
+            emoji={rareDiscovery.emoji}
+            rarity={rareDiscovery.rarity}
+            depth={rareDiscovery.depth}
+            value={rareDiscovery.value}
+            onComplete={() => setRareDiscovery(null)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* DEPTH ZONE BANNER */}
+      <AnimatePresence>
+        {showZoneBanner && currentDepthBand && (
+          <motion.div
+            initial={{ y: -40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -40, opacity: 0 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
+            className="absolute top-14 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+          >
+            <div className={`px-4 py-2 rounded-full font-black uppercase tracking-widest text-xs shadow-2xl backdrop-blur-md border-2 flex items-center space-x-2 ${
+              currentDepthBand === '0-15'
+                ? 'bg-cyan-950/90 border-cyan-400 text-cyan-200'
+                : currentDepthBand === '15-30'
+                  ? 'bg-blue-950/90 border-blue-400 text-blue-200'
+                  : currentDepthBand === '30-45'
+                    ? 'bg-indigo-950/90 border-indigo-400 text-indigo-200'
+                    : 'bg-violet-950/90 border-violet-400 text-violet-200'
+            }`}>
+              <span>🌊</span>
+              <span>
+                {currentDepthBand === '0-15' && 'SHALLOW REEF'}
+                {currentDepthBand === '15-30' && 'MID REEF DROP'}
+                {currentDepthBand === '30-45' && 'SHARK TRENCH'}
+                {currentDepthBand === '45-60' && 'MIDNIGHT ABYSS'}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* SONAR RADAR PROXIMITY ALERT */}
       <AnimatePresence>
         {sonarDistance !== null && (
@@ -1122,7 +1263,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             animate={{ opacity: 1, y: 0, scale: [1, 1.04, 1] }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2, scale: { repeat: Infinity, duration: 0.6 } }}
-            className="absolute top-16 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
+            className="absolute top-28 left-1/2 -translate-x-1/2 z-20 pointer-events-none"
           >
             <div className="bg-purple-950/90 border-2 border-purple-400 text-purple-200 px-3.5 py-1 rounded-full text-[10px] font-black uppercase font-mono tracking-wider shadow-2xl flex items-center space-x-2 backdrop-blur-sm">
               <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping inline-block" />
@@ -1325,7 +1466,8 @@ function renderCanvas(
     scale: number;
   }>,
   shakeIntensity: number,
-  sprites: SpriteSet
+  sprites: SpriteSet,
+  isPanicAscent: boolean = false
 ) {
   const width = canvas.width;
   const height = canvas.height;
@@ -1351,6 +1493,13 @@ function renderCanvas(
   ctx.clearRect(0, 0, width, height);
 
   ctx.save();
+  // Panic Ascent Camera Zoom
+  if (isPanicAscent) {
+    ctx.translate(width / 2, height / 2);
+    ctx.scale(1.06, 1.06);
+    ctx.translate(-width / 2, -height / 2);
+  }
+
   // Screen Shake Transform
   if (shakeIntensity > 0.1) {
     const shakeX = (Math.random() - 0.5) * shakeIntensity;

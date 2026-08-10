@@ -12,6 +12,7 @@ import { SplashScreen } from './components/SplashScreen';
 import { OnboardingScreen } from './components/OnboardingScreen';
 import { DiveReportModal } from './components/DiveReportModal';
 import { PhotoLibraryModal } from './components/PhotoLibraryModal';
+import { ChallengeCompletionToast } from './components/ChallengeCompletionToast';
 import { soundManager } from './audioAndHaptics';
 import { preloadAssets } from './assetPreloader';
 
@@ -204,6 +205,10 @@ export default function App() {
   const [showTuningOverlay, setShowTuningOverlay] = useState(false);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
   const [showPhotoLibrary, setShowPhotoLibrary] = useState(false);
+  const [completedChallenge, setCompletedChallenge] = useState<{
+    title: string;
+    rewardCoins: number;
+  } | null>(null);
 
   // The single end-of-dive report (replaces the old rescue + defeat + summary popups).
   const [diveReport, setDiveReport] = useState<{
@@ -426,6 +431,9 @@ export default function App() {
         }
 
         const isNowCompleted = newProgress >= ch.target;
+        if (isNowCompleted && !ch.completed) {
+          setCompletedChallenge({ title: ch.title, rewardCoins: ch.rewardCoins });
+        }
         return {
           ...ch,
           current: Math.min(newProgress, ch.target),
@@ -656,6 +664,15 @@ export default function App() {
               key="photo-library"
               photoLibrary={photoLibrary}
               onClose={() => setShowPhotoLibrary(false)}
+            />
+          )}
+
+          {completedChallenge && (
+            <ChallengeCompletionToast
+              key="challenge-toast"
+              challengeTitle={completedChallenge.title}
+              rewardCoins={completedChallenge.rewardCoins}
+              onDismiss={() => setCompletedChallenge(null)}
             />
           )}
         </AnimatePresence>
