@@ -422,9 +422,11 @@ export default function App() {
       airAtSurfacing: number;
       rareCollected?: number;
     }) => {
-      // If dive failed, show rescue modal to offer saving treasure
-      // Shows even with 0 treasure (player can't rescue but sees the option)
-      if (result.outcome !== 'surfaced') {
+      // Show rescue modal only for large catches OR at-risk streaks
+      const hasLargeCatch = result.coinsEarned >= 50; // Large haul worth saving
+      const hasStreakAtRisk = stats.streak > 0 && result.outcome !== 'surfaced'; // Losing streak is painful
+
+      if (hasLargeCatch || hasStreakAtRisk) {
         setPendingRescue({
           outcome: result.outcome,
           treasureValue: result.coinsEarned,
