@@ -6,6 +6,7 @@ import { soundManager } from '../audioAndHaptics';
 import { getPlayerRank, getNextRank, DiverRankInfo } from '../ranks';
 import { RankUpModal, StreakComboBanner, DefeatModal } from './AnimatedOverlayEffects';
 import { HavenVillageScreen } from './HavenVillageScreen';
+import { BubbleOverlay } from './BubbleOverlay';
 
 interface SurfaceScreenProps {
   stats: PlayerStats;
@@ -300,6 +301,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       {/* Dynamic Background Atmosphere */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-950 via-slate-950 to-slate-950 pointer-events-none" />
       <div className="absolute top-0 left-0 right-0 h-44 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.2),transparent_75%)] pointer-events-none" />
+      <BubbleOverlay count={15} />
 
       {/* TOP COMPACT HUD BAR */}
       <div className="relative z-10 w-full flex justify-between items-center bg-slate-900/90 border border-slate-800 p-2 rounded-2xl shadow-xl backdrop-blur-md mb-2">

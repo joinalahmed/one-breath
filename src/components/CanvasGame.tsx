@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 import { GameConfig, DiverState, CollectibleItem, SharkState, UpgradesState, ItemSize } from '../types';
 import { soundManager } from '../audioAndHaptics';
 import { BreathGauge } from './BreathGauge';
+import { BubbleOverlay } from './BubbleOverlay';
 import {
   drawVectorDiverCanvas,
   drawVectorPearlShellCanvas,
@@ -14,6 +15,7 @@ import {
   drawVectorOctopusCanvas,
   drawVectorSquidCanvas,
   drawVectorAnglerCanvas,
+  drawVectorShipAndCrewCanvas,
   IconDiver,
   IconPearlShell,
   IconClownfish,
@@ -959,126 +961,70 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       {/* 2D HTML5 Canvas for Render */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
 
-      {/* TOP BAND (12% Height) - Safe Area Compliant HUD */}
-      <div className="relative z-10 w-full px-2 sm:px-4 pt-4 sm:pt-6 pb-2 flex justify-between items-start bg-gradient-to-b from-slate-950/95 via-slate-950/60 to-transparent pointer-events-none gap-2">
-        {/* Top Left: Depth */}
-        <div className="flex flex-col shrink-0">
-          <span className="text-[10px] uppercase tracking-widest text-cyan-300 font-semibold">Depth</span>
-          <div className="flex items-baseline space-x-1">
-            <span className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-mono">{hudDepth}</span>
-            <span className="text-xs font-bold text-cyan-200">m</span>
+      {/* Mark Bowley Ambient Floating Bubble Effect */}
+      <BubbleOverlay count={18} />
+
+      {/* SLEEK FLOATING GLASS PILL HUD */}
+      <div className="relative z-10 w-full px-3 pt-3 flex justify-between items-center pointer-events-none gap-2">
+        {/* Top Left: Depth Glass Pill */}
+        <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-full px-3.5 py-1.5 flex items-center space-x-2">
+          <span className="text-xs">🌊</span>
+          <div className="flex items-baseline space-x-1 font-mono">
+            <span className="text-base sm:text-lg font-black text-white tracking-tight">{hudDepth}</span>
+            <span className="text-[10px] font-bold text-cyan-300">m</span>
           </div>
-          <span className="text-[9px] text-slate-400 font-mono">Max: {hudMaxDepth}m</span>
+          <span className="text-[9px] text-slate-400 font-mono border-l border-slate-700/60 pl-2">Max {hudMaxDepth}m</span>
         </div>
 
-        {/* Top Center: Prominent BREATH GAUGE Widget */}
-        <div className="flex-1 max-w-[210px] sm:max-w-xs mx-auto">
+        {/* Top Center: Compact Glass Air Gauge */}
+        <div className="flex-1 flex justify-center max-w-xs">
           <BreathGauge
             air={hudAir}
             maxAir={maxAir}
             depth={hudDepth}
-            isAscending={diverRef.current.isAscending}
-            isDescending={diverRef.current.isDescending}
-            isPanicAscent={diverRef.current.isPanicAscent}
-            drainRate={currentDrainRate}
           />
         </div>
 
-        {/* Top Right: Combined High-Contrast Multiplier & Basket HUD */}
-        <div className="flex flex-col items-end space-y-1.5 shrink-0">
-          {/* Row 1: Multiplier & Basket Counters */}
-          <div className="flex items-center space-x-1.5 pointer-events-auto">
-            {/* Multiplier Badge */}
-            <div className="bg-slate-950/95 border border-amber-400/80 px-2.5 py-1 rounded-xl flex items-center space-x-1 shadow-lg backdrop-blur-md">
-              <span className="text-[9px] uppercase font-black text-amber-400 tracking-wider">MULT</span>
-              <span className="text-xs sm:text-sm font-black text-amber-300 font-mono drop-shadow-[0_2px_8px_rgba(251,191,36,0.3)]">
-                {hudMultiplier.toFixed(2)}x
-              </span>
+        {/* Top Right: Glass Basket & Multiplier Pill + Quick Controls */}
+        <div className="flex items-center space-x-2 pointer-events-auto">
+          {/* Multiplier & Basket Pill */}
+          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-full px-3 py-1.5 flex items-center space-x-2.5 font-mono text-xs">
+            <div className="flex items-center space-x-1">
+              <span className="text-[10px] font-bold text-amber-400">MULT</span>
+              <span className="font-extrabold text-amber-300">{hudMultiplier.toFixed(2)}x</span>
             </div>
-
-            {/* High-Contrast Upper-Right Basket Pill */}
-            <div className="bg-slate-950/95 border border-emerald-400/80 px-2.5 py-1 rounded-xl flex items-center space-x-1 shadow-lg backdrop-blur-md">
-              <span className="text-xs">🧺</span>
-              <span className="text-xs font-black font-mono text-emerald-300">
-                {hudBasket.length}/{capacity}
-              </span>
+            <span className="text-slate-600">|</span>
+            <div className="flex items-center space-x-1">
+              <span>🧺</span>
+              <span className="font-extrabold text-emerald-300">{hudBasket.length}/{capacity}</span>
             </div>
           </div>
 
-          {/* Row 2: Basket Item Slots (Size & Type Badges) */}
-          <div className="flex items-center space-x-1 bg-slate-950/90 border border-slate-800 px-2 py-0.5 rounded-lg shadow-md backdrop-blur-md">
-            {Array.from({ length: capacity }).map((_, idx) => {
-              const item = hudBasket[idx];
-              if (!item) {
-                return (
-                  <span
-                    key={idx}
-                    className="w-2 h-2 rounded-full bg-slate-800 border border-slate-700/60 inline-block"
-                  />
-                );
-              }
-              return (
-                <span
-                  key={idx}
-                  className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[7px] font-black font-mono shadow-sm ${
-                    item.type === 'fish'
-                      ? item.size === 'giant'
-                        ? 'bg-amber-400 text-slate-950 ring-1 ring-amber-300 animate-pulse'
-                        : 'bg-emerald-400 text-slate-950'
-                      : item.size === 'giant'
-                      ? 'bg-gradient-to-r from-amber-300 to-yellow-100 text-slate-950 ring-1 ring-amber-400 animate-bounce'
-                      : item.size === 'large'
-                      ? 'bg-purple-400 text-slate-950 font-black'
-                      : item.size === 'medium'
-                      ? 'bg-cyan-400 text-slate-950 font-bold'
-                      : 'bg-slate-200 text-slate-900 font-bold'
-                  }`}
-                  title={`${item.size.toUpperCase()} ${item.type === 'fish' ? 'Fish' : 'Pearl'}`}
-                >
-                  {item.type === 'fish'
-                    ? '🐟'
-                    : item.type === 'eel'
-                    ? '⚡'
-                    : item.type === 'seahorse'
-                    ? '🐴'
-                    : item.type === 'crab'
-                    ? '🦀'
-                    : item.type === 'octopus'
-                    ? '🐙'
-                    : item.size === 'giant'
-                    ? '👑'
-                    : '🦪'}
-                </span>
-              );
-            })}
-          </div>
+          {/* Audio Toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const nextMuted = !isMuted;
+              soundManager.setMuted(nextMuted);
+              setIsMuted(nextMuted);
+            }}
+            className="w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-800/80 active:scale-95 text-slate-200 text-xs flex items-center justify-center border border-slate-700/50 backdrop-blur-md cursor-pointer shadow-lg transition-all"
+            title="Toggle Audio"
+          >
+            {isMuted ? '🔇' : '🔊'}
+          </button>
 
-          {/* Row 3: Utility Controls */}
-          <div className="flex items-center space-x-1.5 pointer-events-auto">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                const nextMuted = !isMuted;
-                soundManager.setMuted(nextMuted);
-                setIsMuted(nextMuted);
-              }}
-              className="w-6 h-6 rounded-full bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-slate-200 text-xs flex items-center justify-center border border-slate-600/50 cursor-pointer shadow"
-              title="Toggle Audio"
-            >
-              {isMuted ? '🔇' : '🔊'}
-            </button>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenDebug();
-              }}
-              className="w-6 h-6 rounded-full bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-slate-300 text-xs flex items-center justify-center border border-slate-600/50 cursor-pointer shadow"
-              title="Debug Settings"
-            >
-              ⚙️
-            </button>
-          </div>
+          {/* Debug Settings */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenDebug();
+            }}
+            className="w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-800/80 active:scale-95 text-slate-300 text-xs flex items-center justify-center border border-slate-700/50 backdrop-blur-md cursor-pointer shadow-lg transition-all"
+            title="Debug Settings"
+          >
+            ⚙️
+          </button>
         </div>
       </div>
 
@@ -1227,6 +1173,7 @@ function renderCanvas(
   const width = canvas.width;
   const height = canvas.height;
 
+  const lungLvl = typeof upgrades.lungTraining === 'number' ? upgrades.lungTraining : upgrades.lungTraining ? 1 : 0;
   const goggleLvl = typeof upgrades.pearlGoggles === 'number' ? upgrades.pearlGoggles : upgrades.pearlGoggles ? 1 : 0;
   const lampLvl = typeof upgrades.bioluminescentLamp === 'number' ? upgrades.bioluminescentLamp : upgrades.bioluminescentLamp ? 1 : 0;
   const repellentLvl = typeof upgrades.sharkRepellent === 'number' ? upgrades.sharkRepellent : upgrades.sharkRepellent ? 1 : 0;
@@ -1238,7 +1185,7 @@ function renderCanvas(
 
   // Camera tracking Y center on diver with lag
   const cameraCenterY = diver.y;
-  const topMeterInView = Math.max(0, cameraCenterY - 8);
+  const topMeterInView = Math.max(-4.5, cameraCenterY - 6.5);
 
   ctx.clearRect(0, 0, width, height);
 
@@ -1371,8 +1318,31 @@ function renderCanvas(
     ctx.restore();
   }
 
-  // 5. Water Surface Wave
+  // 5. Expedition Ship & Whole Crew at Surface
   const surfaceScreenY = toScreenY(0);
+  const shipSx = toScreenX(config.WORLD_WIDTH / 2);
+  const distToSharkY = Math.abs(diver.y - shark.y);
+
+  if (surfaceScreenY >= -180 && surfaceScreenY <= height + 100) {
+    const curMaxAir = config.AIR_MAX + lungLvl * 25;
+    drawVectorShipAndCrewCanvas(
+      ctx,
+      shipSx,
+      surfaceScreenY,
+      width,
+      {
+        y: diver.y,
+        airRatio: diver.air / curMaxAir,
+        carryingStone: diver.carryingStone,
+        basketCount: diver.basket.length,
+        isAscending: diver.isAscending,
+      },
+      distToSharkY < 12 ? distToSharkY : null,
+      now
+    );
+  }
+
+  // Water Surface Wave
   if (surfaceScreenY >= -20 && surfaceScreenY <= height) {
     ctx.save();
     ctx.strokeStyle = 'rgba(125, 211, 252, 0.9)';
@@ -1392,35 +1362,73 @@ function renderCanvas(
     ctx.restore();
   }
 
-  // 6. Ambient Water Particles (Bubbles / Marine Snow / Bioluminescent Spores)
+  // 6. Ambient Water Particles (Mark Bowley Glossy Rising & Swaying Bubbles)
   ctx.save();
-  const particleCount = 30;
+  const particleCount = 35;
   for (let i = 0; i < particleCount; i++) {
-    // Deterministic particle positions drifting with time
-    const pWorldY = ((i * 2 + (now * 0.001 * (1 + (i % 3)))) % 62);
-    if (pWorldY < topMeterInView - 1 || pWorldY > topMeterInView + 19) continue;
+    // Continuous upward rising world Y coordinate with time
+    const speedMultiplier = 0.8 + (i % 5) * 0.3;
+    const pWorldY = 62 - (((now * 0.0018 * speedMultiplier + i * 2.1) % 64));
+    if (pWorldY < topMeterInView - 2 || pWorldY > topMeterInView + 20) continue;
 
     const pSy = toScreenY(pWorldY);
-    const pSx = ((i * 37 + Math.sin(now * 0.002 + i) * 15) % (width - wallWidth * 2)) + wallWidth;
+    // Side-to-side horizontal sway math matching Mark Bowley's sway keyframe
+    const sway = Math.sin(now * 0.003 + i * 1.7) * 22;
+    const baseSx = ((i * 41) % (width - wallWidth * 2 - 40)) + wallWidth + 20;
+    const pSx = baseSx + sway;
 
-    if (pWorldY < 20) {
-      // Air Bubbles in Shallows
-      ctx.fillStyle = 'rgba(224, 242, 254, 0.6)';
+    const bubbleRadius = 3 + (i % 4) * 2.5;
+
+    if (pWorldY < 28) {
+      // Shallows: Mark Bowley Glossy Glass Bubble with Radial Highlight & Outer Rim
+      const bGrad = ctx.createRadialGradient(
+        pSx - bubbleRadius * 0.3,
+        pSy - bubbleRadius * 0.3,
+        bubbleRadius * 0.1,
+        pSx,
+        pSy,
+        bubbleRadius
+      );
+      bGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      bGrad.addColorStop(0.35, 'rgba(186, 230, 253, 0.6)');
+      bGrad.addColorStop(0.7, 'rgba(56, 189, 248, 0.25)');
+      bGrad.addColorStop(1, 'rgba(255, 255, 255, 0.8)');
+
+      ctx.fillStyle = bGrad;
+      ctx.strokeStyle = 'rgba(224, 242, 254, 0.85)';
+      ctx.lineWidth = 1;
+
       ctx.beginPath();
-      ctx.arc(pSx, pSy, 1.5 + (i % 2), 0, Math.PI * 2);
+      ctx.arc(pSx, pSy, bubbleRadius, 0, Math.PI * 2);
       ctx.fill();
-    } else if (pWorldY < 40) {
-      // Marine Snow in Mid-Waters
-      ctx.fillStyle = 'rgba(186, 230, 253, 0.4)';
+      ctx.stroke();
+
+      // Top-left Specular Glare Dot
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.beginPath();
-      ctx.arc(pSx, pSy, 1 + (i % 2) * 0.5, 0, Math.PI * 2);
+      ctx.arc(
+        pSx - bubbleRadius * 0.35,
+        pSy - bubbleRadius * 0.35,
+        bubbleRadius * 0.3,
+        0,
+        Math.PI * 2
+      );
       ctx.fill();
+    } else if (pWorldY < 45) {
+      // Mid-depth Marine Bubbles
+      ctx.fillStyle = 'rgba(186, 230, 253, 0.5)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.arc(pSx, pSy, bubbleRadius * 0.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
     } else {
-      // Glowing Bioluminescent Spores in Deep Abyss
-      const pulse = 0.3 + Math.sin(now * 0.004 + i) * 0.3;
+      // Deep Bioluminescent Spores / Bubbles
+      const pulse = 0.4 + Math.sin(now * 0.005 + i) * 0.4;
       ctx.fillStyle = i % 2 === 0 ? `rgba(56, 189, 248, ${pulse})` : `rgba(192, 132, 252, ${pulse})`;
       ctx.beginPath();
-      ctx.arc(pSx, pSy, 2 + (i % 2), 0, Math.PI * 2);
+      ctx.arc(pSx, pSy, bubbleRadius * 0.9, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -1531,42 +1539,84 @@ function renderCanvas(
     ctx.translate(sharkSx, sharkSy);
     if (shark.direction < 0) ctx.scale(-1, 1);
 
-    // Warning Aura
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+    // Subtle Red Threat Proximity Aura
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
     ctx.beginPath();
     ctx.arc(0, 0, config.SHARK_RADIUS * metersToPx, 0, Math.PI * 2);
     ctx.fill();
 
-    // Shark Body
-    ctx.fillStyle = '#334155';
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 28, 12, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Shark Counter-Shaded Torpedo Body (Slate Blue Top, Pale Silver Underbelly)
+    ctx.save();
+    const sharkGrad = ctx.createLinearGradient(0, -18, 0, 18);
+    sharkGrad.addColorStop(0, '#1e293b');
+    sharkGrad.addColorStop(0.4, '#334155');
+    sharkGrad.addColorStop(0.7, '#64748b');
+    sharkGrad.addColorStop(1, '#f1f5f9');
 
-    // Fin
+    ctx.fillStyle = sharkGrad;
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 1.2;
+
+    ctx.beginPath();
+    ctx.moveTo(34, 0); // Snout
+    ctx.quadraticCurveTo(15, -16, -10, -12);
+    ctx.quadraticCurveTo(-28, -6, -34, 0); // Tail base
+    ctx.quadraticCurveTo(-20, 14, 10, 12);
+    ctx.quadraticCurveTo(24, 10, 34, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Main Dorsal Fin
     ctx.fillStyle = '#1e293b';
     ctx.beginPath();
-    ctx.moveTo(2, -8);
-    ctx.lineTo(12, -22);
-    ctx.lineTo(20, -6);
+    ctx.moveTo(2, -12);
+    ctx.quadraticCurveTo(8, -28, 16, -26);
+    ctx.quadraticCurveTo(18, -10, 22, -8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Pectoral Fin
+    ctx.fillStyle = '#334155';
+    ctx.beginPath();
+    ctx.moveTo(10, 4);
+    ctx.lineTo(2, 22);
+    ctx.lineTo(18, 10);
     ctx.closePath();
     ctx.fill();
 
-    // Tail
+    // Crescent Caudal Tail Fin
+    const tailSway = Math.sin(now * 0.008) * 4;
+    ctx.fillStyle = '#1e293b';
     ctx.beginPath();
-    ctx.moveTo(-25, 0);
-    ctx.lineTo(-40, -14);
-    ctx.lineTo(-32, 0);
-    ctx.lineTo(-40, 14);
+    ctx.moveTo(-32, 0);
+    ctx.lineTo(-48, -20 + tailSway);
+    ctx.lineTo(-38, 0 + tailSway);
+    ctx.lineTo(-48, 20 + tailSway);
     ctx.closePath();
     ctx.fill();
+    ctx.stroke();
 
-    // Eye
-    ctx.fillStyle = '#ef4444';
+    // Gill Slits
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 1.5;
+    [10, 14, 18].forEach((gx) => {
+      ctx.beginPath();
+      ctx.moveTo(gx, -4);
+      ctx.lineTo(gx - 1, 4);
+      ctx.stroke();
+    });
+
+    // Menacing Predatory Eye
+    ctx.fillStyle = '#0f172a';
+    ctx.shadowColor = '#ef4444';
+    ctx.shadowBlur = 8;
     ctx.beginPath();
-    ctx.arc(14, -3, 2.5, 0, Math.PI * 2);
+    ctx.arc(22, -4, 2.8, 0, Math.PI * 2);
     ctx.fill();
 
+    ctx.restore();
     ctx.restore();
   }
 
@@ -1618,7 +1668,7 @@ function renderCanvas(
     ctx.restore();
   }
 
-  // Rope connecting to surface
+  // Rope connecting to ship winch at surface
   ctx.save();
   if (ropeLvl > 0) {
     ctx.strokeStyle = '#f59e0b'; // Braided hemp golden rope
@@ -1630,7 +1680,7 @@ function renderCanvas(
     ctx.lineWidth = 2;
   }
   ctx.beginPath();
-  ctx.moveTo(diverSx, surfaceScreenY);
+  ctx.moveTo(shipSx, surfaceScreenY - 24); // Anchor to ship winch
   ctx.lineTo(diverSx, diverSy);
   ctx.stroke();
   ctx.restore();
@@ -1668,56 +1718,7 @@ function renderCanvas(
     time: Date.now(),
   });
 
-  // In-World Diver Breath Gauge Ring (depletes visibly as player stays submerged)
-  if (diver.y > 0.3) {
-    ctx.save();
-    const lungLvl = typeof upgrades.lungTraining === 'number' ? upgrades.lungTraining : upgrades.lungTraining ? 1 : 0;
-    const maxAirCap = config.AIR_MAX + lungLvl * 25;
-    const ringRadius = 28;
-    const airRatio = Math.max(0, Math.min(1, diver.air / maxAirCap));
-    const isLow = airRatio <= 0.3;
 
-    // Track Ring
-    ctx.strokeStyle = isLow ? 'rgba(239, 68, 68, 0.35)' : 'rgba(15, 23, 42, 0.55)';
-    ctx.lineWidth = isLow ? 4 : 3;
-    ctx.beginPath();
-    ctx.arc(diverSx, diverSy, ringRadius, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Depleting Arc (starts top at -PI/2)
-    const startAngle = -Math.PI / 2;
-    const endAngle = startAngle + airRatio * Math.PI * 2;
-
-    if (airRatio > 0.5) {
-      ctx.strokeStyle = '#38bdf8'; // Cyan
-    } else if (airRatio > 0.25) {
-      ctx.strokeStyle = '#facc15'; // Amber Yellow
-    } else {
-      const pulseAlpha = 0.75 + Math.sin(now * 0.012) * 0.25;
-      ctx.strokeStyle = `rgba(244, 63, 94, ${pulseAlpha})`; // Warning Rose Red Pulse
-      ctx.lineWidth = 4.5 + Math.sin(now * 0.012) * 1.5;
-    }
-
-    ctx.beginPath();
-    ctx.arc(diverSx, diverSy, ringRadius, startAngle, endAngle);
-    ctx.stroke();
-
-    // Low breath warning bubbles floating up from diver
-    if (isLow && Math.random() < 0.35) {
-      ctx.fillStyle = 'rgba(244, 63, 94, 0.85)';
-      ctx.beginPath();
-      ctx.arc(
-        diverSx + (Math.random() - 0.5) * 24,
-        diverSy - ringRadius - Math.random() * 8,
-        2,
-        0,
-        Math.PI * 2
-      );
-      ctx.fill();
-    }
-
-    ctx.restore();
-  }
 
   // 7. Render Floating Popups (+15💎, +1 🐟, COMBO!)
   floatingTexts.forEach((ft) => {
@@ -1740,7 +1741,6 @@ function renderCanvas(
   });
 
   // 8. Render Shark Proximity Warning Banner
-  const distToSharkY = Math.abs(diver.y - shark.y);
   if (distToSharkY < 10 && !diver.isPanicAscent && diver.y > 5) {
     const isSharkAbove = shark.y < diver.y;
     ctx.save();
