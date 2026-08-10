@@ -145,10 +145,10 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-hidden flex gap-6 p-6">
+        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
           {/* Left: 3D Card Grid */}
           <div className="flex-1 overflow-y-auto no-scrollbar pr-2">
-            <motion.div layout className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <motion.div layout className="grid grid-cols-2 gap-3 lg:gap-4">
               <AnimatePresence>
                 {discoveredItems.map(([type, item]) => {
                   const info = ITEM_INFO[type];
@@ -265,14 +265,14 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 50 }}
                 transition={{ duration: 0.3 }}
-                className="w-72 flex-shrink-0 flex flex-col"
+                className="w-full lg:w-72 flex-shrink-0 flex flex-col"
               >
                 {/* Large Immersive Card */}
                 <motion.div
                   animate={{
                     rotateY: selectedType ? 0 : 90,
                   }}
-                  className="relative w-full h-80 rounded-3xl overflow-hidden mb-4 group"
+                  className="relative w-full h-64 lg:h-80 rounded-3xl overflow-hidden mb-4 group"
                   style={{
                     background: `linear-gradient(135deg, ${selectedInfo.color.bg})`,
                     boxShadow: `0 25px 50px rgba(0, 0, 0, 0.4), 0 0 40px ${selectedInfo.color.glow}`,
@@ -381,7 +381,7 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-72 flex-shrink-0 flex items-center justify-center"
+                className="w-full lg:w-72 flex-shrink-0 flex items-center justify-center"
               >
                 <div className="text-center">
                   <span className="text-6xl mb-3 block">🔍</span>
@@ -393,27 +393,27 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 p-4 border-t border-cyan-500/20 bg-gradient-to-t from-slate-950 to-slate-900/50">
-          <div className="grid grid-cols-4 gap-3 text-center text-xs">
-            <motion.div whileHover={{ scale: 1.05 }} className="p-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
-              <p className="text-slate-400 font-bold text-[10px]">TOTAL</p>
-              <p className="text-lg font-black text-slate-300">{discoveredItems.length}</p>
+        <div className="flex-shrink-0 p-3 lg:p-4 border-t border-cyan-500/20 bg-gradient-to-t from-slate-950 to-slate-900/50">
+          <div className="grid grid-cols-4 gap-2 lg:gap-3 text-center text-xs">
+            <motion.div whileHover={{ scale: 1.05 }} className="p-1.5 lg:p-2 rounded-lg lg:rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
+              <p className="text-slate-400 font-bold text-[9px] lg:text-[10px]">TOTAL</p>
+              <p className="text-base lg:text-lg font-black text-slate-300">{discoveredItems.length}</p>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} className="p-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
-              <p className="text-slate-400 font-bold text-[10px]">COMMON</p>
-              <p className="text-lg font-black text-slate-300">
+            <motion.div whileHover={{ scale: 1.05 }} className="p-1.5 lg:p-2 rounded-lg lg:rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
+              <p className="text-slate-400 font-bold text-[9px] lg:text-[10px]">COMMON</p>
+              <p className="text-base lg:text-lg font-black text-slate-300">
                 {discoveredItems.filter(([type]) => ['oyster', 'fish'].includes(type)).length}
               </p>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} className="p-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
-              <p className="text-slate-400 font-bold text-[10px]">RARE</p>
-              <p className="text-lg font-black text-blue-300">
+            <motion.div whileHover={{ scale: 1.05 }} className="p-1.5 lg:p-2 rounded-lg lg:rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
+              <p className="text-slate-400 font-bold text-[9px] lg:text-[10px]">RARE</p>
+              <p className="text-base lg:text-lg font-black text-blue-300">
                 {discoveredItems.filter(([type]) => ['seahorse', 'crab', 'eel'].includes(type)).length}
               </p>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} className="p-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
-              <p className="text-slate-400 font-bold text-[10px]">EPIC+</p>
-              <p className="text-lg font-black text-purple-300">
+            <motion.div whileHover={{ scale: 1.05 }} className="p-1.5 lg:p-2 rounded-lg lg:rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
+              <p className="text-slate-400 font-bold text-[9px] lg:text-[10px]">EPIC+</p>
+              <p className="text-base lg:text-lg font-black text-purple-300">
                 {discoveredItems.filter(([type]) => ['octopus', 'squid', 'angler'].includes(type)).length}
               </p>
             </motion.div>
