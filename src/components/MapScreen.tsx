@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { PlayerStats } from '../types';
+import { DiveResultsSummary } from './DiveResultsSummary';
 
 interface DivingBank {
   id: string;
@@ -14,6 +15,16 @@ interface DivingBank {
 
 interface MapScreenProps {
   stats: PlayerStats;
+  lastDiveResult?: {
+    outcome: 'surfaced' | 'shark' | 'drowned';
+    maxDepth: number;
+    diveDuration: number;
+    coinsEarned: number;
+    foodEarned: number;
+    shellsCollected: number;
+    rareCollected: number;
+    stoneCutAtDepth: number | null;
+  } | null;
   onSelectBank: (bankId: string) => void;
   onGoToVillage: () => void;
 }
@@ -66,7 +77,7 @@ const DIVING_BANKS: DivingBank[] = [
   },
 ];
 
-export const MapScreen: React.FC<MapScreenProps> = ({ stats, onSelectBank, onGoToVillage }) => {
+export const MapScreen: React.FC<MapScreenProps> = ({ stats, lastDiveResult, onSelectBank, onGoToVillage }) => {
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
 
   const getDifficultyColor = (difficulty: string) => {
@@ -97,6 +108,25 @@ export const MapScreen: React.FC<MapScreenProps> = ({ stats, onSelectBank, onGoT
 
   return (
     <div className="relative w-full h-full text-slate-100 flex flex-col overflow-hidden">
+      {/* DIVE RESULTS SUMMARY - Shows if there was a recent dive */}
+      {lastDiveResult && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-16 left-2 right-2 z-50"
+        >
+          <DiveResultsSummary
+            outcome={lastDiveResult.outcome}
+            maxDepth={lastDiveResult.maxDepth}
+            diveDuration={lastDiveResult.diveDuration}
+            coinsEarned={lastDiveResult.coinsEarned}
+            foodEarned={lastDiveResult.foodEarned}
+            shellsCollected={lastDiveResult.shellsCollected}
+            rareCollected={lastDiveResult.rareCollected}
+          />
+        </motion.div>
+      )}
+
       {/* MAP BACKGROUND - Gradient seabed effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-950 via-slate-900 to-slate-950">
         {/* Depth contour lines */}

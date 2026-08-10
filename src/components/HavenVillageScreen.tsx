@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PlayerStats, DailyChallenge } from '../types';
 import { soundManager } from '../audioAndHaptics';
-import { DiveResultsSummary } from './DiveResultsSummary';
 
 interface HavenVillageScreenProps {
   stats: PlayerStats;
@@ -97,21 +96,6 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
 
   return (
     <div className="relative w-full h-full text-slate-100 flex flex-col">
-      {/* DIVE RESULTS SUMMARY - Shows if there was a recent dive (overlay at top) */}
-      {lastDiveResult && (
-        <div className="absolute top-2 left-2 right-2 z-50">
-          <DiveResultsSummary
-            outcome={lastDiveResult.outcome}
-            maxDepth={lastDiveResult.maxDepth}
-            diveDuration={lastDiveResult.diveDuration}
-            coinsEarned={lastDiveResult.coinsEarned}
-            foodEarned={lastDiveResult.foodEarned}
-            shellsCollected={lastDiveResult.shellsCollected}
-            rareCollected={lastDiveResult.rareCollected}
-          />
-        </div>
-      )}
-
       {/* Building hitboxes — each covers the actual building in the GIF */}
       {/* Layout: top-left=SMOKEHOUSE, top-right=LIGHTHOUSE, bottom-left=COUNCIL, bottom-right=BULTEOK */}
 

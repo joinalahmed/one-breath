@@ -447,6 +447,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
             >
               <MapScreen
                 stats={stats}
+                lastDiveResult={lastDiveResult}
                 onSelectBank={(bankId) => {
                   console.log('Selected bank:', bankId);
                   onStartDive();
