@@ -979,7 +979,10 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       <BubbleOverlay count={18} />
 
       {/* SLEEK FLOATING GLASS PILL HUD - Compact */}
-      <div className="relative z-10 w-full px-2 pt-2 flex justify-between items-center pointer-events-none gap-1">
+      <div
+        className="relative z-10 w-full px-2 flex justify-between items-center pointer-events-none gap-1"
+        style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
+      >
         {/* Top Left: Compact Depth Pill */}
         <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-full px-2.5 py-1 flex items-center gap-1.5 shrink-0">
           <span className="text-xs">🌊</span>
@@ -1102,7 +1105,8 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-auto"
+            className="absolute left-1/2 -translate-x-1/2 z-20 pointer-events-auto"
+            style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
           >
             <motion.button
               whileHover={{ scale: 1.05 }}

@@ -336,7 +336,13 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   ];
 
   return (
-    <div className="relative w-full h-full max-w-lg mx-auto bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none p-3 sm:p-4 no-scrollbar">
+    <div
+      className="relative w-full h-full max-w-lg mx-auto bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none p-3 sm:p-4 no-scrollbar"
+      style={{
+        paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
+        paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
+      }}
+    >
       {/* Dynamic Background Atmosphere */}
       {activeScreen === 'haven' ? (
         <img
@@ -527,7 +533,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       </AnimatePresence>
 
       {/* DYNAMIC SCREEN CONTENT */}
-      <div className={`relative z-10 flex-1 ${activeScreen === 'haven' || activeScreen === 'home' ? '' : 'overflow-y-auto'} no-scrollbar my-1`}>
+      <div className={`relative z-10 flex-1 ${activeScreen === 'haven' || activeScreen === 'home' ? '' : 'overflow-y-auto'} no-scrollbar`}>
         <AnimatePresence mode="wait">
           {/* 0. MAP SCREEN */}
           {activeScreen === 'home' && (
