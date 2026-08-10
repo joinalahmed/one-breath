@@ -145,9 +145,9 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-6 p-4 lg:p-6">
+        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row gap-4 lg:gap-6 p-3 lg:p-6">
           {/* Left: 3D Card Grid */}
-          <div className="flex-1 overflow-y-auto no-scrollbar pr-2">
+          <div className={`${selectedType ? 'hidden lg:block' : 'flex-1'} overflow-y-auto no-scrollbar pr-2`}>
             <motion.div layout className="grid grid-cols-2 gap-3 lg:gap-4">
               <AnimatePresence>
                 {discoveredItems.map(([type, item]) => {
@@ -265,14 +265,14 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 50 }}
                 transition={{ duration: 0.3 }}
-                className="w-full lg:w-72 flex-shrink-0 flex flex-col"
+                className="w-full lg:w-72 flex-shrink-0 flex flex-col overflow-y-auto"
               >
                 {/* Large Immersive Card */}
                 <motion.div
                   animate={{
                     rotateY: selectedType ? 0 : 90,
                   }}
-                  className="relative w-full h-64 lg:h-80 rounded-3xl overflow-hidden mb-4 group"
+                  className="relative w-full h-72 lg:h-80 rounded-3xl overflow-hidden mb-3 lg:mb-4 flex-shrink-0 group"
                   style={{
                     background: `linear-gradient(135deg, ${selectedInfo.color.bg})`,
                     boxShadow: `0 25px 50px rgba(0, 0, 0, 0.4), 0 0 40px ${selectedInfo.color.glow}`,
@@ -322,7 +322,7 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="flex-1 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-4 border border-slate-700/50 backdrop-blur-sm space-y-4 overflow-y-auto no-scrollbar"
+                  className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl p-3 lg:p-4 border border-slate-700/50 backdrop-blur-sm space-y-3 lg:space-y-4 overflow-y-auto no-scrollbar flex-shrink-0"
                 >
                   {/* Description */}
                   <div>
@@ -381,7 +381,7 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-full lg:w-72 flex-shrink-0 flex items-center justify-center"
+                className="w-full lg:w-72 flex-shrink-0 flex items-center justify-center h-96"
               >
                 <div className="text-center">
                   <span className="text-6xl mb-3 block">🔍</span>
