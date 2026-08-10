@@ -422,11 +422,13 @@ export default function App() {
       airAtSurfacing: number;
       rareCollected?: number;
     }) => {
-      // Show rescue modal only for large catches OR at-risk streaks
+      // Only show rescue modal on FAILED dives with large catch OR at-risk streak
+      const isFailed = result.outcome !== 'surfaced';
       const hasLargeCatch = result.coinsEarned >= 50; // Large haul worth saving
-      const hasStreakAtRisk = stats.streak > 0 && result.outcome !== 'surfaced'; // Losing streak is painful
+      const hasStreakAtRisk = stats.streak > 0; // Losing streak is painful
 
-      if (hasLargeCatch || hasStreakAtRisk) {
+      if (isFailed && (hasLargeCatch || hasStreakAtRisk)) {
+        // Show rescue modal for important failures
         setPendingRescue({
           outcome: result.outcome,
           treasureValue: result.coinsEarned,
@@ -436,7 +438,7 @@ export default function App() {
         return;
       }
 
-      // Otherwise process immediately
+      // Otherwise process immediately (success or unimportant failure)
       processRescuedDiveResult(result);
     },
     [config.DEPTH_MULTIPLIER_DIVISOR, stats.streak]

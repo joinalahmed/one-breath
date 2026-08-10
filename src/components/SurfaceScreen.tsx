@@ -101,9 +101,21 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   const nextRank = getNextRank(currentRank.level);
   const [unlockedRankModal, setUnlockedRankModal] = useState<DiverRankInfo | null>(null);
   const prevRankLevelRef = useRef(currentRank.level);
-  const [showDefeatModal, setShowDefeatModal] = useState<boolean>(() => {
-    return !!lastDiveResult && lastDiveResult.outcome !== 'surfaced';
-  });
+  const [showDefeatModal, setShowDefeatModal] = useState(false);
+  const prevDiveResultRef = useRef<typeof lastDiveResult>(null);
+
+  // Only show defeat modal ONCE when dive result changes to a failed outcome
+  useEffect(() => {
+    if (lastDiveResult && lastDiveResult !== prevDiveResultRef.current) {
+      prevDiveResultRef.current = lastDiveResult;
+
+      if (lastDiveResult.outcome !== 'surfaced') {
+        setShowDefeatModal(true);
+      } else {
+        setShowDefeatModal(false);
+      }
+    }
+  }, [lastDiveResult]);
 
   useEffect(() => {
     if (currentRank.level > prevRankLevelRef.current) {
@@ -111,17 +123,6 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       prevRankLevelRef.current = currentRank.level;
     }
   }, [currentRank]);
-
-  useEffect(() => {
-    if (lastDiveResult) {
-      if (lastDiveResult.outcome !== 'surfaced') {
-        setShowDefeatModal(true);
-      } else {
-        // Successful dive - don't show defeat modal
-        setShowDefeatModal(false);
-      }
-    }
-  }, [lastDiveResult]);
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -726,7 +727,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
           />
         )}
 
-        {showDefeatModal && lastDiveResult && lastDiveResult.outcome !== 'surfaced' && (
+        {showDefeatModal && lastDiveResult && (
           <DefeatModal
             outcome={lastDiveResult.outcome}
             maxDepth={lastDiveResult.maxDepth}
