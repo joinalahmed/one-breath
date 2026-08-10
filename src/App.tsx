@@ -215,6 +215,28 @@ export default function App() {
     localStorage.setItem(ONBOARDING_STORAGE_KEY, 'true');
   };
 
+  // Test rescue modal (for debugging)
+  const testRescueModal = () => {
+    setPendingRescue({
+      outcome: 'shark',
+      treasureValue: 50,
+      result: {
+        outcome: 'shark',
+        maxDepth: 25,
+        diveDuration: 15,
+        shellsCollected: 5,
+        fishCollected: 1,
+        shellsLost: 2,
+        coinsEarned: 50,
+        foodEarned: 1,
+        stoneCutAtDepth: null,
+        airAtSurfacing: 0,
+        rareCollected: 0,
+      },
+    });
+    setShowRescueModal(true);
+  };
+
   // Start Dive Handler (< 1 Second execution)
   const handleStartDive = () => {
     setPhase('DIVING');
@@ -501,6 +523,7 @@ export default function App() {
               onUpdateConfig={setConfig}
               onClose={() => setShowTuningOverlay(false)}
               onOpenTelemetryModal={() => setShowTelemetryModal(true)}
+              onTestRescueModal={testRescueModal}
             />
           )}
 

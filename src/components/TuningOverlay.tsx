@@ -9,6 +9,7 @@ interface TuningOverlayProps {
   onUpdateConfig: (newConfig: GameConfig) => void;
   onClose: () => void;
   onOpenTelemetryModal: () => void;
+  onTestRescueModal?: () => void;
 }
 
 export const TuningOverlay: React.FC<TuningOverlayProps> = ({
@@ -16,6 +17,7 @@ export const TuningOverlay: React.FC<TuningOverlayProps> = ({
   onUpdateConfig,
   onClose,
   onOpenTelemetryModal,
+  onTestRescueModal,
 }) => {
   const handleChange = (key: keyof GameConfig, val: number) => {
     const updated = { ...config, [key]: val };
@@ -186,6 +188,15 @@ export const TuningOverlay: React.FC<TuningOverlayProps> = ({
             className="w-full py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 font-bold text-xs text-white shadow"
           >
             📊 Open Detailed Telemetry Dashboard
+          </button>
+          <button
+            onClick={() => {
+              onTestRescueModal?.();
+              onClose();
+            }}
+            className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 font-bold text-xs text-white shadow"
+          >
+            🧪 Test Rescue Modal
           </button>
           <button
             onClick={() => {
