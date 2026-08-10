@@ -515,7 +515,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       </AnimatePresence>
 
       {/* DYNAMIC SCREEN CONTENT */}
-      <div className={`relative z-10 flex-1 ${activeScreen === 'haven' || activeScreen === 'home' ? '' : 'overflow-y-auto'} no-scrollbar my-1`}>
+      <div className={`relative z-10 flex-1 ${activeScreen === 'haven' || activeScreen === 'home' ? '' : 'overflow-y-auto'} no-scrollbar`}>
         <AnimatePresence mode="wait">
           {/* 0. MAP SCREEN */}
           {activeScreen === 'home' && (

@@ -157,7 +157,7 @@ export const StreakComboBanner: React.FC<StreakComboBannerProps> = ({ streak }) 
       animate={{ scale: 1, y: 0, rotate: 0 }}
       exit={{ scale: 0, y: -20, opacity: 0 }}
       transition={{ type: 'spring', damping: 12, stiffness: 220 }}
-      className="relative z-30 w-full mb-3 p-0.5 rounded-2xl bg-gradient-to-r from-amber-400 via-rose-500 to-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.4)] overflow-hidden"
+      className="relative z-30 w-full mx-2 mb-2 p-0.5 rounded-2xl bg-gradient-to-r from-amber-400 via-rose-500 to-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.4)] overflow-hidden"
     >
       <div className="bg-slate-950/90 rounded-[14px] p-2.5 flex items-center justify-between">
         <div className="flex items-center space-x-2.5">
