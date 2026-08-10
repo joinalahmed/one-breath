@@ -978,20 +978,19 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       {/* Mark Bowley Ambient Floating Bubble Effect */}
       <BubbleOverlay count={18} />
 
-      {/* SLEEK FLOATING GLASS PILL HUD */}
-      <div className="relative z-10 w-full px-3 pt-3 flex justify-between items-center pointer-events-none gap-2">
-        {/* Top Left: Depth Glass Pill */}
-        <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-full px-3.5 py-1.5 flex items-center space-x-2">
+      {/* SLEEK FLOATING GLASS PILL HUD - Compact */}
+      <div className="relative z-10 w-full px-2 pt-2 flex justify-between items-center pointer-events-none gap-1">
+        {/* Top Left: Compact Depth Pill */}
+        <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-full px-2.5 py-1 flex items-center gap-1.5 shrink-0">
           <span className="text-xs">🌊</span>
-          <div className="flex items-baseline space-x-1 font-mono">
-            <span className="text-base sm:text-lg font-black text-white tracking-tight">{hudDepth}</span>
-            <span className="text-[10px] font-bold text-cyan-300">m</span>
+          <div className="flex items-baseline gap-0.5 font-mono">
+            <span className="text-sm font-black text-white">{hudDepth}</span>
+            <span className="text-[9px] font-bold text-cyan-300">m</span>
           </div>
-          <span className="text-[9px] text-slate-400 font-mono border-l border-slate-700/60 pl-2">Max {hudMaxDepth}m</span>
         </div>
 
         {/* Top Center: Compact Glass Air Gauge */}
-        <div className="flex-1 flex justify-center max-w-xs">
+        <div className="flex-1 flex justify-center min-w-0">
           <BreathGauge
             air={hudAir}
             maxAir={maxAir}
@@ -999,19 +998,12 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           />
         </div>
 
-        {/* Top Right: Glass Basket & Multiplier Pill + Quick Controls */}
-        <div className="flex items-center space-x-2 pointer-events-auto">
-          {/* Multiplier & Basket Pill */}
-          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-full px-3 py-1.5 flex items-center space-x-2.5 font-mono text-xs">
-            <div className="flex items-center space-x-1">
-              <span className="text-[10px] font-bold text-amber-400">MULT</span>
-              <span className="font-extrabold text-amber-300">{hudMultiplier.toFixed(2)}x</span>
-            </div>
-            <span className="text-slate-600">|</span>
-            <div className="flex items-center space-x-1">
-              <span>🧺</span>
-              <span className="font-extrabold text-emerald-300">{hudBasket.length}/{capacity}</span>
-            </div>
+        {/* Top Right: Compact Basket & Controls */}
+        <div className="flex items-center gap-1 pointer-events-auto shrink-0">
+          {/* Basket Pill */}
+          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 font-mono text-xs">
+            <span>🧺</span>
+            <span className="font-extrabold text-emerald-300">{hudBasket.length}/{capacity}</span>
           </div>
 
           {/* Audio Toggle */}
@@ -1022,7 +1014,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
               soundManager.setMuted(nextMuted);
               setIsMuted(nextMuted);
             }}
-            className="w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-800/80 active:scale-95 text-slate-200 text-xs flex items-center justify-center border border-slate-700/50 backdrop-blur-md cursor-pointer shadow-lg transition-all"
+            className="w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-800/80 active:scale-95 text-slate-200 text-xs flex items-center justify-center border border-slate-700/50 backdrop-blur-md cursor-pointer shadow-lg transition-all"
             title="Toggle Audio"
           >
             {isMuted ? '🔇' : '🔊'}
@@ -1034,7 +1026,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
               e.stopPropagation();
               onOpenDebug();
             }}
-            className="w-8 h-8 rounded-full bg-slate-900/60 hover:bg-slate-800/80 active:scale-95 text-slate-300 text-xs flex items-center justify-center border border-slate-700/50 backdrop-blur-md cursor-pointer shadow-lg transition-all"
+            className="w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-800/80 active:scale-95 text-slate-300 text-xs flex items-center justify-center border border-slate-700/50 backdrop-blur-md cursor-pointer shadow-lg transition-all"
             title="Debug Settings"
           >
             ⚙️

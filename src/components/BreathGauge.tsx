@@ -33,16 +33,16 @@ export const BreathGauge: React.FC<BreathGaugeProps> = ({
   return (
     <div className="relative pointer-events-none select-none">
       <div
-        className={`flex items-center space-x-2 px-3 py-1.5 rounded-full bg-slate-900/60 backdrop-blur-md border shadow-xl transition-all duration-300 ${
+        className={`flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-900/60 backdrop-blur-md border shadow-xl transition-all duration-300 ${
           isLowBreath
             ? 'border-rose-500/80 shadow-[0_0_15px_rgba(244,63,94,0.4)] animate-pulse'
             : 'border-slate-700/50'
         }`}
       >
-        <Wind className={`w-3.5 h-3.5 shrink-0 ${isLowBreath ? 'text-rose-400' : 'text-cyan-400'}`} />
+        <Wind className={`w-3 h-3 shrink-0 ${isLowBreath ? 'text-rose-400' : 'text-cyan-400'}`} />
 
         {/* Progress Bar Track */}
-        <div className="w-20 sm:w-28 h-2 bg-slate-950/80 rounded-full overflow-hidden border border-slate-700/40 shrink-0">
+        <div className="w-24 h-1.5 bg-slate-950/80 rounded-full overflow-hidden border border-slate-700/40 shrink-0">
           <motion.div
             className={`h-full rounded-full bg-gradient-to-r ${getBarGradient()} transition-all duration-150`}
             style={{ width: `${airPercent}%` }}
@@ -50,7 +50,7 @@ export const BreathGauge: React.FC<BreathGaugeProps> = ({
         </div>
 
         <span
-          className={`text-xs font-black font-mono tracking-tight shrink-0 ${
+          className={`text-[10px] font-black font-mono tracking-tight shrink-0 ${
             isLowBreath ? 'text-rose-400' : 'text-cyan-200'
           }`}
         >
@@ -58,7 +58,7 @@ export const BreathGauge: React.FC<BreathGaugeProps> = ({
         </span>
 
         {isLowBreath && (
-          <AlertTriangle className="w-3.5 h-3.5 text-rose-400 animate-bounce shrink-0" />
+          <AlertTriangle className="w-3 h-3 text-rose-400 animate-bounce shrink-0" />
         )}
       </div>
     </div>
