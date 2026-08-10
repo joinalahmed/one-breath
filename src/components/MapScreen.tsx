@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { PlayerStats } from '../types';
 import { DiveResultsSummary } from './DiveResultsSummary';
 
@@ -79,6 +79,7 @@ const DIVING_BANKS: DivingBank[] = [
 
 export const MapScreen: React.FC<MapScreenProps> = ({ stats, lastDiveResult, onSelectBank, onGoToVillage }) => {
   const [selectedBank, setSelectedBank] = useState<string | null>(null);
+  const [showResults, setShowResults] = useState(!!lastDiveResult);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -108,24 +109,70 @@ export const MapScreen: React.FC<MapScreenProps> = ({ stats, lastDiveResult, onS
 
   return (
     <div className="relative w-full h-full text-slate-100 flex flex-col overflow-hidden">
-      {/* DIVE RESULTS SUMMARY - Shows if there was a recent dive */}
-      {lastDiveResult && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute top-16 left-2 right-2 z-50"
-        >
-          <DiveResultsSummary
-            outcome={lastDiveResult.outcome}
-            maxDepth={lastDiveResult.maxDepth}
-            diveDuration={lastDiveResult.diveDuration}
-            coinsEarned={lastDiveResult.coinsEarned}
-            foodEarned={lastDiveResult.foodEarned}
-            shellsCollected={lastDiveResult.shellsCollected}
-            rareCollected={lastDiveResult.rareCollected}
-          />
-        </motion.div>
-      )}
+      {/* DIVE RESULTS MODAL - Candy Crush style */}
+      <AnimatePresence>
+        {showResults && lastDiveResult && (
+          <>
+            {/* Dimmed Background */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm z-40"
+              onClick={() => setShowResults(false)}
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.7, y: 50 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.7, y: 50 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="absolute inset-0 flex items-center justify-center z-50 pointer-events-none"
+            >
+              <div className="pointer-events-auto w-11/12 max-w-sm">
+                <motion.div
+                  className="bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 rounded-3xl border-2 border-cyan-400/40 shadow-2xl p-6 space-y-4"
+                  style={{
+                    boxShadow: '0 0 40px rgba(34, 211, 238, 0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                  }}
+                >
+                  {/* Close Button - Top Right */}
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowResults(false)}
+                    className="absolute top-3 right-3 w-7 h-7 rounded-full bg-slate-700/60 hover:bg-slate-600 flex items-center justify-center text-slate-300 hover:text-white transition-all"
+                  >
+                    ✕
+                  </motion.button>
+
+                  {/* Results Content */}
+                  <DiveResultsSummary
+                    outcome={lastDiveResult.outcome}
+                    maxDepth={lastDiveResult.maxDepth}
+                    diveDuration={lastDiveResult.diveDuration}
+                    coinsEarned={lastDiveResult.coinsEarned}
+                    foodEarned={lastDiveResult.foodEarned}
+                    shellsCollected={lastDiveResult.shellsCollected}
+                    rareCollected={lastDiveResult.rareCollected}
+                  />
+
+                  {/* Continue Button */}
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowResults(false)}
+                    className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-black uppercase tracking-wider rounded-xl shadow-lg transition-all"
+                  >
+                    Continue
+                  </motion.button>
+                </motion.div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* MAP BACKGROUND - Gradient seabed effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-sky-950 via-slate-900 to-slate-950">
