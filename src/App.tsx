@@ -198,7 +198,6 @@ export default function App() {
     const handleVisibilityChange = () => {
       if (document.hidden && phase === 'DIVING') {
         // Automatically surface safely with no progress lost
-        soundManager.restoreBgMusic();
         setPhase('SURFACE');
       }
     };
@@ -240,7 +239,6 @@ export default function App() {
 
   // Start Dive Handler (< 1 Second execution)
   const handleStartDive = () => {
-    soundManager.dimBgMusic();
     setPhase('DIVING');
   };
 
