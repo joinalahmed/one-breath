@@ -56,6 +56,20 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   const [tipIndex, setTipIndex] = useState(0);
   const [hoveredUpgrade, setHoveredUpgrade] = useState<string | null>(null);
 
+  useEffect(() => {
+    const startMusic = () => {
+      soundManager.startBgMusic();
+      document.removeEventListener('click', startMusic);
+      document.removeEventListener('touchstart', startMusic);
+    };
+    document.addEventListener('click', startMusic);
+    document.addEventListener('touchstart', startMusic);
+    return () => {
+      document.removeEventListener('click', startMusic);
+      document.removeEventListener('touchstart', startMusic);
+    };
+  }, []);
+
   // PWA Installation State
   const [pwaPrompt, setPwaPrompt] = useState<any>(null);
   const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(() => {
@@ -308,12 +322,28 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   return (
     <div className="relative w-full h-full max-w-lg mx-auto bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none p-3 sm:p-4 no-scrollbar">
       {/* Dynamic Background Atmosphere */}
-      <div className="absolute inset-0 bg-gradient-to-b from-sky-950 via-slate-950 to-slate-950 pointer-events-none" />
-      <div className="absolute top-0 left-0 right-0 h-44 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.2),transparent_75%)] pointer-events-none" />
-      <BubbleOverlay count={15} />
+      {activeScreen === 'haven' ? (
+        <img
+          src="/assets/middle_eastern_fishing_village_actual_walking.gif"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover object-top pointer-events-none"
+          style={{ imageRendering: 'pixelated' }}
+          draggable={false}
+        />
+      ) : (
+        <>
+          <div className="absolute inset-0 bg-gradient-to-b from-sky-950 via-slate-950 to-slate-950 pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-44 bg-[radial-gradient(circle_at_50%_0%,rgba(56,189,248,0.2),transparent_75%)] pointer-events-none" />
+          <BubbleOverlay count={15} />
+        </>
+      )}
+      {/* Dim overlay for readability on haven */}
+      {activeScreen === 'haven' && (
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50 pointer-events-none" />
+      )}
 
       {/* TOP COMPACT HUD BAR */}
-      <div className="relative z-10 w-full flex justify-between items-center bg-slate-900/90 border border-slate-800 p-2 rounded-2xl shadow-xl backdrop-blur-md mb-2">
+      <div className="relative z-10 w-full flex justify-between items-center bg-slate-900/80 border border-slate-800/60 p-2 rounded-2xl shadow-xl backdrop-blur-md mb-2">
         {/* Level Badge */}
         <div className="flex items-center space-x-2">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 shadow-md flex items-center justify-center font-black text-slate-950 text-xs font-mono">
@@ -397,7 +427,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       </AnimatePresence>
 
       {/* DYNAMIC SCREEN CONTENT */}
-      <div className="relative z-10 flex-1 overflow-y-auto no-scrollbar my-1">
+      <div className={`relative z-10 flex-1 ${activeScreen === 'haven' ? '' : 'overflow-y-auto'} no-scrollbar my-1`}>
         <AnimatePresence mode="wait">
           {/* 1. HAVEN VILLAGE SCREEN */}
           {activeScreen === 'haven' && (
@@ -407,6 +437,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.2 }}
+              className="h-full"
             >
               <HavenVillageScreen
                 stats={stats}
@@ -671,7 +702,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
 
       {/* BOTTOM NAVIGATION BAR */}
       <div className="relative z-20 shrink-0 pt-1.5 mt-auto">
-        <div className="flex space-x-1.5 p-1.5 bg-slate-900/95 rounded-2xl border border-slate-800 shadow-2xl backdrop-blur-md items-center">
+        <div className="flex space-x-1.5 p-1.5 bg-slate-900/80 rounded-2xl border border-slate-700/60 shadow-2xl backdrop-blur-lg items-center">
           {/* LEFT: SHOP */}
           <button
             onClick={() => setActiveScreen('shop')}

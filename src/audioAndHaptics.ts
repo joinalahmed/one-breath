@@ -6,6 +6,8 @@ class AudioAndHapticsController {
   private heartbeatOsc: OscillatorNode | null = null;
   private heartbeatGain: GainNode | null = null;
   private lastHeartbeatTime: number = 0;
+  private bgMusic: HTMLAudioElement | null = null;
+  private bgMusicStarted: boolean = false;
 
   constructor() {
     // Lazily initialized on first touch
@@ -29,10 +31,44 @@ class AudioAndHapticsController {
 
   public setMuted(muted: boolean) {
     this.isMuted = muted;
+    if (this.bgMusic) {
+      this.bgMusic.muted = muted;
+    }
   }
 
   public getMuted(): boolean {
     return this.isMuted;
+  }
+
+  public startBgMusic() {
+    if (this.bgMusicStarted) return;
+    this.bgMusicStarted = true;
+
+    this.bgMusic = new Audio('/assets/96459__123a4567__ambience_maltese_fishing_village_seafront_winter.wav');
+    this.bgMusic.loop = true;
+    this.bgMusic.volume = 0.3;
+    this.bgMusic.muted = this.isMuted;
+    this.bgMusic.play().catch(() => {});
+  }
+
+  public dimBgMusic() {
+    if (this.bgMusic) {
+      this.bgMusic.volume = 0.05;
+    }
+  }
+
+  public restoreBgMusic() {
+    if (this.bgMusic) {
+      this.bgMusic.volume = 0.3;
+    }
+  }
+
+  public stopBgMusic() {
+    if (this.bgMusic) {
+      this.bgMusic.pause();
+      this.bgMusic.currentTime = 0;
+      this.bgMusicStarted = false;
+    }
   }
 
   // Haptic feedback using navigator.vibrate
