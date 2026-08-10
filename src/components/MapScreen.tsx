@@ -108,7 +108,7 @@ export const MapScreen: React.FC<MapScreenProps> = ({ stats, lastDiveResult, onS
   };
 
   return (
-    <div className="relative w-full h-full text-slate-100 flex flex-col overflow-hidden">
+    <div className="relative w-full h-full text-slate-100 flex flex-col overflow-hidden bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950">
       {/* DIVE RESULTS MODAL - Candy Crush style */}
       <AnimatePresence>
         {showResults && lastDiveResult && (
@@ -174,41 +174,22 @@ export const MapScreen: React.FC<MapScreenProps> = ({ stats, lastDiveResult, onS
         )}
       </AnimatePresence>
 
-      {/* MAP BACKGROUND - Gradient seabed effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-sky-950 via-slate-900 to-slate-950">
-        {/* Depth contour lines */}
-        <svg className="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <defs>
-            <pattern id="depth-lines" x="0" y="0" width="100" height="20" patternUnits="userSpaceOnUse">
-              <line x1="0" y1="0" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" opacity="0.5" />
-            </pattern>
-          </defs>
-          <rect width="100" height="100" fill="url(#depth-lines)" />
-          {/* Deeper areas - contours */}
-          <ellipse cx="75" cy="65" rx="20" ry="15" fill="none" stroke="currentColor" strokeWidth="0.3" opacity="0.3" />
-          <ellipse cx="75" cy="65" rx="15" ry="10" fill="none" stroke="currentColor" strokeWidth="0.3" opacity="0.3" />
-        </svg>
-
-        {/* Water shimmer overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
-      </div>
-
       {/* HEADER */}
       <motion.div
-        initial={{ opacity: 0, y: -15 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 p-3 border-b border-cyan-500/20 bg-gradient-to-b from-slate-900/80 to-slate-950/40 backdrop-blur-sm"
+        className="relative z-10 px-3 py-4 space-y-2"
       >
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-xl font-black text-cyan-400 uppercase tracking-wider">Season Map</h1>
-            <p className="text-xs text-slate-400">Day {stats.totalDives + 1} — Select a diving bank</p>
+            <h1 className="text-2xl font-black text-cyan-400 uppercase tracking-wider">SELECT BANK</h1>
+            <p className="text-xs text-slate-400 mt-1">Day {stats.totalDives + 1}</p>
           </div>
           <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.9 }}
             onClick={onGoToVillage}
-            className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-base text-slate-200 active:scale-95 transition-all cursor-pointer shadow"
+            className="w-8 h-8 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 flex items-center justify-center text-base text-slate-200 transition-all cursor-pointer shadow"
             title="Return to village"
           >
             🏠
@@ -216,81 +197,111 @@ export const MapScreen: React.FC<MapScreenProps> = ({ stats, lastDiveResult, onS
         </div>
       </motion.div>
 
-      {/* INTERACTIVE MAP */}
-      <div className="relative flex-1 overflow-hidden">
-        {/* Bank Location Markers */}
-        {DIVING_BANKS.map((bank, idx) => (
-          <motion.div
-            key={bank.id}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 + idx * 0.08 }}
-            className="absolute"
-            style={{ left: `${bank.position.x}%`, top: `${bank.position.y}%`, transform: 'translate(-50%, -50%)' }}
-          >
-            {/* Depth indicator line from marker to bottom */}
-            {selectedBank === bank.id && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: '200px' }}
-                transition={{ duration: 0.3 }}
-                className={`absolute left-1/2 top-full w-0.5 ${
-                  bank.difficulty === 'easy'
-                    ? 'bg-gradient-to-b from-emerald-500/50 to-transparent'
-                    : bank.difficulty === 'medium'
-                      ? 'bg-gradient-to-b from-amber-500/50 to-transparent'
-                      : 'bg-gradient-to-b from-red-500/50 to-transparent'
-                } pointer-events-none`}
-                style={{ transform: 'translateX(-50%)' }}
-              />
-            )}
-
-            {/* Clickable marker button */}
+      {/* CARD GRID */}
+      <div className="relative flex-1 overflow-y-auto no-scrollbar px-2 pb-3">
+        <div className="grid grid-cols-2 gap-3 auto-rows-max">
+          {DIVING_BANKS.map((bank, idx) => (
             <motion.button
-              whileHover={{ scale: 1.15 }}
-              whileTap={{ scale: 0.9 }}
+              key={bank.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.08 }}
+              whileHover={{ y: -4, scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => {
                 setSelectedBank(bank.id);
                 setTimeout(() => onSelectBank(bank.id), 300);
               }}
-              className={`relative w-20 h-20 rounded-full border-2 ${getDifficultyColor(bank.difficulty)} shadow-xl transition-all flex flex-col items-center justify-center cursor-pointer backdrop-blur-sm`}
+              className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer backdrop-blur-sm flex flex-col items-center justify-center space-y-2 h-32 ${getDifficultyColor(bank.difficulty)}`}
+              style={{
+                boxShadow: selectedBank === bank.id
+                  ? 'inset 0 1px 0 rgba(255,255,255,0.2), 0 0 20px rgba(255,255,255,0.2)'
+                  : 'inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.3)',
+              }}
             >
-              {/* Marker pin effect */}
-              <motion.div
-                animate={{ scale: selectedBank === bank.id ? 1.2 : 1, opacity: selectedBank === bank.id ? 1 : 0.6 }}
-                className="absolute inset-0 rounded-full border-2 border-current opacity-50"
-              />
+              {/* Selected indicator */}
+              {selectedBank === bank.id && (
+                <motion.div
+                  layoutId="selected"
+                  className="absolute inset-0 rounded-2xl border-2 border-current opacity-100"
+                  transition={{ type: 'spring', stiffness: 300 }}
+                />
+              )}
 
-              {/* Bank emoji/icon */}
-              <div className="text-2xl z-10">{bank.emoji}</div>
+              {/* Content */}
+              <div className="relative z-10 flex flex-col items-center space-y-1 w-full">
+                {/* Emoji */}
+                <span className="text-3xl">{bank.emoji}</span>
 
-              {/* Depth label */}
-              <div className={`text-[9px] font-black ${getBankDepthMarker(bank.difficulty)} z-10`}>
-                {bank.depth}m
-              </div>
-            </motion.button>
+                {/* Name */}
+                <h3 className="text-xs font-black uppercase tracking-wider text-white text-center leading-tight">
+                  {bank.name}
+                </h3>
 
-            {/* Info tooltip - shows below marker */}
-            {selectedBank === bank.id && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="absolute top-full mt-24 left-1/2 -translate-x-1/2 whitespace-nowrap z-20 pointer-events-none"
-              >
-                <div className="bg-slate-950/95 border-2 border-slate-700/60 rounded-lg px-3 py-2 text-center backdrop-blur-md shadow-xl">
-                  <div className="text-xs font-black text-white uppercase tracking-wide">{bank.name}</div>
-                  <div className="text-[10px] text-slate-300 mt-0.5">{bank.description}</div>
-                  <div className={`text-[9px] font-mono mt-1 ${getBankDepthMarker(bank.difficulty)}`}>
-                    Max Depth: {bank.depth}m
-                  </div>
+                {/* Depth */}
+                <div className={`text-[10px] font-black font-mono ${getBankDepthMarker(bank.difficulty)}`}>
+                  {bank.depth}m
                 </div>
-              </motion.div>
-            )}
-          </motion.div>
-        ))}
 
+                {/* Difficulty indicator */}
+                <div className="text-[9px] font-black text-slate-300 uppercase tracking-wide">
+                  {bank.difficulty === 'easy' ? '★' : bank.difficulty === 'medium' ? '★★' : '★★★'}
+                </div>
+              </div>
+
+              {/* Pulse effect on hover */}
+              {selectedBank === bank.id && (
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="absolute inset-0 rounded-2xl border-2 border-current opacity-0"
+                />
+              )}
+            </motion.button>
+          ))}
+        </div>
       </div>
+
+      {/* SELECTION INFO */}
+      <AnimatePresence>
+        {selectedBank && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="relative z-10 px-3 py-3 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent border-t border-slate-700/40"
+          >
+            {(() => {
+              const bank = DIVING_BANKS.find(b => b.id === selectedBank);
+              return bank ? (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-xs text-slate-400 uppercase font-black tracking-wider">Selected Bank</p>
+                      <p className="text-sm font-black text-white">{bank.name}</p>
+                    </div>
+                    <p className={`text-2xl font-black ${getBankDepthMarker(bank.difficulty)}`}>
+                      {bank.depth}m
+                    </p>
+                  </div>
+                  <p className="text-xs text-slate-300">{bank.description}</p>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      setSelectedBank(null);
+                      onSelectBank(bank.id);
+                    }}
+                    className="w-full py-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-black uppercase tracking-wider rounded-lg transition-all"
+                  >
+                    DIVE NOW
+                  </motion.button>
+                </div>
+              ) : null;
+            })()}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
