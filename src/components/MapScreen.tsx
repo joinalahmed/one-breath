@@ -290,40 +290,6 @@ export const MapScreen: React.FC<MapScreenProps> = ({ stats, lastDiveResult, onS
           </motion.div>
         ))}
 
-        {/* STATS OVERLAY (bottom right) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute bottom-4 right-4 z-20 space-y-2"
-        >
-          {/* Pearls */}
-          <div
-            className="border-2 border-amber-500/50 bg-amber-950/60 px-4 py-2 rounded-xl flex items-center space-x-2 shadow-lg backdrop-blur-sm"
-            style={{
-              boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.2), 0 3px 6px rgba(0,0,0,0.7)',
-            }}
-          >
-            <span className="text-amber-400 text-lg">💎</span>
-            <div>
-              <div className="text-[9px] font-black text-amber-300 uppercase">Pearls</div>
-              <div className="text-sm font-black text-amber-100">{stats.coins}</div>
-            </div>
-          </div>
-
-          {/* Fish */}
-          <div
-            className="border-2 border-emerald-500/50 bg-emerald-950/60 px-4 py-2 rounded-xl flex items-center space-x-2 shadow-lg backdrop-blur-sm"
-            style={{
-              boxShadow: 'inset 0 1px 0 rgba(100,255,150,0.2), 0 3px 6px rgba(0,0,0,0.7)',
-            }}
-          >
-            <span className="text-emerald-400 text-lg">🐟</span>
-            <div>
-              <div className="text-[9px] font-black text-emerald-300 uppercase">Fish</div>
-              <div className="text-sm font-black text-emerald-100">{stats.food}</div>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </div>
   );
