@@ -6,7 +6,7 @@ import { soundManager } from '../audioAndHaptics';
 import { getPlayerRank, getNextRank, DiverRankInfo } from '../ranks';
 import { RankUpModal, StreakComboBanner, DefeatModal } from './AnimatedOverlayEffects';
 import { HavenVillageScreen } from './HavenVillageScreen';
-import { HomeScreen } from './HomeScreen';
+import { MapScreen } from './MapScreen';
 import { BubbleOverlay } from './BubbleOverlay';
 import { DiveResultsSummary } from './DiveResultsSummary';
 import { UpgradeImpactInfo } from './UpgradeImpactInfo';
@@ -144,7 +144,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       if ((e.code === 'Space' || e.code === 'Enter')) {
         if (activeScreen === 'home') {
           e.preventDefault();
-          setActiveScreen('haven');
+          onStartDive();
         } else if (activeScreen === 'haven') {
           e.preventDefault();
           onStartDive();
@@ -435,17 +435,24 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       {/* DYNAMIC SCREEN CONTENT */}
       <div className={`relative z-10 flex-1 ${activeScreen === 'haven' || activeScreen === 'home' ? '' : 'overflow-y-auto'} no-scrollbar my-1`}>
         <AnimatePresence mode="wait">
-          {/* 0. HOME SCREEN */}
+          {/* 0. MAP SCREEN */}
           {activeScreen === 'home' && (
             <motion.div
-              key="home"
+              key="map"
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.2 }}
               className="h-full"
             >
-              <HomeScreen stats={stats} onGoToVillage={() => setActiveScreen('haven')} />
+              <MapScreen
+                stats={stats}
+                onSelectBank={(bankId) => {
+                  console.log('Selected bank:', bankId);
+                  onStartDive();
+                }}
+                onGoToVillage={() => setActiveScreen('haven')}
+              />
             </motion.div>
           )}
 
@@ -723,7 +730,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       {/* BOTTOM NAVIGATION BAR */}
       <div className="relative z-20 shrink-0 pt-1.5 mt-auto">
         <div className="flex space-x-1.5 p-1.5 bg-slate-900/80 rounded-2xl border border-slate-700/60 shadow-2xl backdrop-blur-lg items-center">
-          {/* HOME */}
+          {/* MAP */}
           <button
             onClick={() => setActiveScreen('home')}
             className={`flex-1 py-2 text-xs font-black rounded-xl uppercase tracking-wider transition-all cursor-pointer flex flex-col items-center justify-center space-y-0.5 ${
@@ -732,8 +739,8 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <span className="text-base">🏠</span>
-            <span className="text-[10px] font-black">HOME</span>
+            <span className="text-base">🗺️</span>
+            <span className="text-[10px] font-black">MAP</span>
           </button>
 
           {/* VILLAGE */}
