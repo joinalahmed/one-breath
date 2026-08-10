@@ -8,6 +8,7 @@ import { RankUpModal, StreakComboBanner, DefeatModal } from './AnimatedOverlayEf
 import { HavenVillageScreen } from './HavenVillageScreen';
 import { BubbleOverlay } from './BubbleOverlay';
 import { DiveResultsSummary } from './DiveResultsSummary';
+import { UpgradeImpactInfo } from './UpgradeImpactInfo';
 
 interface SurfaceScreenProps {
   stats: PlayerStats;
@@ -53,6 +54,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   const [currentBots] = useState<BotDiver[]>(() => simulateBotActivity(bots));
   const [isMuted, setIsMuted] = useState(() => soundManager.getMuted());
   const [tipIndex, setTipIndex] = useState(0);
+  const [hoveredUpgrade, setHoveredUpgrade] = useState<string | null>(null);
 
   // PWA Installation State
   const [pwaPrompt, setPwaPrompt] = useState<any>(null);
@@ -111,8 +113,13 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   }, [currentRank]);
 
   useEffect(() => {
-    if (lastDiveResult && lastDiveResult.outcome !== 'surfaced') {
-      setShowDefeatModal(true);
+    if (lastDiveResult) {
+      if (lastDiveResult.outcome !== 'surfaced') {
+        setShowDefeatModal(true);
+      } else {
+        // Successful dive - don't show defeat modal
+        setShowDefeatModal(false);
+      }
     }
   }, [lastDiveResult]);
 
@@ -530,13 +537,15 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.02, duration: 0.2 }}
-                        className={`scopely-card border p-2.5 rounded-2xl flex justify-between items-center shadow-md ${
+                        onMouseEnter={() => setHoveredUpgrade(item.key)}
+                        onMouseLeave={() => setHoveredUpgrade(null)}
+                        className={`scopely-card border p-2.5 rounded-2xl flex flex-col shadow-md transition-all ${
                           currentLevel > 0
                             ? 'border-amber-500/40 bg-slate-900/80'
                             : 'border-slate-800 bg-slate-950/60'
                         }`}
                       >
-                        <div className="flex items-center space-x-2.5 flex-1 min-w-0 pr-1">
+                        <div className="flex items-center space-x-2.5 flex-1 min-w-0 pr-1 mb-2">
                           <span className={`text-2xl p-1.5 rounded-xl border shrink-0 ${item.bg}`}>{item.icon}</span>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center space-x-1.5">
@@ -555,22 +564,31 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                               )}
                             </p>
                           </div>
+
+                          <motion.button
+                            whileTap={{ scale: 0.92 }}
+                            disabled={isMax || !canAfford}
+                            onClick={() => onBuyUpgrade(item.key, nextCost)}
+                            className={`px-2.5 py-1.5 rounded-xl text-xs font-black transition-all font-mono shrink-0 whitespace-nowrap ${
+                              isMax
+                                ? 'bg-emerald-950/80 border border-emerald-500/50 text-emerald-300'
+                                : canAfford
+                                ? 'btn-scopely-gold text-slate-950 cursor-pointer shadow-md animate-pulse'
+                                : 'bg-slate-800/80 text-slate-500 border border-slate-700'
+                            }`}
+                          >
+                            {isMax ? 'MAX ✅' : `${nextCost} 💎`}
+                          </motion.button>
                         </div>
 
-                        <motion.button
-                          whileTap={{ scale: 0.92 }}
-                          disabled={isMax || !canAfford}
-                          onClick={() => onBuyUpgrade(item.key, nextCost)}
-                          className={`px-2.5 py-1.5 rounded-xl text-xs font-black transition-all font-mono ml-1 shrink-0 whitespace-nowrap ${
-                            isMax
-                              ? 'bg-emerald-950/80 border border-emerald-500/50 text-emerald-300'
-                              : canAfford
-                              ? 'btn-scopely-gold text-slate-950 cursor-pointer shadow-md animate-pulse'
-                              : 'bg-slate-800/80 text-slate-500 border border-slate-700'
-                          }`}
-                        >
-                          {isMax ? 'MAX ✅' : `${nextCost} 💎`}
-                        </motion.button>
+                        {/* Show impact info when hovered */}
+                        {hoveredUpgrade === item.key && (
+                          <UpgradeImpactInfo
+                            upgradeKey={item.key}
+                            currentLevel={currentLevel}
+                            maxLevel={item.maxLevel}
+                          />
+                        )}
                       </motion.div>
                     );
                   })}
