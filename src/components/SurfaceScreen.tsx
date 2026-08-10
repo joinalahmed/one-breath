@@ -733,7 +733,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         whileHover={{ scale: 1.12, x: -4 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setActiveScreen('leaderboard')}
-        className="fixed left-3 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full flex items-center justify-center transition-all"
+        className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full flex items-center justify-center transition-all"
         style={{
           background: activeScreen === 'leaderboard'
             ? 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)'
@@ -753,7 +753,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         whileHover={{ scale: 1.12, x: 4 }}
         whileTap={{ scale: 0.9 }}
         onClick={() => setActiveScreen('shop')}
-        className="fixed right-3 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full flex items-center justify-center transition-all relative"
+        className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full flex items-center justify-center transition-all relative"
         style={{
           background: activeScreen === 'shop'
             ? 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'
