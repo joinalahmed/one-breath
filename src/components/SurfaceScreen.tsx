@@ -54,6 +54,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   const [activeScreen, setActiveScreen] = useState<'home' | 'haven' | 'shop' | 'leaderboard'>('home');
   const [currentBots] = useState<BotDiver[]>(() => simulateBotActivity(bots));
   const [isMuted, setIsMuted] = useState(() => soundManager.getMuted());
+  const [showSettings, setShowSettings] = useState(false);
   const [tipIndex, setTipIndex] = useState(0);
   const [hoveredUpgrade, setHoveredUpgrade] = useState<string | null>(null);
 
@@ -348,40 +349,66 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50 pointer-events-none" />
       )}
 
-      {/* TOP COMPACT HUD BAR */}
-      <div className="relative z-10 w-full flex justify-between items-center bg-slate-900/80 border border-slate-800/60 p-2 rounded-2xl shadow-xl backdrop-blur-md mb-2">
-        {/* Back Button - Show when not on map */}
-        {activeScreen !== 'home' && (
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setActiveScreen('home')}
-            className="w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 flex items-center justify-center text-sm text-slate-200 transition-all cursor-pointer shadow mr-1"
-            title="Back to Map"
-          >
-            ←
-          </motion.button>
-        )}
-
-        {/* Level Badge */}
+      {/* TOP NAV BAR */}
+      <div
+        className="relative z-20 w-full flex justify-between items-center px-3 py-2 rounded-2xl shadow-xl backdrop-blur-md mb-2"
+        style={{
+          background: 'linear-gradient(180deg, rgba(15,23,42,0.92), rgba(2,6,23,0.92))',
+          border: '1px solid rgba(201,162,74,0.28)',
+          boxShadow: '0 6px 18px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)',
+        }}
+      >
+        {/* Left: back (off-map) + circular level badge */}
         <div className="flex items-center space-x-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 shadow-md flex items-center justify-center font-black text-slate-950 text-xs font-mono">
-            LVL {Math.min(100, stats.totalDives + 1)}
+          {activeScreen !== 'home' && (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setActiveScreen('home')}
+              className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-sm text-slate-200 transition-all cursor-pointer shadow"
+              title="Back to Map"
+            >
+              ←
+            </motion.button>
+          )}
+
+          {/* Circular level badge with progress ring */}
+          <div className="relative w-11 h-11 shrink-0">
+            <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
+              <circle cx="22" cy="22" r="18" fill="rgba(2,6,23,0.6)" stroke="#1e293b" strokeWidth="4" />
+              <circle
+                cx="22"
+                cy="22"
+                r="18"
+                fill="none"
+                stroke="url(#lvlRing)"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 18}
+                strokeDashoffset={2 * Math.PI * 18 * (1 - ((stats.totalDives % 5) + 1) / 5)}
+              />
+              <defs>
+                <linearGradient id="lvlRing" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#fbbf24" />
+                  <stop offset="100%" stopColor="#34d399" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
+              <span className="text-[7px] font-black text-amber-300/80 tracking-wider">LVL</span>
+              <span className="text-sm font-black text-white font-mono">{Math.min(100, stats.totalDives + 1)}</span>
+            </div>
           </div>
-          <div>
-            <span className="text-[10px] font-black text-amber-300 uppercase tracking-wider block">
+
+          <div className="leading-tight">
+            <span className="text-[11px] font-black text-amber-300 uppercase tracking-wider block">
               DAY {stats.totalDives + 1}
             </span>
-            <div className="w-16 h-1.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
-              <div
-                className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full"
-                style={{ width: `${Math.min(100, ((stats.totalDives % 5) + 1) * 20)}%` }}
-              />
-            </div>
+            <span className="text-[9px] text-slate-400 uppercase tracking-wide">Freediver</span>
           </div>
         </div>
 
-        {/* Currency Vault & Control Icons */}
+        {/* Right: currency + controls */}
         <div className="flex items-center space-x-1.5">
           {/* Pearls */}
           <div className="bg-slate-950 border border-amber-500/60 px-2 py-1 rounded-xl flex items-center space-x-1 shadow-inner">
@@ -415,28 +442,66 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
             {isMuted ? '🔇' : '🔊'}
           </button>
 
-          {/* Settings / Telemetry */}
-          <button
-            onClick={onOpenTelemetryModal}
-            className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-xs text-slate-200 active:scale-95 transition-all cursor-pointer shadow"
-            title="Settings & Telemetry"
-          >
-            ⚙️
-          </button>
+          {/* Settings (Install lives in here) */}
+          <div className="relative">
+            <button
+              onClick={() => setShowSettings((v) => !v)}
+              className={`w-7 h-7 rounded-lg border flex items-center justify-center text-xs active:scale-95 transition-all cursor-pointer shadow ${
+                showSettings
+                  ? 'bg-amber-500/20 border-amber-400/60 text-amber-200'
+                  : 'bg-slate-800 border-slate-700 text-slate-200'
+              }`}
+              title="Settings"
+            >
+              ⚙️
+            </button>
 
-          {/* PWA Install Button */}
-          <button
-            onClick={handleInstallPWA}
-            className={`h-7 px-2 rounded-lg text-[10px] font-black font-mono border flex items-center space-x-1 active:scale-95 transition-all cursor-pointer shadow ${
-              isPwaInstalled
-                ? 'bg-emerald-950/80 border-emerald-500/50 text-emerald-300'
-                : 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 border-amber-300 font-extrabold shadow-lg'
-            }`}
-            title={isPwaInstalled ? 'PWA App Installed & Offline Ready' : 'Install One Breath PWA App'}
-          >
-            <span>📱</span>
-            <span>{isPwaInstalled ? 'PWA' : 'INSTALL'}</span>
-          </button>
+            <AnimatePresence>
+              {showSettings && (
+                <>
+                  {/* Click-away backdrop */}
+                  <div className="fixed inset-0 z-30" onClick={() => setShowSettings(false)} />
+
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-48 z-40 rounded-xl overflow-hidden border border-slate-700 shadow-2xl bg-slate-900"
+                  >
+                    <div className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                      Settings
+                    </div>
+
+                    {/* Install App */}
+                    <button
+                      onClick={() => {
+                        handleInstallPWA();
+                        setShowSettings(false);
+                      }}
+                      disabled={isPwaInstalled}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 transition-colors disabled:opacity-60 disabled:cursor-default cursor-pointer"
+                    >
+                      <span className="text-sm">📱</span>
+                      <span>{isPwaInstalled ? 'App Installed ✓' : 'Install App'}</span>
+                    </button>
+
+                    {/* Records & Telemetry */}
+                    <button
+                      onClick={() => {
+                        onOpenTelemetryModal();
+                        setShowSettings(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 transition-colors border-t border-slate-800 cursor-pointer"
+                    >
+                      <span className="text-sm">📊</span>
+                      <span>Records &amp; Data</span>
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
@@ -506,95 +571,92 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
               transition={{ duration: 0.2 }}
               className="space-y-3 no-scrollbar pb-4"
             >
-              {/* PEARL EXCHANGE VAULT */}
-              <div className="scopely-card border border-amber-500/50 p-3 rounded-2xl space-y-2.5 shadow-xl">
-                <div className="flex justify-between items-center border-b border-slate-800 pb-1.5">
-                  <div>
-                    <h3 className="text-xs font-black text-amber-300 uppercase tracking-wider">
-                      💎 PEARL EXCHANGE & MERCHANT CONTRACTS
-                    </h3>
-                    <p className="text-[10px] text-slate-400">Trade caught sea fish for rare pearl currency</p>
-                  </div>
-                  <span className="text-xs font-mono font-black text-amber-300 bg-amber-950/80 px-2.5 py-1 rounded-lg border border-amber-500/40">
-                    {stats.coins} 💎
+              {/* STORE HEADER + BALANCE */}
+              <div className="flex items-end justify-between px-1">
+                <div>
+                  <h2 className="text-xl font-black text-amber-300 uppercase tracking-wide">Store</h2>
+                  <p className="text-[11px] text-slate-400">Upgrade your gear & trade your catch</p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="bg-slate-950 border border-amber-500/60 px-2.5 py-1 rounded-xl text-xs font-black text-amber-300 font-mono flex items-center gap-1">
+                    <span className="text-amber-400">💎</span>
+                    {stats.coins}
+                  </span>
+                  <span className="bg-slate-950 border border-emerald-500/60 px-2.5 py-1 rounded-xl text-xs font-black text-emerald-300 font-mono flex items-center gap-1">
+                    <span className="text-emerald-400">🐟</span>
+                    {stats.food}
                   </span>
                 </div>
+              </div>
 
-                {/* Fish Trade Buttons */}
+              {/* TRADE FISH */}
+              <div className="space-y-2">
+                <h3 className="text-[11px] font-black text-slate-300 uppercase tracking-wider px-1 flex items-center gap-1.5">
+                  <span className="text-emerald-400">⇄</span> Trade Fish for Pearls
+                </h3>
                 <div className="grid grid-cols-2 gap-2">
-                  <button
-                    disabled={stats.food < 1}
-                    onClick={() => onTradeFishForPearls?.(1, 15)}
-                    className={`p-2.5 rounded-xl border text-left flex justify-between items-center transition-all ${
-                      stats.food >= 1
-                        ? 'bg-emerald-950/60 border-emerald-500/50 hover:bg-emerald-900/80 cursor-pointer shadow-md'
-                        : 'bg-slate-950 border-slate-800 text-slate-600'
-                    }`}
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-emerald-300 block">Trade 1 Fish</span>
-                      <span className="text-[10px] text-amber-300 font-mono">+15 Pearls</span>
-                    </div>
-                    <span className="text-sm font-bold text-amber-400">⇄</span>
-                  </button>
-
-                  <button
-                    disabled={stats.food < 3}
-                    onClick={() => onTradeFishForPearls?.(3, 50)}
-                    className={`p-2.5 rounded-xl border text-left flex justify-between items-center transition-all ${
-                      stats.food >= 3
-                        ? 'bg-emerald-950/60 border-emerald-500/50 hover:bg-emerald-900/80 cursor-pointer shadow-md'
-                        : 'bg-slate-950 border-slate-800 text-slate-600'
-                    }`}
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-emerald-300 block">Trade 3 Fish</span>
-                      <span className="text-[10px] text-amber-300 font-mono">+50 Pearls</span>
-                    </div>
-                    <span className="text-sm font-bold text-amber-400">⇄</span>
-                  </button>
+                  {[
+                    { f: 1, p: 15 },
+                    { f: 3, p: 50 },
+                  ].map((t) => {
+                    const affordable = stats.food >= t.f;
+                    return (
+                      <button
+                        key={t.f}
+                        disabled={!affordable}
+                        onClick={() => onTradeFishForPearls?.(t.f, t.p)}
+                        className={`p-3 rounded-2xl border flex items-center justify-between transition-all ${
+                          affordable
+                            ? 'scopely-card border-emerald-500/40 hover:border-emerald-400/70 active:scale-95 cursor-pointer'
+                            : 'bg-slate-950/60 border-slate-800 opacity-60'
+                        }`}
+                      >
+                        <div className="text-left">
+                          <span className="text-xs font-black text-emerald-300 block">{t.f} Fish 🐟</span>
+                          <span className="text-[10px] text-amber-300 font-mono font-bold">+{t.p} 💎</span>
+                        </div>
+                        <span className="text-lg text-amber-400">⇄</span>
+                      </button>
+                    );
+                  })}
                 </div>
+              </div>
 
-                {/* Stipends */}
-                <div className="grid grid-cols-3 gap-1.5 pt-1">
-                  <button
-                    onClick={() => onAddPearls?.(50)}
-                    className="btn-scopely-blue p-2 rounded-xl text-center active:scale-95 transition-all cursor-pointer shadow-md"
-                  >
-                    <span className="text-xs text-white font-black block font-mono">+50</span>
-                    <span className="text-[9px] text-sky-100 font-bold block uppercase">Stipend</span>
-                  </button>
-
-                  <button
-                    onClick={() => onAddPearls?.(150)}
-                    className="btn-scopely-gold p-2 rounded-xl text-center active:scale-95 transition-all cursor-pointer shadow-md"
-                  >
-                    <span className="text-xs text-slate-950 font-black block font-mono">+150</span>
-                    <span className="text-[9px] text-slate-900 font-bold block uppercase">Bounty</span>
-                  </button>
-
-                  <button
-                    onClick={() => onAddPearls?.(500)}
-                    className="btn-scopely-purple p-2 rounded-xl text-center active:scale-95 transition-all cursor-pointer shadow-md"
-                  >
-                    <span className="text-xs text-white font-black block font-mono">+500</span>
-                    <span className="text-[9px] text-purple-100 font-bold block uppercase">Grant</span>
-                  </button>
+              {/* PEARL PACKS */}
+              <div className="space-y-2">
+                <h3 className="text-[11px] font-black text-slate-300 uppercase tracking-wider px-1 flex items-center gap-1.5">
+                  <span>💎</span> Pearl Packs
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { amt: 50, label: 'Stipend', cls: 'btn-scopely-blue', text: 'text-white' },
+                    { amt: 150, label: 'Bounty', cls: 'btn-scopely-gold', text: 'text-slate-950' },
+                    { amt: 500, label: 'Grant', cls: 'btn-scopely-purple', text: 'text-white' },
+                  ].map((pack) => (
+                    <button
+                      key={pack.amt}
+                      onClick={() => onAddPearls?.(pack.amt)}
+                      className={`${pack.cls} py-2.5 rounded-2xl text-center active:scale-95 transition-all cursor-pointer`}
+                    >
+                      <span className={`text-sm ${pack.text} font-black block font-mono`}>+{pack.amt}</span>
+                      <span className={`text-[9px] ${pack.text} font-bold block uppercase opacity-80`}>{pack.label}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
               {/* DIVER GEAR & GAMEPLAY UPGRADES (STACKABLE MULTIPLE LEVELS) */}
               <div className="space-y-2">
-                <div className="flex justify-between items-center px-1">
-                  <h3 className="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center space-x-1.5">
-                    <span>🛡️ DIVER GEAR & MULTI-LEVEL UPGRADES</span>
+                <div className="flex items-center justify-between px-1">
+                  <h3 className="text-[11px] font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>🛡️</span> Diver Gear
                   </h3>
-                  <span className="text-amber-300 font-mono text-xs font-bold bg-slate-950 px-2.5 py-0.5 rounded-md border border-slate-800">
-                    {totalUpgradeLevels} LEVELS UNLOCKED
+                  <span className="text-amber-300 font-mono text-[10px] font-bold bg-slate-950 px-2 py-0.5 rounded-md border border-slate-800">
+                    {totalUpgradeLevels} LVLS
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2">
                   {UPGRADE_ITEMS.map((item, idx) => {
                     const rawLvl = stats.upgrades[item.key];
                     const currentLevel = typeof rawLvl === 'number' ? rawLvl : rawLvl ? 1 : 0;
@@ -611,27 +673,38 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                         transition={{ delay: idx * 0.02, duration: 0.2 }}
                         onMouseEnter={() => setHoveredUpgrade(item.key)}
                         onMouseLeave={() => setHoveredUpgrade(null)}
-                        className={`scopely-card border p-2.5 rounded-2xl flex flex-col shadow-md transition-all ${
-                          currentLevel > 0
-                            ? 'border-amber-500/40 bg-slate-900/80'
-                            : 'border-slate-800 bg-slate-950/60'
+                        className={`scopely-card border p-3 rounded-2xl transition-all ${
+                          currentLevel > 0 ? 'border-amber-500/40' : 'border-slate-800'
                         }`}
                       >
-                        <div className="flex items-center space-x-2.5 flex-1 min-w-0 pr-1 mb-2">
-                          <span className={`text-2xl p-1.5 rounded-xl border shrink-0 ${item.bg}`}>{item.icon}</span>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center space-x-1.5">
-                              <h4 className="text-xs font-bold text-slate-100 truncate">{item.title}</h4>
-                              <span className="text-[9px] font-mono font-bold text-amber-300 bg-amber-950/90 px-1.5 py-0.2 rounded border border-amber-500/40 shrink-0">
-                                LVL {currentLevel}/{item.maxLevel}
+                        <div className="flex items-center gap-3">
+                          <span className={`w-11 h-11 rounded-xl border flex items-center justify-center text-2xl shrink-0 ${item.bg}`}>
+                            {item.icon}
+                          </span>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <h4 className="text-[13px] font-bold text-slate-100 leading-tight">{item.title}</h4>
+                              <span className="text-[9px] font-mono font-bold text-amber-300 bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-500/40 shrink-0">
+                                {currentLevel}/{item.maxLevel}
                               </span>
                             </div>
-                            <p className="text-[10px] text-slate-300 leading-tight mt-0.5 font-mono truncate">
+
+                            {/* Level progress */}
+                            <div className="mt-1.5 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-amber-400 to-emerald-400 rounded-full transition-all"
+                                style={{ width: `${(currentLevel / item.maxLevel) * 100}%` }}
+                              />
+                            </div>
+
+                            <p className="text-[10px] text-slate-300 mt-1 font-mono">
                               {isMax ? (
-                                <span className="text-emerald-400 font-bold">MAX: {desc.current}</span>
+                                <span className="text-emerald-400 font-bold">Maxed · {desc.current}</span>
                               ) : (
                                 <span>
-                                  {desc.current} ➔ <strong className="text-emerald-400">{desc.next}</strong>
+                                  {desc.current} <span className="text-slate-500">➔</span>{' '}
+                                  <strong className="text-emerald-400">{desc.next}</strong>
                                 </span>
                               )}
                             </p>
@@ -641,15 +714,15 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                             whileTap={{ scale: 0.92 }}
                             disabled={isMax || !canAfford}
                             onClick={() => onBuyUpgrade(item.key, nextCost)}
-                            className={`px-2.5 py-1.5 rounded-xl text-xs font-black transition-all font-mono shrink-0 whitespace-nowrap ${
+                            className={`self-center px-3 py-2 rounded-xl text-xs font-black transition-all font-mono shrink-0 whitespace-nowrap ${
                               isMax
                                 ? 'bg-emerald-950/80 border border-emerald-500/50 text-emerald-300'
                                 : canAfford
-                                ? 'btn-scopely-gold text-slate-950 cursor-pointer shadow-md animate-pulse'
+                                ? 'btn-scopely-gold text-slate-950 cursor-pointer'
                                 : 'bg-slate-800/80 text-slate-500 border border-slate-700'
                             }`}
                           >
-                            {isMax ? 'MAX ✅' : `${nextCost} 💎`}
+                            {isMax ? 'MAX' : `${nextCost} 💎`}
                           </motion.button>
                         </div>
 
