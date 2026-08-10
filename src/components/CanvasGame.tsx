@@ -98,14 +98,25 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     y: config.SHARK_DEPTH,
     direction: 1,
     speed: config.SHARK_SPEED,
-    minX: 2,
-    maxX: config.WORLD_WIDTH - 2,
+    minX: WALL_MARGIN_FRAC * config.WORLD_WIDTH,
+    maxX: config.WORLD_WIDTH - WALL_MARGIN_FRAC * config.WORLD_WIDTH,
   });
 
   // Touch & Keyboard tracking
   const touchStartPosRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const lastTapTimeRef = useRef<number>(0);
   const keysPressedRef = useRef<Set<string>>(new Set());
+
+  // Animated GIF sprites (live <img> elements sampled by the canvas each frame)
+  const spritesRef = useRef<SpriteSet>({
+    pearl: null,
+    fishVariants: [null, null, null, null],
+    shark: null,
+    crab: null,
+    seabedFloor: null,
+    wallDecor: [null, null, null, null],
+    wallTiles: [null, null, null, null, null],
+  });
 
   // UI state overlays
   const [hudAir, setHudAir] = useState(() => config.AIR_MAX + lungLvl * 25);
@@ -438,6 +449,13 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       });
     }
 
+    // Keep every spawned item clear of the canyon walls so nothing hides behind
+    // the ridges (crabs settle at the reef base just inside the wall).
+    const spawnMargin = WALL_MARGIN_FRAC * config.WORLD_WIDTH + 0.3;
+    for (const it of items) {
+      it.x = Math.max(spawnMargin, Math.min(config.WORLD_WIDTH - spawnMargin, it.x));
+    }
+
     collectiblesRef.current = items;
   }, [config.WORLD_WIDTH, upgrades.seahorseCharm]);
 
@@ -534,11 +552,21 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       }
 
       // 2. Update Swimming Creatures (Fish, Seahorse, Eel, Squid, Angler)
+      // They turn back at the canyon walls (WALL_MARGIN_FRAC of the world on each
+      // side) instead of the raw world edge, so they never swim behind the ridges.
+      const swimMargin = WALL_MARGIN_FRAC * config.WORLD_WIDTH;
       collectibles.forEach((item) => {
         if (['fish', 'seahorse', 'eel', 'squid', 'angler'].includes(item.type) && !item.isCollected && item.swimDirection && item.swimSpeed) {
           item.x += item.swimDirection * item.swimSpeed * dt;
-          if (item.x < 2 || item.x > config.WORLD_WIDTH - 2) {
-            item.swimDirection *= -1;
+          // Clamp at the walls and steer inward with a definite sign, so the
+          // direction can't toggle every frame while lingering in the boundary zone
+          // (which would mirror-flip the sprite each frame and look like spinning).
+          if (item.x < swimMargin) {
+            item.x = swimMargin;
+            item.swimDirection = Math.abs(item.swimDirection) || 1;
+          } else if (item.x > config.WORLD_WIDTH - swimMargin) {
+            item.x = config.WORLD_WIDTH - swimMargin;
+            item.swimDirection = -(Math.abs(item.swimDirection) || 1);
           }
         }
       });
@@ -629,7 +657,10 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
 
       // Horizontal lerp
       diver.x += (diver.vx - diver.x) * Math.min(1, dt * 10);
-      diver.x = Math.max(1.5, Math.min(config.WORLD_WIDTH - 1.5, diver.x));
+      // Keep the diver in the channel — allowed to nose close to the walls but not
+      // swim fully behind the ridges (0.6 of the creature wall margin).
+      const diverMargin = WALL_MARGIN_FRAC * config.WORLD_WIDTH * 0.6;
+      diver.x = Math.max(diverMargin, Math.min(config.WORLD_WIDTH - diverMargin, diver.x));
 
       // Sonar Radar Proximity Check
       if (sonarLvl > 0 && diver.y > 5) {
@@ -721,7 +752,8 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                 let textCol = '#38bdf8';
 
                 if (item.type === 'fish') {
-                  textStr = `+${item.value} 🐟 Clownfish!`;
+                  const fishName = FISH_NAMES[pickVariant(item.id, FISH_NAMES.length)];
+                  textStr = `+${item.value} 🐟 ${fishName}!`;
                   textCol = '#34d399';
                 } else if (item.type === 'seahorse') {
                   textStr = `+${item.value} 💎 Seahorse!`;
@@ -875,7 +907,8 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         collectibles,
         upgrades,
         floatingTextsRef.current,
-        screenShakeRef.current.intensity
+        screenShakeRef.current.intensity,
+        spritesRef.current
       );
 
       animFrameId = requestAnimationFrame(loop);
@@ -974,6 +1007,31 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     >
       {/* 2D HTML5 Canvas for Render */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
+
+      {/* Hidden animated GIF sprites — kept in the DOM so the browser advances
+          their frames; the canvas samples the current frame each render. */}
+      <div aria-hidden className="absolute pointer-events-none" style={{ width: 1, height: 1, left: 0, top: 0, opacity: 0, overflow: 'hidden' }}>
+        <img src="/assets/pearl.gif" alt="" ref={(el) => { spritesRef.current.pearl = el; }} />
+        {/* Fish variants — order must match FISH_FACES_RIGHT */}
+        <img src="/assets/fish-clownfish.gif" alt="" ref={(el) => { spritesRef.current.fishVariants[0] = el; }} />
+        <img src="/assets/fish-pufferfish.gif" alt="" ref={(el) => { spritesRef.current.fishVariants[1] = el; }} />
+        <img src="/assets/fish-betta.gif" alt="" ref={(el) => { spritesRef.current.fishVariants[2] = el; }} />
+        <img src="/assets/fish-angelfish.gif" alt="" ref={(el) => { spritesRef.current.fishVariants[3] = el; }} />
+        <img src="/assets/shark.gif" alt="" ref={(el) => { spritesRef.current.shark = el; }} />
+        <img src="/assets/crab.gif" alt="" ref={(el) => { spritesRef.current.crab = el; }} />
+        {/* Static reef/rock decorations for the canyon walls + seabed floor */}
+        <img src="/assets/seabed-floor.png" alt="" ref={(el) => { spritesRef.current.seabedFloor = el; }} />
+        <img src="/assets/coral-branching.png" alt="" ref={(el) => { spritesRef.current.wallDecor[0] = el; }} />
+        <img src="/assets/coral-seafan.png" alt="" ref={(el) => { spritesRef.current.wallDecor[1] = el; }} />
+        <img src="/assets/rock-seaweed.png" alt="" ref={(el) => { spritesRef.current.wallDecor[2] = el; }} />
+        <img src="/assets/ridge-coral-shelf.png" alt="" ref={(el) => { spritesRef.current.wallDecor[3] = el; }} />
+        {/* Stackable ridge tiles that build the canyon side walls (cap, straight, stepUp, stepDown, block) */}
+        <img src="/assets/ridge-cap.png" alt="" ref={(el) => { spritesRef.current.wallTiles[0] = el; }} />
+        <img src="/assets/ridge-straight.png" alt="" ref={(el) => { spritesRef.current.wallTiles[1] = el; }} />
+        <img src="/assets/ridge-step-up.png" alt="" ref={(el) => { spritesRef.current.wallTiles[2] = el; }} />
+        <img src="/assets/ridge-step-down.png" alt="" ref={(el) => { spritesRef.current.wallTiles[3] = el; }} />
+        <img src="/assets/ridge-block.png" alt="" ref={(el) => { spritesRef.current.wallTiles[4] = el; }} />
+      </div>
 
       {/* Mark Bowley Ambient Floating Bubble Effect */}
       <BubbleOverlay count={18} />
@@ -1164,6 +1222,70 @@ function getOceanColorAtDepth(yMeters: number): { r: number; g: number; b: numbe
   return depthStops[0];
 }
 
+// Animated GIF sprites drawn onto the canvas (each is a live <img> whose
+// current frame is sampled every render, so the GIF animates on the canvas).
+interface SpriteSet {
+  pearl: HTMLImageElement | null;
+  // Multiple fish variants; each fish item is assigned one deterministically by id.
+  fishVariants: (HTMLImageElement | null)[];
+  shark: HTMLImageElement | null;
+  crab: HTMLImageElement | null;
+  // Static reef/rock decorations lining the canyon walls + the seabed floor art.
+  seabedFloor: HTMLImageElement | null;
+  wallDecor: (HTMLImageElement | null)[];
+  // Stackable ridge tiles that build the canyon side walls, top to bottom:
+  // [cap, straight, stepUp, stepDown, block].
+  wallTiles: (HTMLImageElement | null)[];
+}
+
+// Default facing of each fish variant art (true = the fish's head points right),
+// indexed to match the order the <img> refs are registered below.
+const FISH_FACES_RIGHT = [false, false, true, true]; // clownfish, pufferfish, betta, angelfish
+
+// Display names for each fish variant — same order/index as the <img> refs and
+// FISH_FACES_RIGHT, so pickVariant(id) selects a matching species name.
+const FISH_NAMES = ['Clownfish', 'Pufferfish', 'Betta', 'Angelfish'];
+
+// Canyon wall geometry, shared by the renderer and the movement/spawn logic so
+// creatures stay aware of the walls.
+//  - WALL_FRAC: fraction of the screen width each ridge occupies (visual box).
+//  - WALL_MARGIN_FRAC: fraction of WORLD_WIDTH that swimming creatures, the diver,
+//    and spawns keep clear of on each side (a touch inside the art so fish can
+//    still nose up to the reef).
+const WALL_FRAC = 0.19;
+const WALL_MARGIN_FRAC = 0.15;
+
+/** Stable 0..count-1 index derived from a string id (so a fish keeps its variant). */
+function pickVariant(id: string, count: number): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return count > 0 ? Math.abs(h) % count : 0;
+}
+
+/** Draw a sprite centered at (cx, cy), scaled to fit within `box` (px) preserving aspect ratio.
+ *  Returns false if the image is not ready yet (caller can fall back to a vector). */
+function drawSprite(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement | null,
+  cx: number,
+  cy: number,
+  box: number,
+  flipX: boolean,
+  alpha = 1
+): boolean {
+  if (!img || !img.complete || !img.naturalWidth) return false;
+  const scale = box / Math.max(img.naturalWidth, img.naturalHeight);
+  const w = img.naturalWidth * scale;
+  const h = img.naturalHeight * scale;
+  ctx.save();
+  if (alpha !== 1) ctx.globalAlpha = alpha;
+  ctx.translate(cx, cy);
+  if (flipX) ctx.scale(-1, 1);
+  ctx.drawImage(img, -w / 2, -h / 2, w, h);
+  ctx.restore();
+  return true;
+}
+
 // Canvas Renderer Function
 function renderCanvas(
   ctx: CanvasRenderingContext2D,
@@ -1183,7 +1305,8 @@ function renderCanvas(
     alpha: number;
     scale: number;
   }>,
-  shakeIntensity: number
+  shakeIntensity: number,
+  sprites: SpriteSet
 ) {
   const width = canvas.width;
   const height = canvas.height;
@@ -1198,9 +1321,13 @@ function renderCanvas(
   // Scale ratio: 1 meter = X pixels
   const metersToPx = height / 18; // Keep ~18 meters in vertical view
 
-  // Camera tracking Y center on diver with lag
+  // Camera tracking Y center on diver with lag.
+  // Clamp the bottom so the seabed can't scroll past the lower edge — once the
+  // diver nears the floor the view stops descending and the floor stays pinned
+  // near the bottom (leaving ~2m of seabed visible below it) instead of riding up.
   const cameraCenterY = diver.y;
-  const topMeterInView = Math.max(-4.5, cameraCenterY - 6.5);
+  const maxTopMeter = config.MAX_DEPTH - 16;
+  const topMeterInView = Math.min(Math.max(-4.5, cameraCenterY - 6.5), maxTopMeter);
 
   ctx.clearRect(0, 0, width, height);
 
@@ -1234,41 +1361,122 @@ function renderCanvas(
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, width, height);
 
-  // 2. Canyon / Trench Walls on Left & Right Margins for Depth Framing
-  const wallWidth = width * 0.08;
+  // 2. Canyon Walls on Left & Right Margins for Depth Framing.
+  const wallWidth = width * WALL_FRAC;
   const now = Date.now();
-  for (let side = 0; side < 2; side++) {
-    const isLeft = side === 0;
-    const baseX = isLeft ? 0 : width - wallWidth;
-    
-    // Draw rock segments every 2 meters in view
-    const startM = Math.floor(topMeterInView);
-    const endM = Math.ceil(topMeterInView + 19);
+  const ridgeReady = (img: HTMLImageElement | null): img is HTMLImageElement =>
+    !!img && img.complete && !!img.naturalWidth;
+  const [capTile, straightTile, stepUpTile, stepDownTile, blockTile] = sprites.wallTiles;
 
-    ctx.save();
-    for (let m = startM; m <= endM; m++) {
-      const sy1 = toScreenY(m);
-      const sy2 = toScreenY(m + 1);
-      
-      // Color based on depth m
-      const col = getOceanColorAtDepth(m);
-      const rockR = Math.max(10, Math.floor(col.r * 0.4));
-      const rockG = Math.max(15, Math.floor(col.g * 0.4));
-      const rockB = Math.max(25, Math.floor(col.b * 0.5));
-
-      ctx.fillStyle = `rgb(${rockR}, ${rockG}, ${rockB})`;
-      
-      // Jagged contour offset
-      const jitter = Math.sin(m * 12.3) * 6;
-      const w = wallWidth + (isLeft ? jitter : -jitter);
-
-      if (isLeft) {
-        ctx.fillRect(0, sy1, Math.max(8, w), sy2 - sy1 + 1);
-      } else {
-        ctx.fillRect(width - Math.max(8, w), sy1, Math.max(8, w), sy2 - sy1 + 1);
+  if (sprites.wallTiles.some(ridgeReady)) {
+    // Stack ridge tiles from the surface downward to build each canyon wall,
+    // anchored to world depth so the wall scrolls with the view. Tile heights vary
+    // (blocks are tall, straights short), so accumulating from the top keeps the
+    // stack seams stable across frames. The right wall mirrors the left tile for a
+    // symmetric channel. `ridge-cap` sits at the very top; the rest cycle for a
+    // natural stepped silhouette.
+    const stackSeq = [straightTile, stepDownTile, straightTile, stepUpTile, blockTile, straightTile];
+    const tileFor = (k: number): HTMLImageElement | null => {
+      if (k === 0 && ridgeReady(capTile)) return capTile;
+      for (let off = 0; off < stackSeq.length; off++) {
+        const t = stackSeq[(k + off) % stackSeq.length];
+        if (ridgeReady(t)) return t;
+      }
+      return null;
+    };
+    for (let side = 0; side < 2; side++) {
+      const isLeft = side === 0;
+      let y = -2; // world meters at the top edge of the current tile (start above the surface)
+      let k = 0;
+      while (y < topMeterInView + 19 && k < 200) {
+        // Offset the right wall's sequence so it isn't a mirror of the left.
+        const seqK = isLeft ? k : k + 3;
+        const tile = tileFor(seqK);
+        if (!tile) break;
+        // Vary each segment's size deterministically so the wall silhouette is
+        // irregular and chunky rather than a uniform stack of identical bands.
+        const sizeSeed = Math.sin(seqK * 37.7 + side * 91.3) * 0.5 + 0.5; // 0..1, stable
+        const segW = wallWidth * (0.85 + sizeSeed * 0.6); // ~0.85x .. 1.45x wall width
+        const segH = segW * (tile.naturalHeight / tile.naturalWidth);
+        const ty = toScreenY(y);
+        if (ty + segH > -4 && ty < height + 4) {
+          ctx.save();
+          if (isLeft) {
+            ctx.drawImage(tile, 0, ty, segW, segH + 1);
+          } else {
+            // Mirror the tile horizontally so the right wall faces inward.
+            ctx.translate(width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(tile, 0, ty, segW, segH + 1);
+          }
+          ctx.restore();
+        }
+        y += segH / metersToPx;
+        k++;
       }
     }
-    ctx.restore();
+  } else {
+    // Fallback: procedural jagged dark rock walls until the ridge art loads.
+    for (let side = 0; side < 2; side++) {
+      const isLeft = side === 0;
+      const startM = Math.floor(topMeterInView);
+      const endM = Math.ceil(topMeterInView + 19);
+      ctx.save();
+      for (let m = startM; m <= endM; m++) {
+        const sy1 = toScreenY(m);
+        const sy2 = toScreenY(m + 1);
+        const col = getOceanColorAtDepth(m);
+        const rockR = Math.max(10, Math.floor(col.r * 0.4));
+        const rockG = Math.max(15, Math.floor(col.g * 0.4));
+        const rockB = Math.max(25, Math.floor(col.b * 0.5));
+        ctx.fillStyle = `rgb(${rockR}, ${rockG}, ${rockB})`;
+        const jitter = Math.sin(m * 12.3) * 6;
+        const w = wallWidth + (isLeft ? jitter : -jitter);
+        if (isLeft) {
+          ctx.fillRect(0, sy1, Math.max(8, w), sy2 - sy1 + 1);
+        } else {
+          ctx.fillRect(width - Math.max(8, w), sy1, Math.max(8, w), sy2 - sy1 + 1);
+        }
+      }
+      ctx.restore();
+    }
+  }
+
+  // 2b. Reef / coral / rock decorations lining the canyon walls.
+  // Anchored to fixed world depths so they scroll naturally with the view; sides
+  // alternate and the art is chosen deterministically by depth for a stable layout.
+  const decoImgs = sprites.wallDecor;
+  if (decoImgs.some((d) => d && d.complete && d.naturalWidth)) {
+    const decoSpacing = 6; // meters between decorations
+    const startDecoM = Math.floor((topMeterInView - 2) / decoSpacing) * decoSpacing;
+    for (let m = startDecoM; m <= topMeterInView + 20; m += decoSpacing) {
+      if (m < 1 || m > config.MAX_DEPTH - 1) continue; // stay between surface and floor
+      const decoIdx = Math.round(m / decoSpacing);
+      const img = decoImgs[Math.abs(decoIdx) % decoImgs.length];
+      if (!img || !img.complete || !img.naturalWidth) continue;
+
+      const sy = toScreenY(m);
+      if (sy < -80 || sy > height + 80) continue;
+
+      const decoH = height * 0.06;
+      const decoW = decoH * (img.naturalWidth / img.naturalHeight);
+      const onLeft = decoIdx % 2 === 0;
+      // Nestle the cluster against the inner face of the ridge (most of it sits
+      // over the wall base, a little pokes into the channel).
+      const decoX = wallWidth - decoW * 0.7;
+
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      if (onLeft) {
+        ctx.drawImage(img, decoX, sy - decoH, decoW, decoH);
+      } else {
+        // Mirror horizontally to hug the right edge and face inward.
+        ctx.translate(width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(img, decoX, sy - decoH, decoW, decoH);
+      }
+      ctx.restore();
+    }
   }
 
   // 3. Depth Strata Gridlines & Depth Zone Markers (Every 5m & 10m)
@@ -1449,33 +1657,44 @@ function renderCanvas(
   }
   ctx.restore();
 
-  // 7. Seabed Floor at 60m
+  // 7. Seabed Floor — pinned at MAX_DEPTH (the camera clamp keeps it near the bottom)
   const seabedSy = toScreenY(config.MAX_DEPTH);
-  if (seabedSy >= -50 && seabedSy <= height + 200) {
+  if (seabedSy <= height + 40) {
     ctx.save();
-    // Seabed Sandy/Rock Gradient
-    const sandGrad = ctx.createLinearGradient(0, seabedSy, 0, seabedSy + 120);
-    sandGrad.addColorStop(0, '#0284c7');
-    sandGrad.addColorStop(0.2, '#1e293b');
+    // Fill everything below the floor line to the bottom of the screen with dark water/rock.
+    const sandGrad = ctx.createLinearGradient(0, seabedSy, 0, height);
+    sandGrad.addColorStop(0, '#0b2233');
     sandGrad.addColorStop(1, '#020617');
     ctx.fillStyle = sandGrad;
-    ctx.fillRect(0, seabedSy, width, 200);
+    ctx.fillRect(0, seabedSy - 2, width, height - seabedSy + 4);
 
-    // Seabed Ridge
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(0, seabedSy);
-    for (let x = 0; x <= width; x += 15) {
-      const ridge = Math.sin(x * 0.08) * 6 + Math.cos(x * 0.03) * 4;
-      ctx.lineTo(x, seabedSy + ridge);
+    const floorImg = sprites.seabedFloor;
+    if (floorImg && floorImg.complete && floorImg.naturalWidth) {
+      // Stretch the seabed art across the full width; anchor its sand line near seabedSy
+      // with the coral/plants rising above it.
+      const floorH = width * (floorImg.naturalHeight / floorImg.naturalWidth);
+      ctx.drawImage(floorImg, 0, seabedSy - floorH * 0.55, width, floorH);
+    } else {
+      // Vector fallback: sandy ridge line.
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, seabedSy);
+      for (let x = 0; x <= width; x += 15) {
+        const ridge = Math.sin(x * 0.08) * 6 + Math.cos(x * 0.03) * 4;
+        ctx.lineTo(x, seabedSy + ridge);
+      }
+      ctx.stroke();
     }
-    ctx.stroke();
 
-    ctx.fillStyle = '#fef08a';
+    ctx.fillStyle = '#fde68a';
     ctx.font = 'bold 11px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('⚓ OCEAN FLOOR (60M TRENCH) ⚓', width / 2, seabedSy + 24);
+    ctx.strokeStyle = 'rgba(2,6,23,0.85)';
+    ctx.lineWidth = 3;
+    const floorLabel = `⚓ OCEAN FLOOR (${config.MAX_DEPTH}M) ⚓`;
+    ctx.strokeText(floorLabel, width / 2, seabedSy + 16);
+    ctx.fillText(floorLabel, width / 2, seabedSy + 16);
     ctx.restore();
   }
 
@@ -1495,14 +1714,24 @@ function renderCanvas(
     else if (item.size === 'giant') sizePx = 58;
 
     if (item.type === 'oyster') {
-      drawVectorPearlShellCanvas(ctx, sx, sy, sizePx, item.value, item.isEmpty);
+      if (!drawSprite(ctx, sprites.pearl, sx, sy, sizePx * 1.6, false, item.isEmpty ? 0.55 : 1)) {
+        drawVectorPearlShellCanvas(ctx, sx, sy, sizePx, item.value, item.isEmpty);
+      }
     } else if (item.type === 'fish') {
       const facingRight = item.swimDirection ? item.swimDirection > 0 : true;
-      drawVectorClownfishCanvas(ctx, sx, sy, sizePx, facingRight);
+      const variants = sprites.fishVariants;
+      const vi = pickVariant(item.id, variants.length);
+      // Flip only when the desired facing differs from the art's default facing.
+      const flipX = facingRight !== FISH_FACES_RIGHT[vi];
+      if (!drawSprite(ctx, variants[vi], sx, sy, sizePx * 1.7, flipX)) {
+        drawVectorClownfishCanvas(ctx, sx, sy, sizePx, facingRight);
+      }
     } else if (item.type === 'seahorse') {
       drawVectorSeahorseCanvas(ctx, sx, sy, sizePx);
     } else if (item.type === 'crab') {
-      drawVectorCrabCanvas(ctx, sx, sy, sizePx);
+      if (!drawSprite(ctx, sprites.crab, sx, sy, sizePx * 1.6, false)) {
+        drawVectorCrabCanvas(ctx, sx, sy, sizePx);
+      }
     } else if (item.type === 'eel') {
       const facingRight = item.swimDirection ? item.swimDirection > 0 : true;
       drawVectorEelCanvas(ctx, sx, sy, sizePx, facingRight);
@@ -1560,7 +1789,22 @@ function renderCanvas(
     ctx.arc(0, 0, config.SHARK_RADIUS * metersToPx, 0, Math.PI * 2);
     ctx.fill();
 
+    // Animated shark GIF (already translated to shark center & flipped for direction).
+    // The gif faces right by default, matching the vector fallback's snout at +x.
+    const sharkImg = sprites.shark;
+    const sharkDrawn =
+      !!sharkImg && sharkImg.complete && !!sharkImg.naturalWidth;
+    if (sharkDrawn) {
+      const box = 92;
+      const scale = box / Math.max(sharkImg!.naturalWidth, sharkImg!.naturalHeight);
+      const sw = sharkImg!.naturalWidth * scale;
+      const sh = sharkImg!.naturalHeight * scale;
+      ctx.drawImage(sharkImg!, -sw / 2, -sh / 2, sw, sh);
+    }
+
     // Shark Counter-Shaded Torpedo Body (Slate Blue Top, Pale Silver Underbelly)
+    // — vector fallback, only drawn until the GIF is ready.
+    if (!sharkDrawn) {
     ctx.save();
     const sharkGrad = ctx.createLinearGradient(0, -18, 0, 18);
     sharkGrad.addColorStop(0, '#1e293b');
@@ -1632,6 +1876,7 @@ function renderCanvas(
     ctx.fill();
 
     ctx.restore();
+    } // end vector-shark fallback
     ctx.restore();
   }
 
