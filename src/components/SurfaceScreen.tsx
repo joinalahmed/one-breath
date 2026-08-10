@@ -743,19 +743,6 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
             <span className="text-[10px] font-black">MAP</span>
           </button>
 
-          {/* VILLAGE */}
-          <button
-            onClick={() => setActiveScreen('haven')}
-            className={`flex-1 py-2 text-xs font-black rounded-xl uppercase tracking-wider transition-all cursor-pointer flex flex-col items-center justify-center space-y-0.5 ${
-              activeScreen === 'haven'
-                ? 'btn-scopely-cyan text-slate-950 shadow-lg scale-[1.02]'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <span className="text-base">🏕️</span>
-            <span className="text-[10px] font-black">VILLAGE</span>
-          </button>
-
           {/* SHOP */}
           <button
             onClick={() => setActiveScreen('shop')}
