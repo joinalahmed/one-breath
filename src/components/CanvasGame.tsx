@@ -1102,15 +1102,15 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         )}
       </AnimatePresence>
 
-      {/* MID CONTROLS: Cut Stone Button Overlay */}
+      {/* CUT STONE BUTTON - Bottom center */}
       <AnimatePresence>
         {hudCarryingStone && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, x: 20 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.8, x: 20 }}
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="absolute right-4 bottom-24 z-20 pointer-events-auto"
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-auto"
           >
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -1119,23 +1119,21 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                 e.stopPropagation();
                 handleCutStone();
               }}
-              className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-xl flex items-center space-x-1.5 border border-amber-300 transition-transform cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-xl flex items-center space-x-1.5 border border-amber-300 transition-transform cursor-pointer animate-pulse"
             >
-              <span>✂️ Cut Stone</span>
-              <span className="bg-slate-950/20 px-1.5 py-0.5 rounded text-[10px] font-bold">[X]</span>
+              <span>✂️ CUT ROPE</span>
+              <span className="bg-slate-950/30 px-1.5 py-0.5 rounded text-[10px] font-bold">[X]</span>
             </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* DEPTH BAND INDICATOR - Shows current zone */}
-      <div className="relative z-10 w-full mt-auto">
-        <DepthBandIndicator
-          currentDepth={hudDepth}
-          maxDepth={hudMaxDepth}
-          maxGameDepth={config.MAX_DEPTH}
-        />
-      </div>
+      {/* DEPTH BAND INDICATOR - Shows current zone on left */}
+      <DepthBandIndicator
+        currentDepth={hudDepth}
+        maxDepth={hudMaxDepth}
+        maxGameDepth={config.MAX_DEPTH}
+      />
     </div>
   );
 };
