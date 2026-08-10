@@ -25,7 +25,7 @@ const DIVING_BANKS: DivingBank[] = [
     emoji: '🪨',
     depth: 12,
     description: 'Safe waters, calm currents',
-    position: { x: 25, y: 30 },
+    position: { x: 25, y: 35 },
     difficulty: 'easy',
   },
   {
@@ -34,7 +34,7 @@ const DIVING_BANKS: DivingBank[] = [
     emoji: '🌊',
     depth: 20,
     description: 'Moderate depth, good pearls',
-    position: { x: 50, y: 35 },
+    position: { x: 60, y: 30 },
     difficulty: 'medium',
   },
   {
@@ -43,7 +43,7 @@ const DIVING_BANKS: DivingBank[] = [
     emoji: '🌀',
     depth: 30,
     description: 'Rich rewards, dangerous depths',
-    position: { x: 75, y: 50 },
+    position: { x: 75, y: 55 },
     difficulty: 'hard',
   },
   {
@@ -61,149 +61,192 @@ const DIVING_BANKS: DivingBank[] = [
     emoji: '🌿',
     depth: 18,
     description: 'Maze of seaweed, hidden pearls',
-    position: { x: 65, y: 55 },
+    position: { x: 55, y: 60 },
     difficulty: 'medium',
   },
 ];
 
 export const MapScreen: React.FC<MapScreenProps> = ({ stats, onSelectBank, onGoToVillage }) => {
-  const [hoveredBank, setHoveredBank] = useState<string | null>(null);
+  const [selectedBank, setSelectedBank] = useState<string | null>(null);
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':
-        return 'from-emerald-500 to-emerald-600';
+        return 'border-emerald-500/70 bg-emerald-950/60';
       case 'medium':
-        return 'from-amber-500 to-amber-600';
+        return 'border-amber-500/70 bg-amber-950/60';
       case 'hard':
-        return 'from-red-500 to-red-600';
+        return 'border-red-500/70 bg-red-950/60';
       default:
-        return 'from-slate-500 to-slate-600';
+        return 'border-slate-500/50 bg-slate-900/40';
     }
   };
 
-  const getDifficultyBorder = (difficulty: string) => {
+  const getBankDepthMarker = (difficulty: string) => {
     switch (difficulty) {
       case 'easy':
-        return 'border-emerald-500/50';
+        return 'text-emerald-400';
       case 'medium':
-        return 'border-amber-500/50';
+        return 'text-amber-400';
       case 'hard':
-        return 'border-red-500/50';
+        return 'text-red-400';
       default:
-        return 'border-slate-500/50';
+        return 'text-cyan-400';
     }
   };
 
   return (
-    <div className="h-full flex flex-col space-y-3 p-3">
+    <div className="relative w-full h-full text-slate-100 flex flex-col overflow-hidden">
+      {/* MAP BACKGROUND - Gradient seabed effect */}
+      <div className="absolute inset-0 bg-gradient-to-b from-sky-950 via-slate-900 to-slate-950">
+        {/* Depth contour lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <defs>
+            <pattern id="depth-lines" x="0" y="0" width="100" height="20" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="100" y2="0" stroke="currentColor" strokeWidth="0.5" opacity="0.5" />
+            </pattern>
+          </defs>
+          <rect width="100" height="100" fill="url(#depth-lines)" />
+          {/* Deeper areas - contours */}
+          <ellipse cx="75" cy="65" rx="20" ry="15" fill="none" stroke="currentColor" strokeWidth="0.3" opacity="0.3" />
+          <ellipse cx="75" cy="65" rx="15" ry="10" fill="none" stroke="currentColor" strokeWidth="0.3" opacity="0.3" />
+        </svg>
+
+        {/* Water shimmer overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
+      </div>
+
       {/* HEADER */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-1"
+        className="relative z-10 p-3 border-b border-cyan-500/20 bg-gradient-to-b from-slate-900/80 to-slate-950/40 backdrop-blur-sm"
       >
-        <h1 className="text-2xl font-black text-cyan-400">SEASON MAP</h1>
-        <p className="text-xs text-slate-400">Select a diving bank • Day {stats.totalDives + 1}</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-black text-cyan-400 uppercase tracking-wider">Season Map</h1>
+            <p className="text-xs text-slate-400">Day {stats.totalDives + 1} — Select a diving bank</p>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onGoToVillage}
+            className="px-3 py-1.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 border border-slate-600 rounded-lg text-xs font-black uppercase text-slate-200"
+            title="Return to village"
+          >
+            🏠
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* INTERACTIVE MAP */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-        className="relative flex-1 bg-gradient-to-b from-slate-800/40 via-slate-900/60 to-slate-950 border border-cyan-500/30 rounded-2xl p-4 overflow-hidden"
-      >
-        {/* Water wave background */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-              <pattern id="waves" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                <path d="M0,10 Q5,5 10,10 T20,10" stroke="currentColor" fill="none" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect width="100" height="100" fill="url(#waves)" />
-          </svg>
-        </div>
-
-        {/* Bank Locations */}
-        <div className="relative h-full">
-          {DIVING_BANKS.map((bank) => (
-            <motion.button
-              key={bank.id}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 + Math.random() * 0.2 }}
-              onMouseEnter={() => setHoveredBank(bank.id)}
-              onMouseLeave={() => setHoveredBank(null)}
-              onClick={() => onSelectBank(bank.id)}
-              className={`absolute flex flex-col items-center cursor-pointer transition-all ${
-                hoveredBank === bank.id ? 'scale-125 z-20' : 'scale-100 z-10'
-              }`}
-              style={{ left: `${bank.position.x}%`, top: `${bank.position.y}%`, transform: 'translate(-50%, -50%)' }}
-            >
-              {/* Glow effect on hover */}
-              {hoveredBank === bank.id && (
-                <motion.div
-                  layoutId="glow"
-                  className="absolute inset-0 bg-cyan-500/30 rounded-full blur-lg"
-                  style={{ width: '120px', height: '120px' }}
-                />
-              )}
-
-              {/* Bank button */}
+      <div className="relative flex-1 overflow-hidden">
+        {/* Bank Location Markers */}
+        {DIVING_BANKS.map((bank, idx) => (
+          <motion.div
+            key={bank.id}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 + idx * 0.08 }}
+            className="absolute"
+            style={{ left: `${bank.position.x}%`, top: `${bank.position.y}%`, transform: 'translate(-50%, -50%)' }}
+          >
+            {/* Depth indicator line from marker to bottom */}
+            {selectedBank === bank.id && (
               <motion.div
-                whileHover={{ y: -2 }}
-                className={`relative z-10 w-16 h-16 rounded-full border-2 ${getDifficultyBorder(bank.difficulty)} bg-gradient-to-br ${getDifficultyColor(bank.difficulty)} shadow-lg flex items-center justify-center text-2xl`}
-              >
-                {bank.emoji}
-              </motion.div>
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: '200px' }}
+                transition={{ duration: 0.3 }}
+                className={`absolute left-1/2 top-full w-0.5 ${
+                  bank.difficulty === 'easy'
+                    ? 'bg-gradient-to-b from-emerald-500/50 to-transparent'
+                    : bank.difficulty === 'medium'
+                      ? 'bg-gradient-to-b from-amber-500/50 to-transparent'
+                      : 'bg-gradient-to-b from-red-500/50 to-transparent'
+                } pointer-events-none`}
+                style={{ transform: 'translateX(-50%)' }}
+              />
+            )}
 
-              {/* Bank name - shows on hover */}
-              {hoveredBank === bank.id && (
-                <motion.div
-                  initial={{ opacity: 0, y: -5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="absolute top-full mt-2 whitespace-nowrap"
-                >
-                  <div className="bg-slate-950/95 border border-slate-700 rounded-lg px-3 py-2 text-center backdrop-blur-sm shadow-lg">
-                    <div className="text-xs font-black text-white">{bank.name}</div>
-                    <div className="text-[10px] text-slate-300">{bank.description}</div>
-                    <div className="text-[9px] text-cyan-400 font-mono mt-1">
-                      Max Depth: {bank.depth}m
-                    </div>
-                  </div>
-                </motion.div>
-              )}
+            {/* Clickable marker button */}
+            <motion.button
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => {
+                setSelectedBank(bank.id);
+                setTimeout(() => onSelectBank(bank.id), 300);
+              }}
+              className={`relative w-20 h-20 rounded-full border-2 ${getDifficultyColor(bank.difficulty)} shadow-xl transition-all flex flex-col items-center justify-center cursor-pointer backdrop-blur-sm`}
+            >
+              {/* Marker pin effect */}
+              <motion.div
+                animate={{ scale: selectedBank === bank.id ? 1.2 : 1, opacity: selectedBank === bank.id ? 1 : 0.6 }}
+                className="absolute inset-0 rounded-full border-2 border-current opacity-50"
+              />
+
+              {/* Bank emoji/icon */}
+              <div className="text-2xl z-10">{bank.emoji}</div>
+
+              {/* Depth label */}
+              <div className={`text-[9px] font-black ${getBankDepthMarker(bank.difficulty)} z-10`}>
+                {bank.depth}m
+              </div>
             </motion.button>
-          ))}
-        </div>
-      </motion.div>
 
-      {/* FOOTER STATS & ACTION */}
-      <div className="flex items-center gap-2">
-        {/* Quick Stats */}
-        <div className="flex-1 flex gap-1">
-          <div className="flex-1 bg-slate-800/60 border border-amber-500/30 rounded-lg px-2 py-1.5 text-center">
-            <div className="text-[9px] font-black text-amber-300 uppercase">Pearls</div>
-            <div className="text-sm font-black text-white">{stats.coins}</div>
-          </div>
-          <div className="flex-1 bg-slate-800/60 border border-emerald-500/30 rounded-lg px-2 py-1.5 text-center">
-            <div className="text-[9px] font-black text-emerald-300 uppercase">Fish</div>
-            <div className="text-sm font-black text-white">{stats.food}</div>
-          </div>
-        </div>
+            {/* Info tooltip - shows below marker */}
+            {selectedBank === bank.id && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full mt-24 left-1/2 -translate-x-1/2 whitespace-nowrap z-20 pointer-events-none"
+              >
+                <div className="bg-slate-950/95 border-2 border-slate-700/60 rounded-lg px-3 py-2 text-center backdrop-blur-md shadow-xl">
+                  <div className="text-xs font-black text-white uppercase tracking-wide">{bank.name}</div>
+                  <div className="text-[10px] text-slate-300 mt-0.5">{bank.description}</div>
+                  <div className={`text-[9px] font-mono mt-1 ${getBankDepthMarker(bank.difficulty)}`}>
+                    Max Depth: {bank.depth}m
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </motion.div>
+        ))}
 
-        {/* Home Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onGoToVillage}
-          className="px-3 py-1.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 border border-slate-600 rounded-lg text-xs font-black uppercase text-slate-200 transition-all"
-          title="Return to village"
+        {/* STATS OVERLAY (bottom right) */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute bottom-4 right-4 z-20 space-y-2"
         >
-          🏠 Home
-        </motion.button>
+          {/* Pearls */}
+          <div
+            className="border-2 border-amber-500/50 bg-amber-950/60 px-4 py-2 rounded-xl flex items-center space-x-2 shadow-lg backdrop-blur-sm"
+            style={{
+              boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.2), 0 3px 6px rgba(0,0,0,0.7)',
+            }}
+          >
+            <span className="text-amber-400 text-lg">💎</span>
+            <div>
+              <div className="text-[9px] font-black text-amber-300 uppercase">Pearls</div>
+              <div className="text-sm font-black text-amber-100">{stats.coins}</div>
+            </div>
+          </div>
+
+          {/* Fish */}
+          <div
+            className="border-2 border-emerald-500/50 bg-emerald-950/60 px-4 py-2 rounded-xl flex items-center space-x-2 shadow-lg backdrop-blur-sm"
+            style={{
+              boxShadow: 'inset 0 1px 0 rgba(100,255,150,0.2), 0 3px 6px rgba(0,0,0,0.7)',
+            }}
+          >
+            <span className="text-emerald-400 text-lg">🐟</span>
+            <div>
+              <div className="text-[9px] font-black text-emerald-300 uppercase">Fish</div>
+              <div className="text-sm font-black text-emerald-100">{stats.food}</div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );
