@@ -727,90 +727,69 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* BOTTOM NAVIGATION BAR - Candy Crush Style */}
-      <div className="relative z-20 shrink-0 py-3 px-2 mt-auto">
-        <div className="flex gap-2 justify-center items-end">
+      {/* BOTTOM NAVIGATION BAR - Compact */}
+      <div className="relative z-20 shrink-0 py-2 px-2 mt-auto">
+        <div className="flex gap-1.5 justify-center">
           {/* MAP */}
           <motion.button
-            whileHover={{ scale: 1.1, y: -4 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
             onClick={() => setActiveScreen('home')}
-            className={`relative py-3 px-4 rounded-2xl uppercase tracking-wider font-black text-xs transition-all flex flex-col items-center justify-center space-y-1 ${
-              activeScreen === 'home'
-                ? 'scale-105'
-                : ''
-            }`}
+            className="py-2 px-3 rounded-lg flex flex-col items-center justify-center transition-all"
             style={{
               background: activeScreen === 'home'
                 ? 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)'
                 : 'linear-gradient(135deg, #0f766e 0%, #134e4a 100%)',
               boxShadow: activeScreen === 'home'
-                ? '0 8px 20px rgba(6, 182, 212, 0.5), inset 0 1px 0 rgba(255,255,255,0.2)'
-                : '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-              border: activeScreen === 'home'
-                ? '2px solid rgba(255,255,255,0.4)'
-                : '2px solid rgba(255,255,255,0.1)',
+                ? '0 4px 12px rgba(6, 182, 212, 0.4)'
+                : '0 2px 6px rgba(0,0,0,0.3)',
+              border: `1px solid ${activeScreen === 'home' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}`,
             }}
           >
-            <span className="text-2xl">🗺️</span>
-            <span className="text-xs font-black text-white">MAP</span>
+            <span className="text-lg">🗺️</span>
+            <span className="text-[8px] font-black text-white leading-tight">MAP</span>
           </motion.button>
 
           {/* SHOP */}
           <motion.button
-            whileHover={{ scale: 1.1, y: -4 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
             onClick={() => setActiveScreen('shop')}
-            className={`relative py-3 px-4 rounded-2xl uppercase tracking-wider font-black text-xs transition-all flex flex-col items-center justify-center space-y-1 ${
-              activeScreen === 'shop'
-                ? 'scale-105'
-                : ''
-            }`}
+            className="py-2 px-3 rounded-lg flex flex-col items-center justify-center transition-all"
             style={{
               background: activeScreen === 'shop'
                 ? 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'
                 : 'linear-gradient(135deg, #92400e 0%, #78350f 100%)',
               boxShadow: activeScreen === 'shop'
-                ? '0 8px 20px rgba(251, 191, 36, 0.5), inset 0 1px 0 rgba(255,255,255,0.2)'
-                : '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-              border: activeScreen === 'shop'
-                ? '2px solid rgba(255,255,255,0.4)'
-                : '2px solid rgba(255,255,255,0.1)',
+                ? '0 4px 12px rgba(251, 191, 36, 0.4)'
+                : '0 2px 6px rgba(0,0,0,0.3)',
+              border: `1px solid ${activeScreen === 'shop' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}`,
             }}
           >
-            <span className="text-2xl">⚓</span>
-            <div className="flex flex-col items-center">
-              <span className="text-xs font-black text-white">SHOP</span>
-              <span className={`text-[9px] font-mono font-bold ${activeScreen === 'shop' ? 'text-slate-950' : 'text-amber-200'}`}>
-                {ownedCount}/12
-              </span>
-            </div>
+            <span className="text-lg">⚓</span>
+            <span className={`text-[8px] font-black leading-tight ${activeScreen === 'shop' ? 'text-slate-950' : 'text-amber-200'}`}>
+              {ownedCount}
+            </span>
           </motion.button>
 
           {/* LEADERBOARD */}
           <motion.button
-            whileHover={{ scale: 1.1, y: -4 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
             onClick={() => setActiveScreen('leaderboard')}
-            className={`relative py-3 px-4 rounded-2xl uppercase tracking-wider font-black text-xs transition-all flex flex-col items-center justify-center space-y-1 ${
-              activeScreen === 'leaderboard'
-                ? 'scale-105'
-                : ''
-            }`}
+            className="py-2 px-3 rounded-lg flex flex-col items-center justify-center transition-all"
             style={{
               background: activeScreen === 'leaderboard'
                 ? 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)'
                 : 'linear-gradient(135deg, #4c1d95 0%, #3f0f5c 100%)',
               boxShadow: activeScreen === 'leaderboard'
-                ? '0 8px 20px rgba(168, 85, 247, 0.5), inset 0 1px 0 rgba(255,255,255,0.2)'
-                : '0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
-              border: activeScreen === 'leaderboard'
-                ? '2px solid rgba(255,255,255,0.4)'
-                : '2px solid rgba(255,255,255,0.1)',
+                ? '0 4px 12px rgba(168, 85, 247, 0.4)'
+                : '0 2px 6px rgba(0,0,0,0.3)',
+              border: `1px solid ${activeScreen === 'leaderboard' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}`,
             }}
           >
-            <span className="text-2xl">⛵</span>
-            <span className="text-xs font-black text-white">BOARD</span>
+            <span className="text-lg">⛵</span>
+            <span className="text-[8px] font-black text-white leading-tight">BOARD</span>
           </motion.button>
         </div>
       </div>
