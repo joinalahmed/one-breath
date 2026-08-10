@@ -6,6 +6,7 @@ import { soundManager } from '../audioAndHaptics';
 import { getPlayerRank, getNextRank, DiverRankInfo } from '../ranks';
 import { RankUpModal, StreakComboBanner, DefeatModal } from './AnimatedOverlayEffects';
 import { HavenVillageScreen } from './HavenVillageScreen';
+import { HomeScreen } from './HomeScreen';
 import { BubbleOverlay } from './BubbleOverlay';
 import { DiveResultsSummary } from './DiveResultsSummary';
 import { UpgradeImpactInfo } from './UpgradeImpactInfo';
@@ -50,7 +51,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   onOpenTelemetryModal,
   onOpenDebug,
 }) => {
-  const [activeScreen, setActiveScreen] = useState<'haven' | 'shop' | 'leaderboard'>('haven');
+  const [activeScreen, setActiveScreen] = useState<'home' | 'haven' | 'shop' | 'leaderboard'>('home');
   const [currentBots] = useState<BotDiver[]>(() => simulateBotActivity(bots));
   const [isMuted, setIsMuted] = useState(() => soundManager.getMuted());
   const [tipIndex, setTipIndex] = useState(0);
@@ -140,9 +141,14 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
 
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.code === 'Space' || e.code === 'Enter') && activeScreen === 'haven') {
-        e.preventDefault();
-        onStartDive();
+      if ((e.code === 'Space' || e.code === 'Enter')) {
+        if (activeScreen === 'home') {
+          e.preventDefault();
+          setActiveScreen('haven');
+        } else if (activeScreen === 'haven') {
+          e.preventDefault();
+          onStartDive();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -427,8 +433,22 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       </AnimatePresence>
 
       {/* DYNAMIC SCREEN CONTENT */}
-      <div className={`relative z-10 flex-1 ${activeScreen === 'haven' ? '' : 'overflow-y-auto'} no-scrollbar my-1`}>
+      <div className={`relative z-10 flex-1 ${activeScreen === 'haven' || activeScreen === 'home' ? '' : 'overflow-y-auto'} no-scrollbar my-1`}>
         <AnimatePresence mode="wait">
+          {/* 0. HOME SCREEN */}
+          {activeScreen === 'home' && (
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.2 }}
+              className="h-full"
+            >
+              <HomeScreen stats={stats} onGoToVillage={() => setActiveScreen('haven')} />
+            </motion.div>
+          )}
+
           {/* 1. HAVEN VILLAGE SCREEN */}
           {activeScreen === 'haven' && (
             <motion.div
@@ -703,7 +723,33 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       {/* BOTTOM NAVIGATION BAR */}
       <div className="relative z-20 shrink-0 pt-1.5 mt-auto">
         <div className="flex space-x-1.5 p-1.5 bg-slate-900/80 rounded-2xl border border-slate-700/60 shadow-2xl backdrop-blur-lg items-center">
-          {/* LEFT: SHOP */}
+          {/* HOME */}
+          <button
+            onClick={() => setActiveScreen('home')}
+            className={`flex-1 py-2 text-xs font-black rounded-xl uppercase tracking-wider transition-all cursor-pointer flex flex-col items-center justify-center space-y-0.5 ${
+              activeScreen === 'home'
+                ? 'btn-scopely-blue text-white shadow-lg scale-[1.02]'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span className="text-base">🏠</span>
+            <span className="text-[10px] font-black">HOME</span>
+          </button>
+
+          {/* VILLAGE */}
+          <button
+            onClick={() => setActiveScreen('haven')}
+            className={`flex-1 py-2 text-xs font-black rounded-xl uppercase tracking-wider transition-all cursor-pointer flex flex-col items-center justify-center space-y-0.5 ${
+              activeScreen === 'haven'
+                ? 'btn-scopely-cyan text-slate-950 shadow-lg scale-[1.02]'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span className="text-base">🏕️</span>
+            <span className="text-[10px] font-black">VILLAGE</span>
+          </button>
+
+          {/* SHOP */}
           <button
             onClick={() => setActiveScreen('shop')}
             className={`flex-1 py-2 text-xs font-black rounded-xl uppercase tracking-wider transition-all cursor-pointer flex flex-col items-center justify-center space-y-0.5 relative ${
@@ -721,20 +767,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
             <span className="text-[10px] font-black">SHOP</span>
           </button>
 
-          {/* CENTER: HAVEN (MAIN HUB) */}
-          <button
-            onClick={() => setActiveScreen('haven')}
-            className={`flex-1 py-2 text-xs font-black rounded-xl uppercase tracking-wider transition-all cursor-pointer flex flex-col items-center justify-center space-y-0.5 ${
-              activeScreen === 'haven'
-                ? 'btn-scopely-blue text-white shadow-lg scale-[1.02]'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <span className="text-base">🏕️</span>
-            <span className="text-[10px] font-black">HAVEN</span>
-          </button>
-
-          {/* RIGHT: LEADERBOARD */}
+          {/* LEADERBOARD */}
           <button
             onClick={() => setActiveScreen('leaderboard')}
             className={`flex-1 py-2 text-xs font-black rounded-xl uppercase tracking-wider transition-all cursor-pointer flex flex-col items-center justify-center space-y-0.5 ${
@@ -744,7 +777,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
             }`}
           >
             <span className="text-base">⛵</span>
-            <span className="text-[10px] font-black">LEADERBOARD</span>
+            <span className="text-[10px] font-black">BOARD</span>
           </button>
         </div>
       </div>
