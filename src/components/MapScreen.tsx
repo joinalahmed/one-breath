@@ -122,9 +122,20 @@ export const MapScreen: React.FC<MapScreenProps> = ({ stats, onSelectBank, onGoT
         animate={{ opacity: 1, y: 0 }}
         className="relative z-10 p-3 border-b border-cyan-500/20 bg-gradient-to-b from-slate-900/80 to-slate-950/40 backdrop-blur-sm"
       >
-        <div>
-          <h1 className="text-xl font-black text-cyan-400 uppercase tracking-wider">Season Map</h1>
-          <p className="text-xs text-slate-400">Day {stats.totalDives + 1} — Select a diving bank</p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-xl font-black text-cyan-400 uppercase tracking-wider">Season Map</h1>
+            <p className="text-xs text-slate-400">Day {stats.totalDives + 1} — Select a diving bank</p>
+          </div>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onGoToVillage}
+            className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-base text-slate-200 active:scale-95 transition-all cursor-pointer shadow"
+            title="Return to village"
+          >
+            🏠
+          </motion.button>
         </div>
       </motion.div>
 
