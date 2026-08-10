@@ -186,7 +186,8 @@ export const MapScreen: React.FC<MapScreenProps> = ({ stats, lastDiveResult, onS
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 px-4 pt-4 pb-2"
+        className="relative z-10 px-4 pb-2"
+        style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}
       >
         <div>
           <h1

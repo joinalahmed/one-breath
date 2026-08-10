@@ -327,7 +327,10 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   ];
 
   return (
-    <div className="relative w-full h-full max-w-lg mx-auto bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none p-3 sm:p-4 no-scrollbar">
+    <div
+      className="relative w-full h-full max-w-lg mx-auto bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none p-3 sm:p-4 no-scrollbar"
+      style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}
+    >
       {/* Dynamic Background Atmosphere */}
       {activeScreen === 'haven' ? (
         <img
@@ -356,6 +359,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
           background: 'linear-gradient(180deg, rgba(15,23,42,0.92), rgba(2,6,23,0.92))',
           border: '1px solid rgba(201,162,74,0.28)',
           boxShadow: '0 6px 18px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)',
+          paddingTop: 'calc(0.5rem + env(safe-area-inset-top))',
         }}
       >
         {/* Left: back (off-map) + circular level badge */}
