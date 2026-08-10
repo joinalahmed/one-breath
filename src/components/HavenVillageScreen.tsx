@@ -96,12 +96,21 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         onClick={() => setSelectedBuilding(selectedBuilding === 'smokehouse' ? null : 'smokehouse')}
         className="absolute top-[3%] left-[2%] w-[46%] h-[32%] cursor-pointer z-10"
       >
-        <span className={`absolute bottom-[128px] left-1/2 -translate-x-1/2 text-[9px] font-black px-2 py-0.5 rounded shadow-lg whitespace-nowrap ${
-          selectedBuilding === 'smokehouse'
-            ? 'bg-emerald-500 text-white border border-emerald-300'
-            : 'bg-black/70 text-emerald-300 border border-emerald-500/40'
-        }`}>
-          SMOKEHOUSE Lv.{villageLevels.smokehouse}
+        <span
+          className={`absolute bottom-[138px] left-1/2 -translate-x-1/2 text-[9px] font-black px-3 py-1 whitespace-nowrap tracking-wide uppercase ${
+            selectedBuilding === 'smokehouse'
+              ? 'text-amber-100 border-amber-400/80'
+              : 'text-amber-200/90 border-amber-700/60'
+          }`}
+          style={{
+            background: 'linear-gradient(180deg, #5c3d1e 0%, #3b2510 60%, #2a1a0b 100%)',
+            border: '2px solid #8b6914',
+            borderRadius: '4px',
+            boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.2), 0 3px 6px rgba(0,0,0,0.7), 0 1px 0 #1a0f05',
+            textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+          }}
+        >
+          SMOKEHOUSE {villageLevels.smokehouse}
         </span>
       </motion.div>
 
@@ -111,12 +120,21 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         onClick={() => setSelectedBuilding(selectedBuilding === 'lighthouse' ? null : 'lighthouse')}
         className="absolute top-[8%] left-[50%] w-[48%] h-[28%] cursor-pointer z-10"
       >
-        <span className={`absolute bottom-[83px] left-1/2 -translate-x-1/2 text-[9px] font-black px-2 py-0.5 rounded shadow-lg whitespace-nowrap ${
-          selectedBuilding === 'lighthouse'
-            ? 'bg-cyan-500 text-white border border-cyan-300'
-            : 'bg-black/70 text-cyan-300 border border-cyan-500/40'
-        }`}>
-          LIGHTHOUSE Lv.{villageLevels.lighthouse}
+        <span
+          className={`absolute bottom-[83px] left-1/2 -translate-x-1/2 text-[9px] font-black px-3 py-1 whitespace-nowrap tracking-wide uppercase ${
+            selectedBuilding === 'lighthouse'
+              ? 'text-amber-100 border-amber-400/80'
+              : 'text-amber-200/90 border-amber-700/60'
+          }`}
+          style={{
+            background: 'linear-gradient(180deg, #5c3d1e 0%, #3b2510 60%, #2a1a0b 100%)',
+            border: '2px solid #8b6914',
+            borderRadius: '4px',
+            boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.2), 0 3px 6px rgba(0,0,0,0.7), 0 1px 0 #1a0f05',
+            textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+          }}
+        >
+          LIGHTHOUSE {villageLevels.lighthouse}
         </span>
       </motion.div>
 
@@ -126,11 +144,20 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         onClick={() => setSelectedBuilding(selectedBuilding === 'council' ? null : 'council')}
         className="absolute top-[52%] left-[2%] w-[46%] h-[30%] cursor-pointer z-10"
       >
-        <span className={`absolute bottom-[218px] left-[calc(50%-20px)] -translate-x-1/2 text-[9px] font-black px-2 py-0.5 rounded shadow-lg whitespace-nowrap ${
-          selectedBuilding === 'council'
-            ? 'bg-purple-500 text-white border border-purple-300'
-            : 'bg-black/70 text-purple-300 border border-purple-500/40'
-        }`}>
+        <span
+          className={`absolute bottom-[218px] left-[calc(50%-20px)] -translate-x-1/2 text-[9px] font-black px-3 py-1 whitespace-nowrap tracking-wide uppercase ${
+            selectedBuilding === 'council'
+              ? 'text-amber-100 border-amber-400/80'
+              : 'text-amber-200/90 border-amber-700/60'
+          }`}
+          style={{
+            background: 'linear-gradient(180deg, #5c3d1e 0%, #3b2510 60%, #2a1a0b 100%)',
+            border: '2px solid #8b6914',
+            borderRadius: '4px',
+            boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.2), 0 3px 6px rgba(0,0,0,0.7), 0 1px 0 #1a0f05',
+            textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+          }}
+        >
           COUNCIL
         </span>
       </motion.div>
@@ -141,12 +168,21 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         onClick={() => setSelectedBuilding(selectedBuilding === 'campfire' ? null : 'campfire')}
         className="absolute top-[52%] left-[50%] w-[48%] h-[30%] cursor-pointer z-10"
       >
-        <span className={`absolute bottom-[158px] left-1/2 -translate-x-1/2 text-[9px] font-black px-2 py-0.5 rounded shadow-lg whitespace-nowrap ${
-          selectedBuilding === 'campfire'
-            ? 'bg-amber-500 text-white border border-amber-300'
-            : 'bg-black/70 text-amber-300 border border-amber-500/40'
-        }`}>
-          BULTEOK Lv.{villageLevels.campfire}
+        <span
+          className={`absolute bottom-[170px] left-1/2 -translate-x-1/2 text-[9px] font-black px-3 py-1 whitespace-nowrap tracking-wide uppercase ${
+            selectedBuilding === 'campfire'
+              ? 'text-amber-100 border-amber-400/80'
+              : 'text-amber-200/90 border-amber-700/60'
+          }`}
+          style={{
+            background: 'linear-gradient(180deg, #5c3d1e 0%, #3b2510 60%, #2a1a0b 100%)',
+            border: '2px solid #8b6914',
+            borderRadius: '4px',
+            boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.2), 0 3px 6px rgba(0,0,0,0.7), 0 1px 0 #1a0f05',
+            textShadow: '0 1px 2px rgba(0,0,0,0.8)',
+          }}
+        >
+          BULTEOK {villageLevels.campfire}
         </span>
       </motion.div>
 
@@ -156,8 +192,15 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         onClick={onStartDive}
         className="absolute bottom-[0%] left-[10%] w-[80%] h-[16%] cursor-pointer z-20 flex items-center justify-center"
       >
-        <div className="bg-cyan-600/90 backdrop-blur-sm border-2 border-cyan-300/70 rounded-xl px-5 py-2 shadow-2xl flex items-center space-x-2"
-          style={{ boxShadow: '0 4px 0 #164e63, 0 6px 12px rgba(0,0,0,0.5)' }}
+        <div
+          className="flex items-center space-x-2 px-5 py-2.5"
+          style={{
+            background: 'linear-gradient(180deg, #1a5c6b 0%, #0e3d4a 50%, #082a33 100%)',
+            border: '2px solid #3dd4e8',
+            borderRadius: '6px',
+            boxShadow: 'inset 0 1px 0 rgba(100,220,255,0.3), 0 4px 0 #051e25, 0 6px 12px rgba(0,0,0,0.6)',
+            textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+          }}
         >
           <motion.span
             animate={{ y: [0, -2, 0] }}
@@ -166,7 +209,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
           >
             🤿
           </motion.span>
-          <span className="text-white font-black text-xs tracking-wider uppercase">START DIVE</span>
+          <span className="text-cyan-100 font-black text-xs tracking-widest uppercase">START DIVE</span>
         </div>
       </motion.div>
 

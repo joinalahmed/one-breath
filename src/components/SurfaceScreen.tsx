@@ -52,6 +52,20 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   const [isMuted, setIsMuted] = useState(() => soundManager.getMuted());
   const [tipIndex, setTipIndex] = useState(0);
 
+  useEffect(() => {
+    const startMusic = () => {
+      soundManager.startBgMusic();
+      document.removeEventListener('click', startMusic);
+      document.removeEventListener('touchstart', startMusic);
+    };
+    document.addEventListener('click', startMusic);
+    document.addEventListener('touchstart', startMusic);
+    return () => {
+      document.removeEventListener('click', startMusic);
+      document.removeEventListener('touchstart', startMusic);
+    };
+  }, []);
+
   // PWA Installation State
   const [pwaPrompt, setPwaPrompt] = useState<any>(null);
   const [isPwaInstalled, setIsPwaInstalled] = useState<boolean>(() => {

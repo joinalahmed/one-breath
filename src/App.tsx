@@ -177,6 +177,7 @@ export default function App() {
     const handleVisibilityChange = () => {
       if (document.hidden && phase === 'DIVING') {
         // Automatically surface safely with no progress lost
+        soundManager.restoreBgMusic();
         setPhase('SURFACE');
       }
     };
@@ -186,6 +187,7 @@ export default function App() {
 
   // Start Dive Handler (< 1 Second execution)
   const handleStartDive = () => {
+    soundManager.dimBgMusic();
     setPhase('DIVING');
   };
 
@@ -338,6 +340,7 @@ export default function App() {
       appendTelemetryLog(logEntry);
 
       // 3. Return to surface screen
+      soundManager.restoreBgMusic();
       setPhase('SURFACE');
     },
     [config.DEPTH_MULTIPLIER_DIVISOR, stats.streak]
