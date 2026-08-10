@@ -95,7 +95,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center justify-center flex-1 gap-6 w-full"
             >
-              <h1 className="text-2xl font-black text-cyan-400 uppercase tracking-wide" style={{ fontSize: '28px' }}>Hold Your Breath 💨</h1>
+              <h1 className="text-headline-lg text-cyan-400 uppercase">Hold Your Breath 💨</h1>
 
               {/* Breathing visualization - expanding/contracting circles */}
               <motion.div className="flex gap-8 items-center justify-center my-8">
@@ -119,7 +119,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNext}
-                className="mt-8 px-6 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-black text-sm uppercase tracking-wide shadow-lg transition-all"
+                className="mt-8 px-6 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-black text-sm uppercase tracking-wide shadow-ocean-md transition-all duration-200"
               >
                 GOT IT, NEXT →
               </motion.button>
@@ -134,7 +134,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center justify-center flex-1 gap-4 w-full"
             >
-              <h1 className="text-2xl font-black text-cyan-400 uppercase tracking-wide" style={{ fontSize: '28px' }}>Treasure Awaits 💎</h1>
+              <h1 className="text-headline-lg text-cyan-400 uppercase">Treasure Awaits 💎</h1>
               <p className="text-slate-400 text-sm mb-2">Deeper = Better Loot</p>
 
               {/* Depth zone cards */}
@@ -171,7 +171,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleNext}
-                className="mt-8 px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-black text-sm uppercase tracking-wide shadow-lg transition-all"
+                className="mt-8 px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-black text-sm uppercase tracking-wide shadow-ocean-md glow-emerald transition-all duration-200"
               >
                 READY TO DIVE
               </motion.button>

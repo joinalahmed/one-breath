@@ -48,10 +48,10 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           transition={{ duration: 0.6, type: 'spring', stiffness: 200, damping: 15 }}
           className="flex flex-col items-center"
         >
-          <h1 className="text-5xl font-black text-cyan-400 tracking-wider uppercase" style={{ letterSpacing: '0.08em' }}>
+          <h1 className="text-display-lg text-cyan-400 uppercase">
             ONE BREATH
           </h1>
-          <p className="text-sm font-semibold text-slate-300 mt-2 tracking-widest">
+          <p className="text-label text-slate-400 mt-3 tracking-widest">
             FREEDIVER HAVEN
           </p>
         </motion.div>
@@ -73,7 +73,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           transition={{ duration: 0.5, delay: 0.4 }}
           whileTap={{ scale: 0.95 }}
           onClick={onComplete}
-          className="mt-16 px-8 py-3 rounded-lg bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 text-slate-950 font-black text-sm uppercase tracking-wider shadow-lg shadow-cyan-500/30 transition-all"
+          className="mt-16 px-8 py-3 rounded-lg bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 text-slate-950 font-black text-sm uppercase tracking-wider shadow-ocean-lg glow-cyan transition-all"
         >
           Begin Journey
         </motion.button>

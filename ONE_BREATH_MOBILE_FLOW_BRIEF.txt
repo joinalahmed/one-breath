@@ -1,0 +1,221 @@
+ONE BREATH: FREEDIVER HAVEN — PREMIUM iOS MOBILE APP FLOW (7–8 SCREENS)
+
+=== DESIGN DIRECTION ===
+Platform: iOS-native premium
+Aesthetic: Dark ocean immersion (navy #0f172a, slate #1e293b, deep blue #0c4a6e)
+Accents: Cyan #38bdf8, indigo #4f46e5, emerald #10b981, rose #e11d48, amber #f59e0b
+First Impression: Premium, immersive arcade game with high production value and oceanic atmosphere
+Device: Clean iPhone mockup with subtle dark frame, balanced outer margins, notch-aware
+
+=== VISUAL SYSTEM ===
+Typography: Clean system sans, strong headline/body contrast, readable on mobile
+Spacing: Generous (8/10 tier), calming and breathable
+Texture: Subtle film grain over dark backgrounds, tactile underwater depth
+Images: Underwater atmosphere, ocean cinematography, creature illustrations
+Glass Elements: Used purposefully on HUD only (backdrop blur, semi-transparent pills)
+Icons: Clean, custom-feeling, not generic library defaults
+Shadows: Soft, controlled, premium depth (2xl with colored glows)
+
+=== COLOR LOGIC ===
+Base: Navy/slate with cyan highlights for primary actions
+Depth Zones: Cyan (0-15m), blue (15-30m), indigo (30-45m), rose (45-60m)
+Success: Emerald
+Warning: Rose
+Accents: All from palette — no random bright colors
+
+=== SCREEN PROGRESSION ===
+
+SCREEN 1: SPLASH SCREEN
+Purpose: Set premium tone, establish ocean atmosphere
+Auto-advance: 2.5s
+Layout:
+  - Full-screen dark ocean gradient (navy top → deep blue bottom)
+  - Subtle animated wave illustration or underwater silhouette (opacity ~0.2)
+  - Centered text block:
+    * "ONE BREATH" (large, cyan, tracking-wide, bold)
+    * "FREEDIVER HAVEN" (small, slate-300, uppercase)
+  - Large wave emoji or diver silhouette (60px, opacity ~0.4, gentle motion implied)
+  - "BEGIN JOURNEY" button (cyan gradient, strong shadow, bottom area)
+  - Soft film grain texture overlay
+  - "LOADING..." text (bottom, gray, minimal, appears ~1.5s)
+Mood: Calm, mysterious, premium ocean entry
+
+SCREEN 2: ONBOARDING 1 — "HOLD YOUR BREATH"
+Purpose: First game mechanic, breathing visualization
+Layout:
+  - Same dark ocean gradient (continuity from splash)
+  - Floating ocean emoji accents (🌊 top left, 🐚 bottom right, faded)
+  - Safe area padding respected (top notch, bottom home indicator)
+  - Centered content block:
+    * "HOLD YOUR BREATH 💨" (28px, cyan, uppercase, tracking-wide)
+    * Breathing visualization (two alternating circles, 80px each):
+      - Left: cyan→indigo gradient, scales 1→1.4→1 (2s infinite)
+      - Right: indigo→cyan gradient, scales 1.4→1→1.4 (2s infinite, delay 1s)
+      - Gap between, centered
+    * Supporting text: "Hold [Space] to descend with your weight stone. Release to float up. Simple? 😊"
+      (slate-300, 14px, clean line height)
+    * "GOT IT, NEXT →" button (blue gradient, 56px height)
+  - Sound toggle button (top right, slate-800/60, volume icon)
+Mood: Interactive, calm, mechanical clarity
+
+SCREEN 3: ONBOARDING 2 — "TREASURE AWAITS"
+Purpose: Depth zones, earning mechanics, momentum to gameplay
+Layout:
+  - Same ocean gradient, continued atmosphere
+  - Floating emoji accents (💎 top, faded)
+  - Safe area padding
+  - Top section:
+    * "TREASURE AWAITS 💎" (28px, cyan, uppercase)
+    * "Deeper = Better Loot" (slate-400, 12px, subtle)
+  - Depth zone card grid (space-y-3, each full width):
+    * Card 1: "0-15m SHALLOW REEF" | "Pearls: 2-5 💚" (cyan border, 2px)
+    * Card 2: "15-30m MID REEF DROP" | "Pearls: 8-15 💙" (blue border)
+    * Card 3: "30-45m SHARK TRENCH" | "Pearls: 25-80 💜" (indigo border)
+    * Card 4: "45-60m DEEP ABYSS" | "Pearls: 75-150+ ⭐ LEGENDARY" (rose border)
+    * Each card: slate-700/30 bg, backdrop-blur-sm, rounded-xl, staggered fade-in (0.1s per card)
+  - "READY TO DIVE" button (emerald gradient, strong shadow, bottom safe area)
+Mood: Progression, rewards clarity, gamification energy
+
+SCREEN 4: HAVEN VILLAGE HUB
+Purpose: Home screen, village hub, start diving, access features
+Layout:
+  - Dark ocean gradient background
+  - Top bar (glass effect, safe area):
+    * Left: Level badge (small pill, "Lvl 3")
+    * Center: Coins (💎 amber-400) | Food (🐟 emerald-400)
+    * Right: Streak badge (emerald if active)
+    * Bar bg: slate-900/60, backdrop-blur-md, border slate-700/50
+  - Main content (generous spacing):
+    * Village illustration (280×200px, centered, ocean-themed, peaceful huts/campfire/lighthouse)
+    * "PEARL COAST HAVEN" (subtitle, cyan, 12px uppercase)
+  - Primary action:
+    * "🤿 START DIVE" button (300px wide, 56px, cyan gradient, prominent)
+  - Secondary actions (4-button 2×2 grid):
+    * ⚙️ Shop | 📋 Challenges | 📸 Photos (with count) | 🗺️ Map
+    * Each: 56px square, glass effect, readable label
+  - Footer: Campfire tip area (small, italic quote, faded)
+Mood: Safe, welcoming, hub energy
+
+SCREEN 5: DIVE GAMEPLAY HUD
+Purpose: Show active dive with minimal glass HUD overlays
+Layout:
+  - Canvas game background (full screen, dark ocean scene):
+    * Animated diver figure (simple shape, moving up/down)
+    * Collectible pearls, fish, rare creatures (scattered)
+    * Soft particle effects (bubbles, light rays implied)
+    * Shark silhouette at ~31m depth (faint, menacing)
+  - Top HUD bar (glass effect, safe area):
+    * Left pill: "🌊 23 m" (depth, cyan, mono font)
+    * Center: Air gauge bar (gradient cyan→emerald full, rose→amber low)
+    * Right pills:
+      - "🧺 5/8" (basket, emerald)
+      - 🔊 or 🔇 (audio toggle)
+      - ⚙️ (settings)
+    * Bar bg: slate-900/60, backdrop-blur-md
+  - Center overlay (zone transition):
+    * Zone banner slides down: "SHARK TRENCH" or depth zone name
+    * Color matches depth: cyan/blue/indigo/rose border
+    * Duration ~2.5s, then fades
+  - Bottom CTA (safe area):
+    * Pulsing "✂️ CUT ROPE" button (amber-500→yellow-400, spring pulse)
+    * Only visible when carrying stone
+  - Overlays (conditional):
+    * Low air warning (top-center, rose bg, "LOW AIR — RELEASE TO ASCEND!")
+    * Start prompt (center, if not yet descending)
+  - Left sidebar (optional):
+    * Depth band indicator (0-15m | 15-30m | 30-45m | 45-60m) with current highlighted
+Mood: Action, focus, immersive, minimal chrome
+
+SCREEN 6: RARE CREATURE DISCOVERY MODAL
+Purpose: Celebration moment, finding rare species
+Layout:
+  - Background: Dim overlay (black, opacity ~0.6) with blur on scene
+  - Modal card (centered, 300×380px):
+    * Corner radius: 20px
+    * Border: 2px, purple/indigo glow
+    * Bg: slate-950/95
+    * Shadow: 2xl, purple glow
+    * Content (centered, vertical):
+      - ⭐ EPIC DISCOVERY (12px, emerald, uppercase, bold)
+      - Large emoji (60px, creature like 🐙 or 🌊🐴)
+      - Creature name (cyan, 18px, bold) — e.g., "OCTOPUS"
+      - Stats block (slate-300, 12px):
+        * "Depth: 42m"
+        * "Value: 120 coins"
+      - "Added to Photo Library!" (slate-400, italic, 12px)
+      - Auto-dismiss 3.5s or tap to close
+  - Confetti animation implied (particles floating down)
+  - Animation: Spring pop-in from center, 300ms ease-out
+Mood: Celebratory, premium, momentary delight
+
+SCREEN 7: POST-DIVE REPORT MODAL
+Purpose: Results, earnings, next action
+Layout:
+  - Background: Dim overlay (black, opacity ~0.6)
+  - Modal card (centered, 310×520px):
+    * Corner radius: 20px
+    * Border: 2px, emerald glow
+    * Bg: slate-950/95
+    * Shadow: 2xl, emerald glow
+    * Content (vertical, centered):
+      - Success badge: ✅ (large, emerald, 40px)
+      - Title: "SURFACED SAFELY" (cyan, 20px, bold)
+      - Subtitle: "Dive summary and rewards below" (slate-400, 12px)
+      - Stats grid (3 columns, 12px body):
+        * 🌊 Depth | "42 m"
+        * ⏱️ Time | "3:24"
+        * 🧺 Items | "7"
+      - Earnings section (slate-300):
+        * "Coins earned: +145 💎"
+        * "Food earned: +8 🐟"
+        * "Streak bonus: +1x" (if active)
+      - Buttons (bottom, stacked or side):
+        * "DIVE AGAIN" (emerald gradient, 56px, primary)
+        * "BACK TO HAVEN" (slate-700, secondary)
+  - Animation: Spring pop-in, 300ms ease-out
+Mood: Accomplishment, clarity, momentum
+
+SCREEN 8 (OPTIONAL): SHOP SCREEN
+Purpose: Upgrade/shop system
+Layout:
+  - Dark ocean gradient
+  - Safe area padding
+  - Top bar: "STORE" (amber, 20px) | Balance (💎 coins | 🐟 food)
+  - Content sections:
+    * Trade Fish → Pearls (grid buttons)
+    * Pearl Packs (3-button row)
+    * Diver Gear upgrades (12 cards, grid, scrollable):
+      - Each: icon, title, level, cost, affordability state
+      - Disabled: opacity-60, no scale on tap
+      - Available: active color, scale feedback
+  - All follow glass/gradient system
+
+=== CONSISTENCY RULES ===
+✓ All screens: Same dark ocean gradient base
+✓ All modals: slate-950/95 bg, emerald/purple borders, 2xl shadows
+✓ All glass: slate-900/60, backdrop-blur-md, border slate-700/50
+✓ All text: Readable, proper contrast, clean hierarchy
+✓ All buttons: Rounded (12-16px), gradient or solid, state feedback
+✓ All icons: Custom-feeling, clean, not generic defaults
+✓ All spacing: Generous (8/10), breathing, safe area respect
+✓ All mockups: iPhone, subtle dark frame, even 40-50px outer margins, notch-aware
+✓ All color: From palette only (navy, slate, cyan, blue, indigo, rose, emerald, amber)
+✓ All flows: Logical progression (splash → onboard → haven → dive → report)
+
+=== GENERATION REQUIREMENTS ===
+- Generate all 7–8 screens as separate clean iPhone mockups
+- Keep first screen (splash) especially clean and inviting
+- Ensure text is always readable at normal viewing size
+- Use the breathing visualization as a central design moment in Screen 2
+- Show proper staggered animation logic in Screen 3 depth cards
+- Make Screen 4 (haven hub) feel like a real game hub with strong primary CTA
+- Show Screen 5 (dive HUD) with full game scene + glass overlays
+- Make Screen 6 (rare discovery) a premium celebratory moment
+- Make Screen 7 (post-dive) clear, structured, with earnings visible
+- Keep all device mockups clean, evenly spaced, premium framing
+- Maintain strong consistency across all screens
+- Use ocean atmosphere, underwater imagery, and texture where appropriate
+- Avoid generic AI mobile tells (random gradients, nested cards clutter, etc.)
+- Focus content first, device frame supportive but visible
+
+=== READY FOR GENERATION ===

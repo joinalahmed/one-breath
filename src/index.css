@@ -1,8 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
 @import "tailwindcss";
+
+/* Premium typeface with intentional hierarchy */
+* {
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+}
 
 /* All buttons are pointer cursor */
 button {
   cursor: pointer;
+}
+
+/* Accessibility: Focus rings for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
 }
 
 /* Hide scrollbar globally and via class */
@@ -23,58 +42,144 @@ html, body, * {
     scrollbar-width: none;
   }
 
+  /* Premium Tinted Shadows (blue-shifted for ocean aesthetic) */
+  .shadow-ocean-sm {
+    box-shadow: 0 4px 6px -1px rgba(2, 6, 23, 0.3), 0 2px 4px -2px rgba(2, 6, 23, 0.4);
+  }
+  .shadow-ocean-md {
+    box-shadow: 0 10px 15px -3px rgba(2, 6, 23, 0.4), 0 4px 6px -4px rgba(2, 6, 23, 0.5);
+  }
+  .shadow-ocean-lg {
+    box-shadow: 0 20px 25px -5px rgba(2, 6, 23, 0.5), 0 8px 10px -6px rgba(2, 6, 23, 0.6);
+  }
+
+  /* Glow effects for CTAs (cyan accent) */
+  .glow-cyan {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4), 0 0 40px rgba(56, 189, 248, 0.2);
+  }
+  .glow-emerald {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2);
+  }
+
   /* Scopely 3D Chunky Buttons */
   .btn-scopely-green {
-    background: linear-gradient(180deg, #4ade80 0%, #16a34a 50%, #15803d 100%);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 6px 0 #14532d, 0 10px 15px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #4ade80 0%, #16a34a 50%, #15803d 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 6px 0 #14532d, 0 10px 15px rgba(2, 6, 23, 0.5);
     border: 2px solid #bbf7d0;
+    transition: all 200ms ease-out;
+  }
+  .btn-scopely-green:hover {
+    background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #16a34a 100%);
   }
   .btn-scopely-green:active {
     transform: translateY(4px);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 2px 0 #14532d, 0 4px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 2px 0 #14532d, 0 4px 8px rgba(2, 6, 23, 0.4);
+  }
+  .btn-scopely-green:disabled {
+    opacity: 0.5;
+    color: #94a3b8;
+    cursor: not-allowed;
   }
 
   .btn-scopely-gold {
-    background: linear-gradient(180deg, #fde047 0%, #eab308 50%, #ca8a04 100%);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 6px 0 #854d0e, 0 10px 15px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #fde047 0%, #eab308 50%, #ca8a04 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 6px 0 #854d0e, 0 10px 15px rgba(2, 6, 23, 0.5);
     border: 2px solid #fef08a;
+    transition: all 200ms ease-out;
+  }
+  .btn-scopely-gold:hover {
+    background: linear-gradient(135deg, #fde047 0%, #facc15 50%, #eab308 100%);
   }
   .btn-scopely-gold:active {
     transform: translateY(4px);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 2px 0 #854d0e, 0 4px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 2px 0 #854d0e, 0 4px 8px rgba(2, 6, 23, 0.4);
+  }
+  .btn-scopely-gold:disabled {
+    opacity: 0.5;
+    color: #94a3b8;
+    cursor: not-allowed;
   }
 
   .btn-scopely-blue {
-    background: linear-gradient(180deg, #38bdf8 0%, #0284c7 50%, #0369a1 100%);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 6px 0 #0c4a6e, 0 10px 15px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 50%, #0369a1 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 6px 0 #0c4a6e, 0 10px 15px rgba(2, 6, 23, 0.5), 0 0 20px rgba(56, 189, 248, 0.3);
     border: 2px solid #bae6fd;
+    transition: all 200ms ease-out;
+  }
+  .btn-scopely-blue:hover {
+    background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #0284c7 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 6px 0 #0c4a6e, 0 10px 15px rgba(2, 6, 23, 0.5), 0 0 30px rgba(56, 189, 248, 0.5);
   }
   .btn-scopely-blue:active {
     transform: translateY(4px);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 2px 0 #0c4a6e, 0 4px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 2px 0 #0c4a6e, 0 4px 8px rgba(2, 6, 23, 0.4);
+  }
+  .btn-scopely-blue:disabled {
+    opacity: 0.5;
+    color: #94a3b8;
+    cursor: not-allowed;
   }
 
   .btn-scopely-purple {
-    background: linear-gradient(180deg, #c084fc 0%, #9333ea 50%, #7e22ce 100%);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 6px 0 #581c87, 0 10px 15px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(135deg, #c084fc 0%, #9333ea 50%, #7e22ce 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 6px 0 #581c87, 0 10px 15px rgba(2, 6, 23, 0.5);
     border: 2px solid #f3e8ff;
+    transition: all 200ms ease-out;
+  }
+  .btn-scopely-purple:hover {
+    background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #9333ea 100%);
   }
   .btn-scopely-purple:active {
     transform: translateY(4px);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 2px 0 #581c87, 0 4px 8px rgba(0, 0, 0, 0.4);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 2px 0 #581c87, 0 4px 8px rgba(2, 6, 23, 0.4);
+  }
+  .btn-scopely-purple:disabled {
+    opacity: 0.5;
+    color: #94a3b8;
+    cursor: not-allowed;
   }
 
-  /* Glossy Game Card Frame */
+  /* Glossy Game Card Frame with tinted shadow */
   .scopely-card {
-    background: linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 12px 24px -6px rgba(0, 0, 0, 0.6);
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 2px rgba(2, 6, 23, 0.4), 0 12px 24px -6px rgba(2, 6, 23, 0.6);
   }
 
   /* Gold Bevel Header Ribbon */
   .scopely-gold-ribbon {
-    background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 4px 10px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 2px rgba(2, 6, 23, 0.3), 0 4px 10px rgba(2, 6, 23, 0.4);
     border: 2px solid #fef08a;
+  }
+
+  /* Typography utilities for premium hierarchy */
+  .text-display-sm {
+    @apply text-3xl font-black tracking-tight;
+    letter-spacing: -0.02em;
+  }
+  .text-display-md {
+    @apply text-4xl font-black tracking-tight;
+    letter-spacing: -0.03em;
+  }
+  .text-display-lg {
+    @apply text-5xl font-black tracking-tight;
+    letter-spacing: -0.04em;
+  }
+  .text-headline-sm {
+    @apply text-lg font-semibold;
+    letter-spacing: 0.01em;
+  }
+  .text-headline-md {
+    @apply text-xl font-bold;
+    letter-spacing: 0.005em;
+  }
+  .text-headline-lg {
+    @apply text-2xl font-black;
+    letter-spacing: -0.01em;
+  }
+  .text-label {
+    @apply text-xs font-semibold uppercase;
+    letter-spacing: 0.08em;
   }
 }
 
