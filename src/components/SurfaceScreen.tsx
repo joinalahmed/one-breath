@@ -708,20 +708,8 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
           />
         )}
 
-        {showDefeatModal && lastDiveResult && lastDiveResult.outcome !== 'surfaced' && (
-          <DefeatModal
-            outcome={lastDiveResult.outcome}
-            maxDepth={lastDiveResult.maxDepth}
-            previousStreak={stats.streak}
-            onRetry={() => {
-              setShowDefeatModal(false);
-              onStartDive();
-            }}
-            onReturnToVillage={() => {
-              setShowDefeatModal(false);
-            }}
-          />
-        )}
+        {/* Defeat Modal disabled - replaced by Rescue Modal in App.tsx */}
+        {/* The Rescue Modal now handles all failed dive feedback */}
       </AnimatePresence>
     </div>
   );
