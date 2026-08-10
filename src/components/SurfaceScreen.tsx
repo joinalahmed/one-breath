@@ -397,6 +397,19 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
 
       {/* TOP COMPACT HUD BAR */}
       <div className="relative z-10 w-full flex justify-between items-center bg-slate-900/80 border border-slate-800/60 p-2 rounded-2xl shadow-xl backdrop-blur-md mb-2">
+        {/* Back Button - Show when not on map */}
+        {activeScreen !== 'home' && (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setActiveScreen('home')}
+            className="w-7 h-7 rounded-lg bg-slate-700 hover:bg-slate-600 border border-slate-600 flex items-center justify-center text-sm text-slate-200 transition-all cursor-pointer shadow mr-1"
+            title="Back to Map"
+          >
+            ←
+          </motion.button>
+        )}
+
         {/* Level Badge */}
         <div className="flex items-center space-x-2">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 p-0.5 shadow-md flex items-center justify-center font-black text-slate-950 text-xs font-mono">
