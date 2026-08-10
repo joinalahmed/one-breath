@@ -12,6 +12,7 @@ import { SplashScreen } from './components/SplashScreen';
 import { OnboardingScreen } from './components/OnboardingScreen';
 import { DiveReportModal } from './components/DiveReportModal';
 import { soundManager } from './audioAndHaptics';
+import { preloadAssets } from './assetPreloader';
 
 const STATS_STORAGE_KEY = 'one_breath_player_stats_v1';
 const CHALLENGES_STORAGE_KEY = 'one_breath_daily_challenges_v1';
@@ -212,6 +213,11 @@ export default function App() {
       console.warn('Failed to save daily challenges', e);
     }
   }, [dailyChallenges]);
+
+  // Preload all assets on app mount
+  useEffect(() => {
+    preloadAssets().catch(() => {});
+  }, []);
 
   // Handle Visibility Change (Backgrounding mid-dive requirement)
   useEffect(() => {
