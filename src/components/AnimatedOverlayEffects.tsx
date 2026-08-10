@@ -130,7 +130,7 @@ interface StreakComboBannerProps {
   onDismiss?: () => void;
 }
 
-export const StreakComboBanner: React.FC<StreakComboBannerProps> = ({ streak }) => {
+export const StreakComboBanner: React.FC<StreakComboBannerProps> = ({ streak, onDismiss }) => {
   if (streak <= 1) return null;
 
   let bannerTitle = 'TASTY STREAK! 🔥';
@@ -157,9 +157,10 @@ export const StreakComboBanner: React.FC<StreakComboBannerProps> = ({ streak }) 
       animate={{ scale: 1, y: 0, rotate: 0 }}
       exit={{ scale: 0, y: -20, opacity: 0 }}
       transition={{ type: 'spring', damping: 12, stiffness: 220 }}
-      className="relative z-30 w-full mx-2 mb-2 p-0.5 rounded-2xl bg-gradient-to-r from-amber-400 via-rose-500 to-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.4)] overflow-hidden"
+      onClick={onDismiss}
+      className="relative z-30 w-full mx-2 mb-2 p-0.5 rounded-2xl bg-gradient-to-r from-amber-400/40 via-rose-500/40 to-amber-400/40 shadow-[0_0_25px_rgba(251,191,36,0.2)] overflow-hidden cursor-pointer"
     >
-      <div className="bg-slate-950/90 rounded-[14px] p-2.5 flex items-center justify-between">
+      <div className="bg-slate-950/30 backdrop-blur-sm rounded-[14px] p-2.5 flex items-center justify-between">
         <div className="flex items-center space-x-2.5">
           <motion.div
             animate={{ scale: [1, 1.25, 1], rotate: [0, -10, 10, 0] }}

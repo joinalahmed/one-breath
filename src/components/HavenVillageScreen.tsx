@@ -39,6 +39,7 @@ interface HavenVillageScreenProps {
   onAddPearls?: (amount: number) => void;
   onNextTip: () => void;
   onOpenDebug?: () => void;
+  onStartDive?: () => void;
 }
 
 type BuildingKey = 'campfire' | 'smokehouse' | 'lighthouse' | 'council';
@@ -54,6 +55,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
   onAddPearls,
   onNextTip,
   onOpenDebug,
+  onStartDive,
 }) => {
   const [villageLevels, setVillageLevels] = useState(() => {
     try {
@@ -119,7 +121,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
             textShadow: '0 1px 2px rgba(0,0,0,0.8)',
           }}
         >
-          SMOKEHOUSE {villageLevels.smokehouse}
+          SMOKEHOUSE (Lv.{villageLevels.smokehouse})
         </span>
       </motion.div>
 
@@ -143,7 +145,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
             textShadow: '0 1px 2px rgba(0,0,0,0.8)',
           }}
         >
-          LIGHTHOUSE {villageLevels.lighthouse}
+          LIGHTHOUSE (Lv.{villageLevels.lighthouse})
         </span>
       </motion.div>
 
@@ -191,7 +193,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
             textShadow: '0 1px 2px rgba(0,0,0,0.8)',
           }}
         >
-          BULTEOK {villageLevels.campfire}
+          BULTEOK (Lv.{villageLevels.campfire})
         </span>
       </motion.div>
 
@@ -442,6 +444,26 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* FLOATING DIVE BUTTON — bottom right */}
+      {onStartDive && (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => {
+            soundManager.playConfirm();
+            onStartDive();
+          }}
+          className="absolute bottom-4 right-4 z-30 w-14 h-14 rounded-full cursor-pointer flex items-center justify-center shadow-lg"
+          style={{
+            background: 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)',
+            border: '2px solid #38bdf8',
+            boxShadow: '0 4px 15px rgba(14,165,233,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
+          }}
+        >
+          <span className="text-2xl">🤿</span>
+        </motion.button>
+      )}
     </div>
   );
 };

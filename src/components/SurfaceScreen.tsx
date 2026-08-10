@@ -51,7 +51,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   onOpenTelemetryModal,
   onOpenDebug,
 }) => {
-  const [activeScreen, setActiveScreen] = useState<'home' | 'haven' | 'shop' | 'leaderboard'>('home');
+  const [activeScreen, setActiveScreen] = useState<'home' | 'haven' | 'shop' | 'leaderboard'>('haven');
   const [currentBots] = useState<BotDiver[]>(() => simulateBotActivity(bots));
   const [isMuted, setIsMuted] = useState(() => soundManager.getMuted());
   const [showSettings, setShowSettings] = useState(false);
@@ -116,6 +116,15 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   const currentRank = getPlayerRank(stats.bestDepth, stats.coins);
   const nextRank = getNextRank(currentRank.level);
   const [unlockedRankModal, setUnlockedRankModal] = useState<DiverRankInfo | null>(null);
+  const [streakBannerDismissed, setStreakBannerDismissed] = useState(false);
+  const streakRef = useRef(stats.streak);
+  useEffect(() => {
+    if (stats.streak !== streakRef.current) {
+      streakRef.current = stats.streak;
+      setStreakBannerDismissed(false);
+    }
+  }, [stats.streak]);
+
   const prevRankLevelRef = useRef(currentRank.level);
   const [showDefeatModal, setShowDefeatModal] = useState(false);
   const prevDiveResultRef = useRef<typeof lastDiveResult>(null);
@@ -343,6 +352,13 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
           style={{ imageRendering: 'pixelated' }}
           draggable={false}
         />
+      ) : activeScreen === 'home' ? (
+        <img
+          src="/assets/ChatGPT Image Aug 10, 2026, 02_57_33 PM.png"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          draggable={false}
+        />
       ) : (
         <>
           <div className="absolute inset-0 bg-gradient-to-b from-sky-950 via-slate-950 to-slate-950 pointer-events-none" />
@@ -513,7 +529,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
 
       {/* STREAK COMBO BANNER */}
       <AnimatePresence>
-        {stats.streak > 1 && <StreakComboBanner streak={stats.streak} />}
+        {stats.streak > 1 && !streakBannerDismissed && <StreakComboBanner streak={stats.streak} onDismiss={() => setStreakBannerDismissed(true)} />}
       </AnimatePresence>
 
       {/* DYNAMIC SCREEN CONTENT */}
@@ -563,6 +579,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                 onAddPearls={onAddPearls}
                 onNextTip={() => setTipIndex((prev) => prev + 1)}
                 onOpenDebug={onOpenDebug}
+                onStartDive={onStartDive}
               />
             </motion.div>
           )}
