@@ -326,7 +326,54 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   ];
 
   return (
-    <div className="relative w-full h-full max-w-lg mx-auto bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none p-3 sm:p-4 no-scrollbar">
+    <>
+      {/* FLOATING SIDE BUTTONS */}
+      {/* LEFT: LEADERBOARD */}
+      <motion.button
+        whileHover={{ scale: 1.12, x: -4 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setActiveScreen('leaderboard')}
+        className="fixed left-2 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full flex items-center justify-center transition-all"
+        style={{
+          background: activeScreen === 'leaderboard'
+            ? 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)'
+            : 'linear-gradient(135deg, #4c1d95 0%, #3f0f5c 100%)',
+          boxShadow: activeScreen === 'leaderboard'
+            ? '0 4px 16px rgba(168, 85, 247, 0.5)'
+            : '0 4px 12px rgba(0,0,0,0.4)',
+          border: `1.5px solid ${activeScreen === 'leaderboard' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}`,
+        }}
+        title="Leaderboard"
+      >
+        <span className="text-xl">⛵</span>
+      </motion.button>
+
+      {/* RIGHT: SHOP */}
+      <motion.button
+        whileHover={{ scale: 1.12, x: 4 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setActiveScreen('shop')}
+        className="fixed right-2 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full flex items-center justify-center transition-all relative"
+        style={{
+          background: activeScreen === 'shop'
+            ? 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'
+            : 'linear-gradient(135deg, #92400e 0%, #78350f 100%)',
+          boxShadow: activeScreen === 'shop'
+            ? '0 4px 16px rgba(251, 191, 36, 0.5)'
+            : '0 4px 12px rgba(0,0,0,0.4)',
+          border: `1.5px solid ${activeScreen === 'shop' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}`,
+        }}
+        title="Shop"
+      >
+        <span className="text-xl">⚓</span>
+        {ownedCount < 12 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-400 text-slate-950 text-[10px] font-black rounded-full flex items-center justify-center">
+            {ownedCount}
+          </span>
+        )}
+      </motion.button>
+
+      <div className="relative w-full h-full max-w-lg mx-auto bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none p-3 sm:p-4 no-scrollbar">
       {/* Dynamic Background Atmosphere */}
       {activeScreen === 'haven' ? (
         <img
@@ -727,51 +774,6 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* FLOATING SIDE BUTTONS */}
-      {/* LEFT: LEADERBOARD */}
-      <motion.button
-        whileHover={{ scale: 1.12, x: -4 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setActiveScreen('leaderboard')}
-        className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full flex items-center justify-center transition-all"
-        style={{
-          background: activeScreen === 'leaderboard'
-            ? 'linear-gradient(135deg, #a855f7 0%, #9333ea 100%)'
-            : 'linear-gradient(135deg, #4c1d95 0%, #3f0f5c 100%)',
-          boxShadow: activeScreen === 'leaderboard'
-            ? '0 4px 16px rgba(168, 85, 247, 0.5)'
-            : '0 4px 12px rgba(0,0,0,0.4)',
-          border: `1.5px solid ${activeScreen === 'leaderboard' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}`,
-        }}
-        title="Leaderboard"
-      >
-        <span className="text-xl">⛵</span>
-      </motion.button>
-
-      {/* RIGHT: SHOP */}
-      <motion.button
-        whileHover={{ scale: 1.12, x: 4 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setActiveScreen('shop')}
-        className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full flex items-center justify-center transition-all relative"
-        style={{
-          background: activeScreen === 'shop'
-            ? 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'
-            : 'linear-gradient(135deg, #92400e 0%, #78350f 100%)',
-          boxShadow: activeScreen === 'shop'
-            ? '0 4px 16px rgba(251, 191, 36, 0.5)'
-            : '0 4px 12px rgba(0,0,0,0.4)',
-          border: `1.5px solid ${activeScreen === 'shop' ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.1)'}`,
-        }}
-        title="Shop"
-      >
-        <span className="text-xl">⚓</span>
-        {ownedCount < 12 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-400 text-slate-950 text-[10px] font-black rounded-full flex items-center justify-center">
-            {ownedCount}
-          </span>
-        )}
-      </motion.button>
 
       {/* OVERLAY ANIMATION MODALS */}
       <AnimatePresence>
@@ -798,5 +800,6 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         )}
       </AnimatePresence>
     </div>
+    </>
   );
 };
