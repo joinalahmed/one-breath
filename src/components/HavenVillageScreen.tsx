@@ -35,7 +35,6 @@ interface HavenVillageScreenProps {
     rareCollected: number;
     stoneCutAtDepth: number | null;
   } | null;
-  onStartDive: () => void;
   onClaimChallengeReward?: (id: string) => void;
   onTradeFishForPearls?: (fishCost: number, pearlsEarned: number) => void;
   onAddPearls?: (amount: number) => void;
@@ -51,7 +50,6 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
   dailyChallenges,
   currentTip,
   lastDiveResult,
-  onStartDive,
   onClaimChallengeReward,
   onTradeFishForPearls,
   onAddPearls,
@@ -211,33 +209,6 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         >
           BULTEOK {villageLevels.campfire}
         </span>
-      </motion.div>
-
-      {/* DIVE — boat area at the very bottom */}
-      <motion.div
-        whileTap={{ scale: 0.95 }}
-        onClick={onStartDive}
-        className="absolute bottom-[0%] left-[10%] w-[80%] h-[16%] cursor-pointer z-20 flex items-center justify-center"
-      >
-        <div
-          className="flex items-center space-x-2 px-5 py-2.5"
-          style={{
-            background: 'linear-gradient(180deg, #1a5c6b 0%, #0e3d4a 50%, #082a33 100%)',
-            border: '2px solid #3dd4e8',
-            borderRadius: '6px',
-            boxShadow: 'inset 0 1px 0 rgba(100,220,255,0.3), 0 4px 0 #051e25, 0 6px 12px rgba(0,0,0,0.6)',
-            textShadow: '0 1px 3px rgba(0,0,0,0.8)',
-          }}
-        >
-          <motion.span
-            animate={{ y: [0, -2, 0] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-            className="text-base"
-          >
-            🤿
-          </motion.span>
-          <span className="text-cyan-100 font-black text-xs tracking-widest uppercase">START DIVE</span>
-        </div>
       </motion.div>
 
       {/* UPGRADE NOTIFICATION TOAST */}

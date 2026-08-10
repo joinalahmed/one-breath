@@ -473,7 +473,6 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                 dailyChallenges={dailyChallenges}
                 currentTip={currentTip}
                 lastDiveResult={lastDiveResult}
-                onStartDive={onStartDive}
                 onClaimChallengeReward={onClaimChallengeReward}
                 onTradeFishForPearls={onTradeFishForPearls}
                 onAddPearls={onAddPearls}
