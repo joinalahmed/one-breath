@@ -28,79 +28,55 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
       animate={{ opacity: isReady ? 0 : 1 }}
       transition={{ duration: 0.6 }}
       className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center z-50 overflow-hidden"
+      style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.02\' /%3E%3C/svg%3E")' }}
     >
-      {/* Animated waves background */}
-      <div className="absolute inset-0 overflow-hidden opacity-30">
+      {/* Ocean wave visualization */}
+      <div className="absolute inset-0 overflow-hidden opacity-20 pointer-events-none">
         <motion.div
-          animate={{ y: [0, 20, 0] }}
-          transition={{ duration: 3, repeat: Infinity }}
-          className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-cyan-500/20 to-transparent"
-        />
-        <motion.div
-          animate={{ y: [20, 0, 20] }}
-          transition={{ duration: 4, repeat: Infinity, delay: 0.5 }}
-          className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-cyan-400/20 to-transparent"
+          animate={{ y: [0, 30, 0] }}
+          transition={{ duration: 4, repeat: Infinity }}
+          className="absolute top-1/3 left-0 w-full h-48 bg-gradient-to-b from-cyan-400 to-transparent blur-3xl"
         />
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 text-center flex flex-col items-center justify-center gap-4">
+      <div className="relative z-10 text-center flex flex-col items-center justify-center gap-6">
         {/* Animated title */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, type: 'spring' }}
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, type: 'spring', stiffness: 200, damping: 15 }}
+          className="flex flex-col items-center"
         >
-          <div className="text-7xl mb-2">🌊</div>
-          <h1 className="text-4xl font-bold text-white tracking-tight">
-            ONE
-            <br />
-            <span className="text-cyan-400">BREATH</span>
+          <h1 className="text-5xl font-black text-cyan-400 tracking-wider uppercase" style={{ letterSpacing: '0.08em' }}>
+            ONE BREATH
           </h1>
+          <p className="text-sm font-semibold text-slate-300 mt-2 tracking-widest">
+            FREEDIVER HAVEN
+          </p>
         </motion.div>
 
-        {/* Subtitle */}
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
+        {/* Diver silhouette or wave illustration (120x120px) */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 0.4, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-9xl mt-8"
+        >
+          🌊
+        </motion.div>
+
+        {/* BEGIN JOURNEY Button */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="text-slate-400 text-sm tracking-widest font-light"
+          transition={{ duration: 0.5, delay: 0.4 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onComplete}
+          className="mt-16 px-8 py-3 rounded-lg bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 text-slate-950 font-black text-sm uppercase tracking-wider shadow-lg shadow-cyan-500/30 transition-all"
         >
-          FREEDIVER HAVEN
-        </motion.p>
-
-        {/* Loading bar */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="mt-12 w-24 h-1 bg-slate-700 rounded-full overflow-hidden"
-        >
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: isReady ? '100%' : '60%' }}
-            transition={{ duration: isReady ? 0.4 : 2, ease: 'easeInOut' }}
-            className="h-full bg-gradient-to-r from-cyan-400 to-cyan-300 rounded-full"
-          />
-        </motion.div>
-
-        {/* Animated icons */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-          className="flex gap-8 mt-12 text-4xl"
-        >
-          <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity }}>
-            🤿
-          </motion.div>
-          <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}>
-            🐚
-          </motion.div>
-          <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}>
-            💎
-          </motion.div>
-        </motion.div>
+          Begin Journey
+        </motion.button>
 
         {/* Loading text */}
         <motion.p
