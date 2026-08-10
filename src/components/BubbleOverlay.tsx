@@ -15,19 +15,19 @@ interface BubbleConfig {
 }
 
 export const BubbleOverlay: React.FC<BubbleOverlayProps> = ({
-  count = 22,
+  count = 18,
   className = '',
 }) => {
   const bubbles = useMemo<BubbleConfig[]>(() => {
     return Array.from({ length: count }).map((_, i) => {
-      // Varied sizes from 12px up to 55px
-      const size = 12 + Math.floor(Math.random() * 45);
+      // Natural ambient bubble sizes from 8px to 28px
+      const size = 8 + Math.floor(Math.random() * 20);
       // Random X start position across screen percentage
-      const left = Math.floor(Math.random() * 96);
+      const left = Math.floor(Math.random() * 94) + 3;
       // Varied speed/duration for natural asynchronous rising
-      const riseDuration = 7 + Math.random() * 12; // 7s to 19s
-      const swayDuration = 3 + Math.random() * 4; // 3s to 7s
-      const delay = -(Math.random() * riseDuration); // negative delay so they start pre-populated across screen
+      const riseDuration = 6 + Math.random() * 10;
+      const swayDuration = 2.5 + Math.random() * 3.5;
+      const delay = -(Math.random() * riseDuration);
 
       return {
         id: i,

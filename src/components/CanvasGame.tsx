@@ -75,7 +75,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   const diverRef = useRef<DiverState>({
     x: config.WORLD_WIDTH / 2,
     y: 0,
-    vx: 0,
+    vx: config.WORLD_WIDTH / 2,
     vy: 0,
     air: maxAir,
     isDescending: false,
@@ -606,11 +606,24 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
 
       // Keyboard & Touch continuous steering
       const speedMult = finsSpeedMultiplier;
+      const isSteering =
+        keysPressedRef.current.has('ArrowLeft') ||
+        keysPressedRef.current.has('KeyA') ||
+        keysPressedRef.current.has('TouchLeft') ||
+        keysPressedRef.current.has('ArrowRight') ||
+        keysPressedRef.current.has('KeyD') ||
+        keysPressedRef.current.has('TouchRight');
+
       if (keysPressedRef.current.has('ArrowLeft') || keysPressedRef.current.has('KeyA') || keysPressedRef.current.has('TouchLeft')) {
         diver.vx = Math.max(1.5, diver.vx - config.HORIZONTAL_SPEED * speedMult * dt * 3.5);
       }
       if (keysPressedRef.current.has('ArrowRight') || keysPressedRef.current.has('KeyD') || keysPressedRef.current.has('TouchRight')) {
         diver.vx = Math.min(config.WORLD_WIDTH - 1.5, diver.vx + config.HORIZONTAL_SPEED * speedMult * dt * 3.5);
+      }
+
+      // If at surface and not steering, align with expedition boat
+      if (diver.y < 0.2 && !isSteering) {
+        diver.vx = config.WORLD_WIDTH / 2;
       }
 
       // Horizontal lerp
