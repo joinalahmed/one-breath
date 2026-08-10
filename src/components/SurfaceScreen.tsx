@@ -7,6 +7,7 @@ import { getPlayerRank, getNextRank, DiverRankInfo } from '../ranks';
 import { RankUpModal, StreakComboBanner, DefeatModal } from './AnimatedOverlayEffects';
 import { HavenVillageScreen } from './HavenVillageScreen';
 import { BubbleOverlay } from './BubbleOverlay';
+import { DiveResultsSummary } from './DiveResultsSummary';
 
 interface SurfaceScreenProps {
   stats: PlayerStats;
@@ -405,6 +406,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                 nextRank={nextRank}
                 dailyChallenges={dailyChallenges}
                 currentTip={currentTip}
+                lastDiveResult={lastDiveResult}
                 onStartDive={onStartDive}
                 onClaimChallengeReward={onClaimChallengeReward}
                 onTradeFishForPearls={onTradeFishForPearls}

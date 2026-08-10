@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PlayerStats, DailyChallenge } from '../types';
 import { soundManager } from '../audioAndHaptics';
+import { DiveResultsSummary } from './DiveResultsSummary';
 
 interface HavenVillageScreenProps {
   stats: PlayerStats;
@@ -24,6 +25,16 @@ interface HavenVillageScreenProps {
     text: string;
     avatar: string;
   };
+  lastDiveResult?: {
+    outcome: 'surfaced' | 'shark' | 'drowned';
+    maxDepth: number;
+    diveDuration: number;
+    coinsEarned: number;
+    foodEarned: number;
+    shellsCollected: number;
+    rareCollected: number;
+    stoneCutAtDepth: number | null;
+  } | null;
   onStartDive: () => void;
   onClaimChallengeReward?: (id: string) => void;
   onTradeFishForPearls?: (fishCost: number, pearlsEarned: number) => void;
@@ -38,6 +49,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
   nextRank,
   dailyChallenges,
   currentTip,
+  lastDiveResult,
   onStartDive,
   onClaimChallengeReward,
   onTradeFishForPearls,
@@ -87,6 +99,19 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
 
   return (
     <div className="flex flex-col space-y-3 pb-6 text-slate-100">
+      {/* DIVE RESULTS SUMMARY - Shows if there was a recent dive */}
+      {lastDiveResult && (
+        <DiveResultsSummary
+          outcome={lastDiveResult.outcome}
+          maxDepth={lastDiveResult.maxDepth}
+          diveDuration={lastDiveResult.diveDuration}
+          coinsEarned={lastDiveResult.coinsEarned}
+          foodEarned={lastDiveResult.foodEarned}
+          shellsCollected={lastDiveResult.shellsCollected}
+          rareCollected={lastDiveResult.rareCollected}
+        />
+      )}
+
       {/* VILLAGE HERO BANNER */}
       <div className="relative rounded-3xl p-4 bg-gradient-to-b from-slate-900 via-sky-950 to-slate-950 border border-cyan-500/40 shadow-2xl overflow-hidden flex flex-col space-y-3">
         {/* Animated Background Atmosphere */}

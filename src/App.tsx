@@ -157,8 +157,11 @@ export default function App() {
   const [lastDiveResult, setLastDiveResult] = useState<{
     outcome: 'surfaced' | 'shark' | 'drowned';
     maxDepth: number;
+    diveDuration: number;
     coinsEarned: number;
     foodEarned: number;
+    shellsCollected: number;
+    rareCollected: number;
     stoneCutAtDepth: number | null;
   } | null>(null);
 
@@ -330,8 +333,11 @@ export default function App() {
       setLastDiveResult({
         outcome: result.outcome,
         maxDepth: result.maxDepth,
+        diveDuration: result.diveDuration,
         coinsEarned: result.coinsEarned,
         foodEarned: result.foodEarned,
+        shellsCollected: result.shellsCollected,
+        rareCollected: result.rareCollected || 0,
         stoneCutAtDepth: result.stoneCutAtDepth,
       });
 

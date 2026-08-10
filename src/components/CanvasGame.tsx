@@ -5,6 +5,7 @@ import { GameConfig, DiverState, CollectibleItem, SharkState, UpgradesState, Ite
 import { soundManager } from '../audioAndHaptics';
 import { BreathGauge } from './BreathGauge';
 import { BubbleOverlay } from './BubbleOverlay';
+import { DepthBandIndicator } from './DepthBandIndicator';
 import {
   drawVectorDiverCanvas,
   drawVectorPearlShellCanvas,
@@ -1127,7 +1128,14 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         )}
       </AnimatePresence>
 
-
+      {/* DEPTH BAND INDICATOR - Shows current zone */}
+      <div className="relative z-10 w-full mt-auto">
+        <DepthBandIndicator
+          currentDepth={hudDepth}
+          maxDepth={hudMaxDepth}
+          maxGameDepth={config.MAX_DEPTH}
+        />
+      </div>
     </div>
   );
 };
