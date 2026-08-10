@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* All buttons are pointer cursor */
+button {
+  cursor: pointer;
+}
+
 /* Hide scrollbar globally and via class */
 html, body, * {
   -ms-overflow-style: none;

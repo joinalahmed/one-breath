@@ -197,7 +197,7 @@ export default function App() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && phase === 'DIVING') {
-        // Automatically surface safely with no progress lost
+        soundManager.restoreBgMusic();
         setPhase('SURFACE');
       }
     };
@@ -237,9 +237,10 @@ export default function App() {
     setShowRescueModal(true);
   };
 
-  // Start Dive Handler (< 1 Second execution)
+  // Start Dive Handler — plays boat departure video then enters dive
   const handleStartDive = () => {
-    setPhase('DIVING');
+    soundManager.dimBgMusic();
+    setPhase('DIVE_TRANSITION');
   };
 
   // Claim Daily Challenge Reward
@@ -404,6 +405,7 @@ export default function App() {
     appendTelemetryLog(logEntry);
 
     // 4. Return to surface screen
+    soundManager.restoreBgMusic();
     setPhase('SURFACE');
   };
 
@@ -461,48 +463,67 @@ export default function App() {
         </AnimatePresence>
 
         <AnimatePresence mode="wait">
-          {!showOnboarding && !showSplash && (
-            phase === 'SURFACE' ? (
-              <motion.div
-                key="surface"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.04, filter: 'blur(4px)' }}
-                transition={{ duration: 0.28, ease: 'easeInOut' }}
-                className="w-full h-full flex flex-col"
-              >
-                <SurfaceScreen
-                  stats={stats}
-                  bots={INITIAL_BOTS}
-                  dailyChallenges={dailyChallenges}
-                  onClaimChallengeReward={handleClaimChallengeReward}
-                  lastDiveResult={lastDiveResult}
-                  onStartDive={handleStartDive}
-                  onBuyUpgrade={handleBuyUpgrade}
-                  onTradeFishForPearls={handleTradeFishForPearls}
-                  onAddPearls={handleAddPearls}
-                  onOpenTelemetryModal={() => setShowTelemetryModal(true)}
-                  onOpenDebug={() => setShowTuningOverlay(true)}
-                />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="diving"
-                initial={{ opacity: 0, scale: 1.06, filter: 'blur(6px)' }}
-                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="w-full h-full flex flex-col"
-              >
-                <CanvasGame
-                  config={config}
-                  upgrades={stats.upgrades}
-                  streak={stats.streak}
-                  onDiveComplete={handleDiveComplete}
-                  onOpenDebug={() => setShowTuningOverlay(true)}
-                />
-              </motion.div>
-            )
+          {!showOnboarding && !showSplash && phase === 'SURFACE' && (
+            <motion.div
+              key="surface"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.04, filter: 'blur(4px)' }}
+              transition={{ duration: 0.28, ease: 'easeInOut' }}
+              className="w-full h-full flex flex-col"
+            >
+              <SurfaceScreen
+                stats={stats}
+                bots={INITIAL_BOTS}
+                dailyChallenges={dailyChallenges}
+                onClaimChallengeReward={handleClaimChallengeReward}
+                lastDiveResult={lastDiveResult}
+                onStartDive={handleStartDive}
+                onBuyUpgrade={handleBuyUpgrade}
+                onTradeFishForPearls={handleTradeFishForPearls}
+                onAddPearls={handleAddPearls}
+                onOpenTelemetryModal={() => setShowTelemetryModal(true)}
+                onOpenDebug={() => setShowTuningOverlay(true)}
+              />
+            </motion.div>
+          )}
+          {!showOnboarding && !showSplash && phase === 'DIVE_TRANSITION' && (
+            <motion.div
+              key="dive-transition"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-full flex items-center justify-center bg-black"
+            >
+              <video
+                autoPlay
+                muted
+                playsInline
+                onEnded={() => setPhase('DIVING')}
+                onClick={() => setPhase('DIVING')}
+                className="w-full h-full object-cover cursor-pointer"
+                src="/assets/village_boat_departure_3s_fast.mp4"
+              />
+            </motion.div>
+          )}
+          {!showOnboarding && !showSplash && (phase === 'DIVING' || phase === 'RESULTS' || phase === 'TELEMETRY') && (
+            <motion.div
+              key="diving"
+              initial={{ opacity: 0, scale: 1.06, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className="w-full h-full flex flex-col"
+            >
+              <CanvasGame
+                config={config}
+                upgrades={stats.upgrades}
+                streak={stats.streak}
+                onDiveComplete={handleDiveComplete}
+                onOpenDebug={() => setShowTuningOverlay(true)}
+              />
+            </motion.div>
           )}
         </AnimatePresence>
 
