@@ -8,18 +8,14 @@ interface PhotoLibraryModalProps {
 }
 
 const ITEM_INFO: Record<string, { emoji: string; name: string; description: string; rarity: string }> = {
-  oyster: { emoji: '🐚', name: 'Pearl Oyster', description: 'A precious pearl-bearing shellfish', rarity: 'Common' },
-  fish: { emoji: '🐟', name: 'Reef Fish', description: 'Colorful tropical fish', rarity: 'Common' },
-  clownfish: { emoji: '🐠', name: 'Clownfish', description: 'Orange and white anemone dweller', rarity: 'Uncommon' },
-  pufferfish: { emoji: '🐡', name: 'Pufferfish', description: 'Defensive spiky swimmer', rarity: 'Uncommon' },
-  betta: { emoji: '🐠', name: 'Betta Fish', description: 'Vibrant aggressive species', rarity: 'Uncommon' },
-  angelfish: { emoji: '🐠', name: 'Angelfish', description: 'Graceful triangular fish', rarity: 'Uncommon' },
-  seahorse: { emoji: '🐴', name: 'Seahorse', description: 'Mystical gentle dweller', rarity: 'Rare' },
-  crab: { emoji: '🦀', name: 'Hermit Crab', description: 'Swift scavenging crustacean', rarity: 'Rare' },
-  eel: { emoji: '🐍', name: 'Moray Eel', description: 'Dangerous predatory fish', rarity: 'Rare' },
-  octopus: { emoji: '🐙', name: 'Octopus', description: 'Intelligent eight-armed cephalopod', rarity: 'Epic' },
-  squid: { emoji: '🦑', name: 'Squid', description: 'Fast-moving deep sea hunter', rarity: 'Epic' },
-  angler: { emoji: '🦑', name: 'Anglerfish', description: 'Bioluminescent deep dweller', rarity: 'Legendary' },
+  oyster: { emoji: '🐚', name: 'Pearl Oyster', description: 'A precious pearl-bearing shellfish found on the seabed', rarity: 'Common' },
+  fish: { emoji: '🐟', name: 'Reef Fish', description: 'Colorful tropical fish in many varieties and sizes', rarity: 'Common' },
+  seahorse: { emoji: '🐴', name: 'Seahorse', description: 'Mystical and graceful denizen of the reef', rarity: 'Rare' },
+  crab: { emoji: '🦀', name: 'Hermit Crab', description: 'Swift scavenging crustacean that hides in shells', rarity: 'Rare' },
+  eel: { emoji: '🐍', name: 'Electric Eel', description: 'Dangerous predatory fish that shocks with electricity', rarity: 'Rare' },
+  octopus: { emoji: '🐙', name: 'Octopus', description: 'Intelligent eight-armed cephalopod master of disguise', rarity: 'Epic' },
+  squid: { emoji: '🦑', name: 'Squid', description: 'Fast-moving deep sea hunter with remarkable intelligence', rarity: 'Epic' },
+  angler: { emoji: '🦑', name: 'Anglerfish', description: 'Bioluminescent deep dweller with hypnotic lure', rarity: 'Legendary' },
 };
 
 export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibrary, onClose }) => {
@@ -187,19 +183,19 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
             <div>
               <p className="text-slate-400">Common</p>
               <p className="font-bold text-slate-300">
-                {discoveredItems.filter((_, i) => ['oyster', 'fish'].includes(discoveredItems[i][0])).length}
+                {discoveredItems.filter(([type]) => ['oyster', 'fish'].includes(type)).length}
               </p>
             </div>
             <div>
               <p className="text-slate-400">Rare</p>
               <p className="font-bold text-blue-300">
-                {discoveredItems.filter((_, i) => ['seahorse', 'crab', 'eel'].includes(discoveredItems[i][0])).length}
+                {discoveredItems.filter(([type]) => ['seahorse', 'crab', 'eel'].includes(type)).length}
               </p>
             </div>
             <div>
-              <p className="text-slate-400">Legendary</p>
+              <p className="text-slate-400">Epic+</p>
               <p className="font-bold text-amber-300">
-                {discoveredItems.filter((_, i) => ['octopus', 'squid', 'angler'].includes(discoveredItems[i][0])).length}
+                {discoveredItems.filter(([type]) => ['octopus', 'squid', 'angler'].includes(type)).length}
               </p>
             </div>
           </div>
