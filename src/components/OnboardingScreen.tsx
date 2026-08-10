@@ -10,95 +10,32 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
   const [step, setStep] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
 
-  const steps = [
-    {
-      title: 'Welcome, Freediver! 🤿',
-      subtitle: 'Join the Pearl Coast Haven',
-      description: 'You\'re about to descend into the ocean\'s mysteries. Collect treasures, upgrade your gear, and build your village.',
-      icon: '🌊',
-      action: 'Begin',
-      animation: 'bounce',
-    },
-    {
-      title: 'Hold Your Breath 💨',
-      description: 'You start with 100 air. Hold [Space] or tap to swim DOWN with your weight stone. Release to float UP. Simple, right?',
-      icon: '💨',
-      tips: [
-        '⬇️ HOLDING DOWN = Descend with stone (fast!)',
-        '⬆️ RELEASING = Float up (slower, but saves air)',
-        '⚠️ Air drains FASTER the DEEPER you go!',
-      ],
-      warning: 'Run out of air = 💀 DROWNED',
-    },
-    {
-      title: 'Treasure Everywhere 💎',
-      description: 'Oysters hide pearls worth more the deeper you find them! Grab fish 🐟 for food. Different depth zones = different loot.',
-      icon: '🐚',
-      tips: [
-        '0-15m: Easy pearls (2-5) 💚',
-        '15-30m: Medium pearls (8-15) 💙',
-        '30-45m: Giant pearls (50-80) 💜',
-        '45-60m: LEGENDARY hauls (75-130) 🌟',
-      ],
-    },
-    {
-      title: 'The Magic X Button ⚖️',
-      description: 'Grabbed too much treasure? Press X (Cut Stone) to DROP your weight stone. You\'ll zoom back up, but lose descending power!',
-      icon: '✂️',
-      tips: [
-        '✅ Use it to escape sharks!',
-        '✅ Use it when panicking (no air left)',
-        '⚠️ Perfect timing = victory',
-        '❌ Bad timing = missed treasure',
-      ],
-    },
-    {
-      title: 'Beware! 🦈 Shark Alert',
-      description: 'A hungry shark patrols at 31m depth. It moves in patterns. Watch where it\'s swimming—time your dives carefully!',
-      icon: '🦈',
-      tips: [
-        '🚫 Get too close = DEVOURED',
-        '📍 Fixed depth zone (around 31m)',
-        '🔄 Predictable movement = exploitable',
-        '💡 Upgrade Shark Repellent to reduce danger',
-      ],
-      warning: 'Shark attack = 💀 GAME OVER',
-    },
-    {
-      title: 'Level Up Your Gear ⚙️',
-      description: 'Spend pearls on upgrades! Each upgrade stacks and gets more expensive. More lungs? Faster fins? Bigger basket? It\'s up to you!',
-      icon: '⚙️',
-      tips: [
-        '🫁 Lung Training: Stay deep longer',
-        '🪸 Fast Fins: Move quicker (escape sharks!)',
-        '🧺 Larger Basket: Carry more treasure',
-        '🥽 Pearl Goggles: Spot more valuable items',
-      ],
-    },
-    {
-      title: 'Daily Quests 📋',
-      description: 'Complete daily challenges for bonus pearls! Pearl Collector, Safe Diver, Rare Species Hunter—there\'s always something to do.',
-      icon: '⭐',
-      tips: [
-        '💎 Pearl Collector: Gather lots of pearls',
-        '🤿 Safe Freediver: Survive multiple dives',
-        '🌊 Trench Explorer: Reach 25m depth',
-        '🐙 Rare Hunter: Catch special creatures',
-      ],
-    },
-    {
-      title: 'Ready to Dive? 🏁',
-      description: 'You\'ve got the basics. Now jump in! Fail, learn, upgrade, repeat. Build your haven and become a legendary freediver!',
-      icon: '🎉',
-      action: 'Dive Now!',
-      animation: 'dance',
-    },
-  ];
+  // Screen 2: Hold Your Breath - Breathing visualization
+  const screen1 = {
+    title: 'HOLD YOUR BREATH 💨',
+    copy: 'Hold [Space] to descend with your weight stone. Release to float up. Simple? 😊',
+    hasVisual: true,
+    action: 'GOT IT, NEXT →',
+  };
 
-  const currentStep = steps[step];
+  // Screen 3: Treasure Awaits - Depth zones
+  const screen2 = {
+    title: 'TREASURE AWAITS 💎',
+    subtitle: 'Deeper = Better Loot',
+    zones: [
+      { depth: '0-15m', name: 'Shallow Reef', reward: 'Pearls: 2-5 💚', color: 'cyan' },
+      { depth: '15-30m', name: 'Mid Reef Drop', reward: 'Pearls: 8-15 💙', color: 'blue' },
+      { depth: '30-45m', name: 'Shark Trench', reward: 'Pearls: 25-80 💜', color: 'indigo' },
+      { depth: '45-60m', name: 'Deep Abyss', reward: 'Pearls: 75-150+ ⭐ LEGENDARY', color: 'rose' },
+    ],
+    action: 'READY TO DIVE',
+  };
+
+  const screens = [screen1, screen2];
+  const currentScreen = screens[step];
 
   const handleNext = () => {
-    if (step < steps.length - 1) {
+    if (step < screens.length - 1) {
       setStep(step + 1);
     } else {
       onComplete();
@@ -143,139 +80,107 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onComplete }
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-6 py-8 text-center max-w-md">
-        {/* Progress indicator */}
-        <div className="mb-8 flex gap-1">
-          {steps.map((_, i) => (
-            <motion.div
-              key={i}
-              className={`h-1.5 rounded-full transition-all ${
-                i <= step ? 'bg-gradient-to-r from-cyan-400 to-blue-400' : 'bg-slate-700'
-              }`}
-              animate={{ width: i <= step ? 24 : 14 }}
-            />
-          ))}
-        </div>
+      <div className="relative z-10 w-full h-full flex flex-col items-center justify-between px-6 py-8 text-center max-w-md">
+        {/* Safe area top spacer */}
+        <div className="h-4" />
 
-        {/* Icon with animation */}
-        <motion.div
-          key={`icon-${step}`}
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{
-            scale: 1,
-            rotate: 0,
-            ...(currentStep.animation === 'bounce' && {
-              y: [0, -10, 0],
-            }),
-            ...(currentStep.animation === 'dance' && {
-              rotate: [0, 5, -5, 5, -5, 0],
-            }),
-          }}
-          transition={{
-            type: 'spring',
-            stiffness: 200,
-            ...(currentStep.animation && { duration: 0.8 }),
-          }}
-          className="text-7xl mb-6 inline-block"
-        >
-          {currentStep.icon}
-        </motion.div>
-
-        {/* Title and subtitle */}
         <AnimatePresence mode="wait">
-          <motion.div
-            key={`title-${step}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h1 className="text-3xl font-black text-white mb-2">{currentStep.title}</h1>
-            {currentStep.subtitle && (
-              <p className="text-cyan-300 text-lg font-light mb-6">{currentStep.subtitle}</p>
-            )}
-          </motion.div>
+          {step === 0 ? (
+            // SCREEN 1: Hold Your Breath
+            <motion.div
+              key="screen-1"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center justify-center flex-1 gap-6 w-full"
+            >
+              <h1 className="text-2xl font-black text-cyan-400 uppercase tracking-wide" style={{ fontSize: '28px' }}>Hold Your Breath 💨</h1>
+
+              {/* Breathing visualization - expanding/contracting circles */}
+              <motion.div className="flex gap-8 items-center justify-center my-8">
+                <motion.div
+                  animate={{ scale: [1, 1.4, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-20 h-20 rounded-full bg-gradient-to-br from-cyan-400 to-indigo-500 opacity-60"
+                />
+                <motion.div
+                  animate={{ scale: [1.4, 1, 1.4] }}
+                  transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                  className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-400 opacity-40"
+                />
+              </motion.div>
+
+              <p className="text-slate-300 text-base leading-relaxed max-w-xs font-medium">
+                Hold [Space] to descend with your weight stone. Release to float up. Simple? 😊
+              </p>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleNext}
+                className="mt-8 px-6 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white font-black text-sm uppercase tracking-wide shadow-lg transition-all"
+              >
+                GOT IT, NEXT →
+              </motion.button>
+            </motion.div>
+          ) : (
+            // SCREEN 2: Treasure Awaits
+            <motion.div
+              key="screen-2"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center justify-center flex-1 gap-4 w-full"
+            >
+              <h1 className="text-2xl font-black text-cyan-400 uppercase tracking-wide" style={{ fontSize: '28px' }}>Treasure Awaits 💎</h1>
+              <p className="text-slate-400 text-sm mb-2">Deeper = Better Loot</p>
+
+              {/* Depth zone cards */}
+              <div className="w-full space-y-3 my-6">
+                {screen2.zones.map((zone, idx) => {
+                  const colorMap: Record<string, string> = {
+                    cyan: 'border-cyan-400 text-cyan-200',
+                    blue: 'border-blue-400 text-blue-200',
+                    indigo: 'border-indigo-400 text-indigo-200',
+                    rose: 'border-rose-400 text-rose-200',
+                  };
+                  const color = colorMap[zone.color];
+
+                  return (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className={`border-2 ${color} rounded-xl px-4 py-3 bg-slate-700/30 backdrop-blur-sm`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="text-left">
+                          <p className="font-bold text-sm">{zone.depth} {zone.name}</p>
+                        </div>
+                        <p className="text-sm font-semibold">{zone.reward}</p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleNext}
+                className="mt-8 px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-black text-sm uppercase tracking-wide shadow-lg transition-all"
+              >
+                READY TO DIVE
+              </motion.button>
+            </motion.div>
+          )}
         </AnimatePresence>
 
-        {/* Description with emoji reactions */}
-        <motion.p
-          key={`desc-${step}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="text-slate-300 text-base leading-relaxed mb-6 max-w-xs font-medium"
-        >
-          {currentStep.description}
-        </motion.p>
-
-        {/* Tips list with visual markers */}
-        {currentStep.tips && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-            className="mb-6 w-full bg-slate-800/60 rounded-lg p-4 border border-slate-600 backdrop-blur-sm"
-          >
-            {currentStep.tips.map((tip, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="flex items-start gap-2.5 mb-2 last:mb-0"
-              >
-                <span className="text-sm mt-0.5 flex-shrink-0">{tip.substring(0, 3)}</span>
-                <p className="text-sm text-slate-200 text-left font-medium">{tip.substring(3).trim()}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-
-        {/* Warning if present */}
-        {currentStep.warning && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mb-6 px-4 py-2.5 rounded-lg bg-rose-950/60 border border-rose-500/50 text-rose-300 font-bold text-sm"
-          >
-            {currentStep.warning}
-          </motion.div>
-        )}
-
-        {/* Buttons */}
-        <div className="flex gap-4 w-full mt-auto pb-6">
-          {step > 0 && (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setStep(step - 1)}
-              className="flex-1 px-4 py-3 rounded-lg border border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white transition-colors font-bold"
-            >
-              ← Back
-            </motion.button>
-          )}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleNext}
-            className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 font-black flex items-center justify-center gap-2 transition-all shadow-lg"
-          >
-            {currentStep.action || 'Next'}
-            <ChevronRight size={18} />
-          </motion.button>
-        </div>
-
-        {/* Skip button with urgency */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleSkip}
-          className="text-slate-400 hover:text-slate-200 text-xs transition-colors font-semibold"
-        >
-          {step === steps.length - 1 ? 'Jump In' : 'Skip Tutorial'}
-        </motion.button>
+        {/* Bottom safe area spacer */}
+        <div className="h-4" />
       </div>
 
       {/* Sound toggle (top right) */}
