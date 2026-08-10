@@ -28,6 +28,8 @@ interface SurfaceScreenProps {
   onAddPearls?: (amount: number) => void;
   onOpenTelemetryModal: () => void;
   onOpenDebug: () => void;
+  onOpenPhotoLibrary?: () => void;
+  photoLibraryCount?: number;
 }
 
 const CAMPFIRE_TIPS = [
@@ -49,6 +51,8 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   onAddPearls,
   onOpenTelemetryModal,
   onOpenDebug,
+  onOpenPhotoLibrary,
+  photoLibraryCount = 0,
 }) => {
   const [activeScreen, setActiveScreen] = useState<'home' | 'haven' | 'shop' | 'leaderboard'>('haven');
   const [currentBots] = useState<BotDiver[]>(() => simulateBotActivity(bots));
@@ -894,6 +898,24 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
           >
             <span className="text-lg">⛵</span>
             <span className="text-[8px] font-black text-white leading-tight">BOARD</span>
+          </motion.button>
+
+          {/* PHOTO LIBRARY */}
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => onOpenPhotoLibrary?.()}
+            className="py-2 px-3 rounded-lg flex flex-col items-center justify-center transition-all"
+            style={{
+              background: 'linear-gradient(135deg, #0d9488 0%, #086f5d 100%)',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
+            <span className="text-lg">📷</span>
+            <span className={`text-[8px] font-black leading-tight ${photoLibraryCount > 0 ? 'text-teal-200' : 'text-slate-400'}`}>
+              {photoLibraryCount}
+            </span>
           </motion.button>
         </div>
       </div>

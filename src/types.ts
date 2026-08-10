@@ -140,3 +140,14 @@ export interface BotDiver {
   currentStatus: 'diving' | 'at surface' | 'resting in bulteok';
   recentHaul?: string;
 }
+
+export interface DiscoveredItem {
+  type: CollectibleItem['type'];
+  discoveredAt: string; // ISO timestamp
+  count: number; // Total times collected
+  maxDepthFound: number; // Deepest location found
+}
+
+export interface PhotoLibrary {
+  [itemType: string]: DiscoveredItem;
+}

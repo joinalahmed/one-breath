@@ -105,6 +105,9 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     maxX: config.WORLD_WIDTH - WALL_MARGIN_FRAC * config.WORLD_WIDTH,
   });
 
+  // Track collected item types for photo library
+  const itemTypesCollectedRef = useRef<Map<string, number>>(new Map());
+
   // Touch & Keyboard tracking
   const touchStartPosRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const lastTapTimeRef = useRef<number>(0);
@@ -524,6 +527,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   useEffect(() => {
     initCollectibles();
     announcedBandsRef.current.clear();
+    itemTypesCollectedRef.current.clear();
 
     let animFrameId: number;
     let lastTime = performance.now();
@@ -749,6 +753,12 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
                   value: item.value,
                   size: item.size,
                 });
+                // Track item type for photo library
+                const photoType = item.type === 'oyster' ? 'oyster' : item.type;
+                itemTypesCollectedRef.current.set(
+                  photoType,
+                  (itemTypesCollectedRef.current.get(photoType) || 0) + 1
+                );
                 soundManager.playGrabConfirm(true);
 
                 let textStr = `+${item.value} 💎`;
@@ -894,6 +904,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           stoneCutAtDepth: diver.stoneCutAtDepth,
           airAtSurfacing: Math.round(diver.air),
           rareCollected,
+          itemsCollected: Array.from(itemTypesCollectedRef.current.entries()).map(([type, count]) => ({ type, count })),
         });
         return; // End loop
       }

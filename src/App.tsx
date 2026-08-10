@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { GameConfig, PlayerStats, GamePhase, DiveTelemetryLog, DailyChallenge } from './types';
+import { GameConfig, PlayerStats, GamePhase, DiveTelemetryLog, DailyChallenge, PhotoLibrary } from './types';
 import { loadSavedConfig } from './config';
 import { getOrCreateSessionId, appendTelemetryLog, loadTelemetryLogs } from './telemetry';
 import { INITIAL_BOTS } from './bots';
@@ -11,12 +11,14 @@ import { TelemetryViewModal } from './components/TelemetryViewModal';
 import { SplashScreen } from './components/SplashScreen';
 import { OnboardingScreen } from './components/OnboardingScreen';
 import { DiveReportModal } from './components/DiveReportModal';
+import { PhotoLibraryModal } from './components/PhotoLibraryModal';
 import { soundManager } from './audioAndHaptics';
 import { preloadAssets } from './assetPreloader';
 
 const STATS_STORAGE_KEY = 'one_breath_player_stats_v1';
 const CHALLENGES_STORAGE_KEY = 'one_breath_daily_challenges_v1';
 const ONBOARDING_STORAGE_KEY = 'one_breath_onboarding_completed_v1';
+const PHOTO_LIBRARY_STORAGE_KEY = 'one_breath_photo_library_v1';
 
 const DEFAULT_DAILY_CHALLENGES: DailyChallenge[] = [
   {
@@ -91,6 +93,7 @@ type DiveResultPayload = {
   stoneCutAtDepth: number | null;
   airAtSurfacing: number;
   rareCollected?: number;
+  itemsCollected?: Array<{ type: string; count: number }>;
 };
 
 export default function App() {
@@ -173,6 +176,19 @@ export default function App() {
     return DEFAULT_DAILY_CHALLENGES;
   });
 
+  // Photo Library State
+  const [photoLibrary, setPhotoLibrary] = useState<PhotoLibrary>(() => {
+    try {
+      const raw = localStorage.getItem(PHOTO_LIBRARY_STORAGE_KEY);
+      if (raw) {
+        return JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn('Failed to load photo library', e);
+    }
+    return {};
+  });
+
   const [lastDiveResult, setLastDiveResult] = useState<{
     outcome: 'surfaced' | 'shark' | 'drowned';
     maxDepth: number;
@@ -187,6 +203,7 @@ export default function App() {
   // Overlays
   const [showTuningOverlay, setShowTuningOverlay] = useState(false);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
+  const [showPhotoLibrary, setShowPhotoLibrary] = useState(false);
 
   // The single end-of-dive report (replaces the old rescue + defeat + summary popups).
   const [diveReport, setDiveReport] = useState<{
@@ -213,6 +230,14 @@ export default function App() {
       console.warn('Failed to save daily challenges', e);
     }
   }, [dailyChallenges]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(PHOTO_LIBRARY_STORAGE_KEY, JSON.stringify(photoLibrary));
+    } catch (e) {
+      console.warn('Failed to save photo library', e);
+    }
+  }, [photoLibrary]);
 
   // Preload all assets on app mount
   useEffect(() => {
@@ -328,9 +353,43 @@ export default function App() {
     }));
   };
 
+  // Record discovered items in the photo library
+  const recordDiscoveredItems = (itemsCollected: DiveResultPayload['shellsCollected'] | number, itemTypes: string[], maxDepth: number) => {
+    setPhotoLibrary((prev) => {
+      const updated = { ...prev };
+      itemTypes.forEach((type) => {
+        if (!updated[type]) {
+          updated[type] = {
+            type: type as any,
+            discoveredAt: new Date().toISOString(),
+            count: 1,
+            maxDepthFound: maxDepth,
+          };
+        } else {
+          updated[type] = {
+            ...updated[type],
+            count: updated[type].count + 1,
+            maxDepthFound: Math.max(updated[type].maxDepthFound, maxDepth),
+          };
+        }
+      });
+      return updated;
+    });
+  };
+
   // Commit a finished dive to stats, challenges, telemetry, and lastDiveResult.
   // Phase/music transitions are handled by the caller (report actions below).
   const commitDiveResult = (result: DiveResultPayload) => {
+    // Record discovered items if this was a successful dive
+    if (result.outcome === 'surfaced' && result.itemsCollected) {
+      const itemTypes = result.itemsCollected
+        .filter((item) => item.count > 0)
+        .flatMap((item) => Array(item.count).fill(item.type));
+      if (itemTypes.length > 0) {
+        recordDiscoveredItems(result.shellsCollected + result.fishCollected, itemTypes, result.maxDepth);
+      }
+    }
+
     // 1. Calculate new stats
     setStats((prev) => {
       const nextStreak = result.outcome === 'surfaced' ? prev.streak + 1 : 0;
@@ -503,6 +562,8 @@ export default function App() {
                 onAddPearls={handleAddPearls}
                 onOpenTelemetryModal={() => setShowTelemetryModal(true)}
                 onOpenDebug={() => setShowTuningOverlay(true)}
+                onOpenPhotoLibrary={() => setShowPhotoLibrary(true)}
+                photoLibraryCount={Object.keys(photoLibrary).length}
               />
             </motion.div>
           )}
@@ -587,6 +648,14 @@ export default function App() {
             <TelemetryViewModal
               key="telemetry-modal"
               onClose={() => setShowTelemetryModal(false)}
+            />
+          )}
+
+          {showPhotoLibrary && (
+            <PhotoLibraryModal
+              key="photo-library"
+              photoLibrary={photoLibrary}
+              onClose={() => setShowPhotoLibrary(false)}
             />
           )}
         </AnimatePresence>
