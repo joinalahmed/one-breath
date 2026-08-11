@@ -521,6 +521,11 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         return;
       }
 
+      if (e.code === 'KeyG') {
+        onOpenDebug();
+        return;
+      }
+
       keysPressedRef.current.add(e.code);
 
       const diver = diverRef.current;
@@ -550,7 +555,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [handleCutStone]);
+  }, [handleCutStone, onOpenDebug]);
 
   // Set up animation loop
   useEffect(() => {

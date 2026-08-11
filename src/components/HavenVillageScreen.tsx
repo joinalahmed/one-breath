@@ -1,5 +1,5 @@
 ﻿import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { PlayerStats, DailyChallenge } from '../types';
 import { soundManager } from '../audioAndHaptics';
 import { Waves } from 'lucide-react';
@@ -198,27 +198,30 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         </span>
       </motion.div>
 
-      {/* UPGRADE NOTIFICATION TOAST */}
-      <AnimatePresence>
-        {upgradeToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute top-2 left-2 right-2 z-30 p-2 rounded-xl border border-amber-500/60 bg-amber-950/90 backdrop-blur-md text-amber-200 text-xs font-bold font-mono text-center shadow-lg"
-          >
-            {upgradeToast}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* UPGRADE NOTIFICATION TOAST.
+          NOTE: intentionally NOT wrapped in <AnimatePresence>. This screen is
+          itself an exiting child of the parent screen-switch <AnimatePresence
+          mode="wait"> in SurfaceScreen; a nested AnimatePresence here deadlocks
+          that parent's exit (the village screen never unmounts, so nav appears
+          frozen). Enter animation is kept; it just disappears instantly. */}
+      {upgradeToast && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-2 left-2 right-2 z-30 p-2 rounded-xl border border-amber-500/60 bg-amber-950/90 backdrop-blur-md text-amber-200 text-xs font-bold font-mono text-center shadow-lg"
+        >
+          {upgradeToast}
+        </motion.div>
+      )}
 
-      {/* BUILDING DETAIL PANEL â€” slides up from bottom over the village */}
-      <AnimatePresence>
-        {selectedBuilding && (
+      {/* BUILDING DETAIL PANEL â€” slides up from bottom over the village.
+          NOTE: intentionally NOT wrapped in <AnimatePresence> — see the toast
+          note above; a nested AnimatePresence deadlocks the parent screen-switch
+          transition and freezes navigation out of the village. */}
+      {selectedBuilding && (
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
             className="absolute bottom-0 left-0 right-0 z-30 max-h-[55%] overflow-y-auto no-scrollbar p-2"
           >
             {/* BULTEOK CAMPFIRE */}
@@ -443,8 +446,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
               </div>
             )}
           </motion.div>
-        )}
-      </AnimatePresence>
+      )}
 
     </div>
   );

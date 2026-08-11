@@ -407,9 +407,9 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
           </AnimatePresence>
         </div>
 
-        {/* Footer */}
+        {/* Footer — Stats + Close Button */}
         <div className="flex-shrink-0 p-3 lg:p-4 border-t border-cyan-500/20 bg-gradient-to-t from-slate-950 to-slate-900/50">
-          <div className="grid grid-cols-4 gap-2 lg:gap-3 text-center text-xs">
+          <div className="grid grid-cols-4 gap-2 lg:gap-3 text-center text-xs mb-2">
             <motion.div whileHover={{ scale: 1.05 }} className="p-1.5 lg:p-2 rounded-lg lg:rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
               <p className="text-slate-400 font-bold text-[9px] lg:text-[10px]">TOTAL</p>
               <p className="text-base lg:text-lg font-black text-slate-300">{discoveredItems.length}</p>
@@ -433,6 +433,14 @@ export const PhotoLibraryModal: React.FC<PhotoLibraryModalProps> = ({ photoLibra
               </p>
             </motion.div>
           </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onClose}
+            className="w-full py-2.5 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-sm transition-colors"
+          >
+            ← Back
+          </motion.button>
         </div>
       </motion.div>
     </motion.div>
