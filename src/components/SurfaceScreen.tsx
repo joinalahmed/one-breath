@@ -55,11 +55,17 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   photoLibraryCount = 0,
 }) => {
   const [activeScreen, setActiveScreen] = useState<'home' | 'haven' | 'shop' | 'leaderboard'>('haven');
+  const [previousScreen, setPreviousScreen] = useState<'home' | 'haven' | 'shop' | 'leaderboard'>('haven');
   const [currentBots] = useState<BotDiver[]>(() => simulateBotActivity(bots));
   const [isMuted, setIsMuted] = useState(() => soundManager.getMuted());
   const [showSettings, setShowSettings] = useState(false);
   const [tipIndex, setTipIndex] = useState(0);
   const [hoveredUpgrade, setHoveredUpgrade] = useState<string | null>(null);
+
+  const handleScreenChange = (newScreen: 'home' | 'haven' | 'shop' | 'leaderboard') => {
+    setPreviousScreen(activeScreen);
+    setActiveScreen(newScreen);
+  };
 
   useEffect(() => {
     const startMusic = () => {
@@ -374,9 +380,9 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => setActiveScreen('home')}
+              onClick={() => setActiveScreen(previousScreen)}
               className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 flex items-center justify-center text-sm text-slate-200 transition-all cursor-pointer shadow"
-              title="Back to Map"
+              title="Back"
             >
               ←
             </motion.button>
@@ -425,7 +431,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
             <span className="text-amber-400 text-xs">💎</span>
             <span className="text-xs font-black text-amber-300 font-mono">{stats.coins}</span>
             <button
-              onClick={() => setActiveScreen('shop')}
+              onClick={() => handleScreenChange('shop')}
               className="w-4 h-4 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center text-[10px] font-black cursor-pointer ml-0.5"
               title="Get Pearls"
             >
