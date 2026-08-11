@@ -101,10 +101,9 @@ export default function App() {
   const [config, setConfig] = useState<GameConfig>(loadSavedConfig);
   const [phase, setPhase] = useState<GamePhase>('SURFACE');
 
-  // Onboarding/Splash State
-  const [showSplash, setShowSplash] = useState(() => {
-    return !localStorage.getItem(ONBOARDING_STORAGE_KEY);
-  });
+  // Onboarding/Splash State — the splash loop plays on every app load; onboarding
+  // still only shows the first time (until ONBOARDING_STORAGE_KEY is set).
+  const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem(ONBOARDING_STORAGE_KEY);
   });
