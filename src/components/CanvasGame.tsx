@@ -2008,10 +2008,10 @@ function renderCanvas(
     const sx = toScreenX(item.x);
 
     ctx.save();
-    let sizePx = 38;
-    if (item.size === 'medium') sizePx = 50;
-    else if (item.size === 'large') sizePx = 64;
-    else if (item.size === 'giant') sizePx = 80;
+    let sizePx = 48;
+    if (item.size === 'medium') sizePx = 64;
+    else if (item.size === 'large') sizePx = 80;
+    else if (item.size === 'giant') sizePx = 100;
 
     if (item.type === 'oyster') {
       if (!drawSprite(ctx, sprites.pearl, sx, sy, sizePx * 1.6, false, item.isEmpty ? 0.55 : 1)) {
@@ -2269,7 +2269,7 @@ function renderCanvas(
   }
 
   // Diver Vector Character
-  drawVectorDiverCanvas(ctx, diverSx, diverSy, 46, 46, {
+  drawVectorDiverCanvas(ctx, diverSx, diverSy, 60, 60, {
     isDescending: diver.isDescending,
     isAscending: diver.isAscending,
     carryingStone: diver.carryingStone,
