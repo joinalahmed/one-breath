@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { motion } from 'motion/react';
 import { soundManager } from '../audioAndHaptics';
 
@@ -65,11 +65,13 @@ export const RareCreatureDiscoveryModal: React.FC<RareCreatureDiscoveryModalProp
   value,
   onComplete,
 }) => {
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
   useEffect(() => {
     soundManager.playLevelUp();
-    const timer = window.setTimeout(onComplete, 1500);
+    const timer = window.setTimeout(() => onCompleteRef.current(), 1500);
     return () => window.clearTimeout(timer);
-  }, [onComplete]);
+  }, []);
 
   const gifSrc = CREATURE_GIFS[itemType.toLowerCase()] || CREATURE_GIFS[itemType];
 

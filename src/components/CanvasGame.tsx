@@ -118,6 +118,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   const touchStartPosRef = useRef<{ x: number; y: number; time: number } | null>(null);
   const lastTapTimeRef = useRef<number>(0);
   const keysPressedRef = useRef<Set<string>>(new Set());
+  const musicStartedRef = useRef(false);
 
   // Animated GIF sprites (live <img> elements sampled by the canvas each frame)
   const spritesRef = useRef<SpriteSet>({
@@ -510,6 +511,10 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       }
 
       soundManager.enableAudio();
+      if (!musicStartedRef.current) {
+        musicStartedRef.current = true;
+        soundManager.playWaterSplashThenIngame();
+      }
 
       if (e.code === 'KeyX' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
         handleCutStone();
@@ -1054,6 +1059,10 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     if (target.closest('[data-hud]')) return;
 
     soundManager.enableAudio();
+    if (!musicStartedRef.current) {
+      musicStartedRef.current = true;
+      soundManager.playWaterSplashThenIngame();
+    }
 
     // Check double tap for stone cut
     const now = Date.now();
@@ -1121,9 +1130,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         <img src="/assets/ocean-wall-fixed.png" alt="" ref={(el) => { spritesRef.current.oceanWalls[2] = el; }} />
         <img src="/assets/ocean-wall-dark.png" alt="" ref={(el) => { spritesRef.current.oceanWalls[3] = el; }} />
         <img src="/assets/ocean-plant.png" alt="" ref={(el) => { spritesRef.current.oceanPlant = el; }} />
-        <img src="/assets/greenfish.png" alt="" ref={(el) => { spritesRef.current.bgFish[0] = el; }} />
-        <img src="/assets/bluefush-patcheye.png" alt="" ref={(el) => { spritesRef.current.bgFish[1] = el; }} />
-        <img src="/assets/pearl.gif" alt="" ref={(el) => { spritesRef.current.pearl = el; }} />
+        <img src="/assets/pearl-clam.png" alt="" ref={(el) => { spritesRef.current.pearl = el; }} />
         {/* Fish variants — order must match FISH_FACES_RIGHT */}
         <img src="/assets/fish-clownfish.gif" alt="" ref={(el) => { spritesRef.current.fishVariants[0] = el; }} />
         <img src="/assets/fish-pufferfish.gif" alt="" ref={(el) => { spritesRef.current.fishVariants[1] = el; }} />
@@ -1671,40 +1678,6 @@ function renderCanvas(
     }
   }
 
-  // 1c. Scattered decorative background fish
-  const bgFishSprites = sprites.bgFish;
-  if (bgFishSprites[0] && bgFishSprites[0].naturalWidth > 0) {
-    const fishCount = 18;
-    for (let i = 0; i < fishCount; i++) {
-      const seed = i * 4729 + 331;
-      const h1 = Math.abs(Math.sin(seed) * 10000) % 1;
-      const h2 = Math.abs(Math.sin(seed + 1) * 10000) % 1;
-      const h3 = Math.abs(Math.sin(seed + 2) * 10000) % 1;
-      const h4 = Math.abs(Math.sin(seed + 3) * 10000) % 1;
-      const h5 = Math.abs(Math.sin(seed + 4) * 10000) % 1;
-      const fishIdx = h1 < 0.7 ? 0 : 1;
-      const fishImg = bgFishSprites[fishIdx];
-      if (!fishImg || fishImg.naturalWidth === 0) continue;
-      const fishAspect = fishImg.naturalHeight / fishImg.naturalWidth;
-      const fishDepth = h2 * config.MAX_DEPTH;
-      const fishX = wallWidth + h3 * (width - wallWidth * 2 - 80);
-      const fishScale = 0.6 + h4 * 0.7;
-      const fishW = 70 * fishScale;
-      const fishH = fishW * fishAspect;
-      const sy = toScreenY(fishDepth);
-      if (sy < -fishH || sy > height + fishH) continue;
-      ctx.save();
-      ctx.globalAlpha = 0.6 + h5 * 0.35;
-      if (h5 > 0.5) {
-        ctx.translate(fishX + fishW, 0);
-        ctx.scale(-1, 1);
-        ctx.drawImage(fishImg, 0, sy, fishW, fishH);
-      } else {
-        ctx.drawImage(fishImg, fishX, sy, fishW, fishH);
-      }
-      ctx.restore();
-    }
-  }
 
   // 2. Cliff walls on Left (RedStar) & Right (PurpleStar) — varied sizes
   const cliffL = sprites.cliffLeft;

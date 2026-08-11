@@ -62,18 +62,35 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   const [hoveredUpgrade, setHoveredUpgrade] = useState<string | null>(null);
 
   useEffect(() => {
-    const startMusic = () => {
-      soundManager.startBgMusic();
-      document.removeEventListener('click', startMusic);
-      document.removeEventListener('touchstart', startMusic);
+    const startAudio = () => {
+      soundManager.enableAudio();
+      document.removeEventListener('click', startAudio);
+      document.removeEventListener('touchstart', startAudio);
     };
-    document.addEventListener('click', startMusic);
-    document.addEventListener('touchstart', startMusic);
+    document.addEventListener('click', startAudio);
+    document.addEventListener('touchstart', startAudio);
     return () => {
-      document.removeEventListener('click', startMusic);
-      document.removeEventListener('touchstart', startMusic);
+      document.removeEventListener('click', startAudio);
+      document.removeEventListener('touchstart', startAudio);
     };
   }, []);
+
+  useEffect(() => {
+    if (activeScreen === 'haven') {
+      soundManager.stopMapMusic();
+      soundManager.startBgMusic();
+    } else if (activeScreen === 'home') {
+      soundManager.stopBgMusic();
+      soundManager.startMapMusic();
+    } else {
+      soundManager.stopBgMusic();
+      soundManager.stopMapMusic();
+    }
+    return () => {
+      soundManager.stopBgMusic();
+      soundManager.stopMapMusic();
+    };
+  }, [activeScreen]);
 
   // PWA Installation State
   const [pwaPrompt, setPwaPrompt] = useState<any>(null);
