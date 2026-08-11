@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
+﻿import React, { useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
+import { ChevronRight, Waves } from 'lucide-react';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -7,104 +8,76 @@ interface SplashScreenProps {
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
   const [isReady, setIsReady] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsReady(true);
-    }, 2500);
-    return () => clearTimeout(timer);
+    const timer = window.setTimeout(() => setIsReady(true), 2500);
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
-    if (isReady) {
-      const timer = setTimeout(onComplete, 600);
-      return () => clearTimeout(timer);
-    }
-  }, [isReady, onComplete]);
+    if (!isReady) return;
+    const timer = window.setTimeout(onComplete, reduceMotion ? 0 : 600);
+    return () => window.clearTimeout(timer);
+  }, [isReady, onComplete, reduceMotion]);
 
   return (
-    <motion.div
+    <motion.section
       initial={{ opacity: 1 }}
       animate={{ opacity: isReady ? 0 : 1 }}
-      transition={{ duration: 0.6 }}
-      className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col items-center justify-center z-50 overflow-hidden"
-      style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'100\' height=\'100\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.02\' /%3E%3C/svg%3E")' }}
+      transition={{ duration: reduceMotion ? 0 : 0.6 }}
+      className="ocean-screen absolute inset-0 z-50 flex min-h-[100dvh] flex-col overflow-hidden text-slate-100"
+      aria-label="One Breath loading screen"
     >
-      {/* Ocean wave visualization */}
-      <div className="absolute inset-0 overflow-hidden opacity-20 pointer-events-none">
-        <motion.div
-          animate={{ y: [0, 30, 0] }}
-          transition={{ duration: 4, repeat: Infinity }}
-          className="absolute top-1/3 left-0 w-full h-48 bg-gradient-to-b from-cyan-400 to-transparent blur-3xl"
-        />
-      </div>
+      <div className="ocean-caustics" aria-hidden="true" />
+      <div className="ocean-grain" aria-hidden="true" />
 
-      {/* Main content */}
-      <div className="relative z-10 text-center flex flex-col items-center justify-center gap-6">
-        {/* Animated title */}
+      <div className="relative flex flex-1 flex-col items-center px-7 pb-[max(2rem,env(safe-area-inset-bottom))] pt-[max(3.75rem,env(safe-area-inset-top))] text-center">
         <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.6, type: 'spring', stiffness: 200, damping: 15 }}
-          className="flex flex-col items-center"
-        >
-          <h1 className="text-display-lg text-cyan-400 uppercase">
-            ONE BREATH
-          </h1>
-          <p className="text-label text-slate-400 mt-3 tracking-widest">
-            FREEDIVER HAVEN
-          </p>
-        </motion.div>
-
-        {/* Diver silhouette or wave illustration (120x120px) */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.6 }}
-          animate={{ opacity: 0.4, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-9xl mt-8"
-        >
-          🌊
-        </motion.div>
-
-        {/* BEGIN JOURNEY Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onComplete}
-          className="mt-16 px-8 py-3 rounded-lg bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 text-slate-950 font-black text-sm uppercase tracking-wider shadow-ocean-lg glow-cyan transition-all"
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-[12vh]"
         >
-          Begin Journey
+          <h1 className="text-[clamp(2.5rem,12vw,4.25rem)] font-extrabold leading-none tracking-[0.14em] text-cyan-200 [text-shadow:0_2px_24px_rgba(34,211,238,0.2)]">ONE BREATH</h1>
+          <p className="mt-4 text-sm font-semibold tracking-[0.34em] text-slate-300">FREEDIVER HAVEN</p>
+        </motion.div>
+
+        <div className="relative flex flex-1 items-center justify-center" aria-hidden="true">
+          <motion.div
+            animate={reduceMotion ? undefined : { y: [0, 14, 0] }}
+            transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut' }}
+            className="relative flex h-48 w-32 items-center justify-center"
+          >
+            <div className="absolute inset-y-0 left-1/2 w-px bg-gradient-to-b from-cyan-200/70 via-cyan-300/20 to-transparent" />
+            <div className="diver-mark">
+              <span className="diver-mark__head" />
+              <span className="diver-mark__body" />
+              <span className="diver-mark__fins" />
+            </div>
+            <div className="absolute bottom-3 flex flex-col items-center gap-2 text-[10px] font-medium tabular-nums text-cyan-200/55">
+              <span>10</span><span>20</span><span>30</span>
+            </div>
+          </motion.div>
+        </div>
+
+        <motion.button
+          initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.55 }}
+          whileTap={{ scale: 0.98, y: 1 }}
+          onClick={onComplete}
+          className="ocean-primary-button group w-full max-w-sm"
+        >
+          <Waves size={20} aria-hidden="true" />
+          <span>Begin journey</span>
+          <ChevronRight size={20} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
         </motion.button>
 
-        {/* Loading text */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isReady ? 0 : 1 }}
-          transition={{ delay: 1.5 }}
-          className="text-slate-500 text-xs mt-8 font-light tracking-widest"
-        >
-          LOADING...
-        </motion.p>
+        <p className="mt-5 min-h-5 text-xs font-medium tracking-[0.2em] text-slate-400" aria-live="polite">
+          {isReady ? 'READY' : 'PREPARING THE DIVE'}
+        </p>
       </div>
-
-      {/* Tap to continue hint (appears near end) */}
-      {isReady && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="absolute bottom-8 text-slate-400 text-xs"
-        >
-          <motion.div
-            animate={{ y: [0, 4, 0] }}
-            transition={{ duration: 1, repeat: Infinity }}
-          >
-            Tap to continue...
-          </motion.div>
-        </motion.div>
-      )}
-    </motion.div>
+    </motion.section>
   );
 };

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PlayerStats, DailyChallenge } from '../types';
 import { soundManager } from '../audioAndHaptics';
+import { Waves } from 'lucide-react';
 
 interface HavenVillageScreenProps {
   stats: PlayerStats;
@@ -98,10 +99,10 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
 
   return (
     <div className="relative w-full h-full text-slate-100 flex flex-col">
-      {/* Building hitboxes — each covers the actual building in the GIF */}
+      {/* Building hitboxes â€” each covers the actual building in the GIF */}
       {/* Layout: top-left=SMOKEHOUSE, top-right=LIGHTHOUSE, bottom-left=COUNCIL, bottom-right=BULTEOK */}
 
-      {/* SMOKEHOUSE — top-left tall windtower building */}
+      {/* SMOKEHOUSE â€” top-left tall windtower building */}
       <motion.div
         whileTap={{ scale: 0.97 }}
         onClick={() => setSelectedBuilding(selectedBuilding === 'smokehouse' ? null : 'smokehouse')}
@@ -125,7 +126,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         </span>
       </motion.div>
 
-      {/* LIGHTHOUSE — top-right flat-roof building */}
+      {/* LIGHTHOUSE â€” top-right flat-roof building */}
       <motion.div
         whileTap={{ scale: 0.97 }}
         onClick={() => setSelectedBuilding(selectedBuilding === 'lighthouse' ? null : 'lighthouse')}
@@ -149,7 +150,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         </span>
       </motion.div>
 
-      {/* COUNCIL — bottom-left building with nets */}
+      {/* COUNCIL â€” bottom-left building with nets */}
       <motion.div
         whileTap={{ scale: 0.97 }}
         onClick={() => setSelectedBuilding(selectedBuilding === 'council' ? null : 'council')}
@@ -173,7 +174,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         </span>
       </motion.div>
 
-      {/* BULTEOK — bottom-right thatched roof building */}
+      {/* BULTEOK â€” bottom-right thatched roof building */}
       <motion.div
         whileTap={{ scale: 0.97 }}
         onClick={() => setSelectedBuilding(selectedBuilding === 'campfire' ? null : 'campfire')}
@@ -211,7 +212,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         )}
       </AnimatePresence>
 
-      {/* BUILDING DETAIL PANEL — slides up from bottom over the village */}
+      {/* BUILDING DETAIL PANEL â€” slides up from bottom over the village */}
       <AnimatePresence>
         {selectedBuilding && (
           <motion.div
@@ -242,7 +243,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
                         : 'bg-slate-950 text-slate-600 border-slate-800'
                     }`}
                   >
-                    UPGRADE ({villageLevels.campfire * 100} 💎)
+                    UPGRADE ({villageLevels.campfire * 100} ðŸ’Ž)
                   </button>
                 </div>
                 <div className="p-2.5 rounded-xl bg-slate-950/90 border border-slate-800 flex items-start space-x-3 shadow-inner">
@@ -287,7 +288,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
                         : 'bg-slate-950 text-slate-600 border-slate-800'
                     }`}
                   >
-                    UPGRADE ({villageLevels.smokehouse * 120} 💎)
+                    UPGRADE ({villageLevels.smokehouse * 120} ðŸ’Ž)
                   </button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -306,7 +307,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
                         +{15 + (villageLevels.smokehouse - 1) * 5} Pearls
                       </span>
                     </div>
-                    <span className="text-sm font-bold text-amber-400">⇄</span>
+                    <span className="text-sm font-bold text-amber-400">â‡„</span>
                   </button>
                   <button
                     disabled={stats.food < 3}
@@ -323,7 +324,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
                         +{50 + (villageLevels.smokehouse - 1) * 15} Pearls
                       </span>
                     </div>
-                    <span className="text-sm font-bold text-amber-400">⇄</span>
+                    <span className="text-sm font-bold text-amber-400">â‡„</span>
                   </button>
                 </div>
               </div>
@@ -351,7 +352,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
                         : 'bg-slate-950 text-slate-600 border-slate-800'
                     }`}
                   >
-                    UPGRADE ({villageLevels.lighthouse * 150} 💎)
+                    UPGRADE ({villageLevels.lighthouse * 150} ðŸ’Ž)
                   </button>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs font-mono">
@@ -401,7 +402,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
                             <div className="flex justify-between items-center pr-1">
                               <h4 className="text-[11px] font-bold text-slate-100 truncate">{ch.title}</h4>
                               <span className="text-[10px] font-mono font-bold text-amber-300 shrink-0 ml-1">
-                                +{ch.rewardCoins} 💎
+                                +{ch.rewardCoins} ðŸ’Ž
                               </span>
                             </div>
                             <p className="text-[10px] text-slate-400 truncate">{ch.description}</p>
@@ -445,25 +446,22 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         )}
       </AnimatePresence>
 
-      {/* FLOATING DIVE BUTTON — bottom right */}
-      {onStartDive && (
+      {/* Primary dive action stays reachable above the safe area. */}
+      {onStartDive && !selectedBuilding && (
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.9 }}
+          whileTap={{ scale: 0.98, y: 1 }}
           onClick={() => {
             soundManager.playConfirm();
             onStartDive();
           }}
-          className="absolute bottom-4 right-4 z-30 w-14 h-14 rounded-full cursor-pointer flex items-center justify-center shadow-lg"
-          style={{
-            background: 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)',
-            border: '2px solid #38bdf8',
-            boxShadow: '0 4px 15px rgba(14,165,233,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
-          }}
+          className="ocean-primary-button absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-4 right-4 z-30"
         >
-          <span className="text-2xl">🤿</span>
+          <Waves size={20} strokeWidth={1.6} aria-hidden="true" />
+          <span>Start dive</span>
         </motion.button>
       )}
     </div>
   );
 };
+
+

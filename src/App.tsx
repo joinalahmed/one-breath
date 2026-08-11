@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GameConfig, PlayerStats, GamePhase, DiveTelemetryLog, DailyChallenge, PhotoLibrary } from './types';
 import { loadSavedConfig } from './config';
@@ -31,7 +31,7 @@ const DEFAULT_DAILY_CHALLENGES: DailyChallenge[] = [
     rewardCoins: 120,
     completed: false,
     claimed: false,
-    icon: '💎',
+    icon: 'ðŸ’Ž',
   },
   {
     id: 'reef_fisherman',
@@ -42,7 +42,7 @@ const DEFAULT_DAILY_CHALLENGES: DailyChallenge[] = [
     rewardCoins: 100,
     completed: false,
     claimed: false,
-    icon: '🐟',
+    icon: 'ðŸŸ',
   },
   {
     id: 'trench_explorer',
@@ -53,7 +53,7 @@ const DEFAULT_DAILY_CHALLENGES: DailyChallenge[] = [
     rewardCoins: 150,
     completed: false,
     claimed: false,
-    icon: '🌊',
+    icon: 'ðŸŒŠ',
   },
   {
     id: 'safe_freediver',
@@ -64,7 +64,7 @@ const DEFAULT_DAILY_CHALLENGES: DailyChallenge[] = [
     rewardCoins: 110,
     completed: false,
     claimed: false,
-    icon: '🤿',
+    icon: 'ðŸ¤¿',
   },
   {
     id: 'abyssal_fauna',
@@ -75,7 +75,7 @@ const DEFAULT_DAILY_CHALLENGES: DailyChallenge[] = [
     rewardCoins: 200,
     completed: false,
     claimed: false,
-    icon: '🐙',
+    icon: 'ðŸ™',
   },
 ];
 
@@ -294,7 +294,7 @@ export default function App() {
     });
   };
 
-  // Start Dive Handler — plays boat departure video then enters dive
+  // Start Dive Handler â€” plays boat departure video then enters dive
   const handleStartDive = () => {
     soundManager.dimBgMusic();
     setPhase('DIVE_TRANSITION');
@@ -477,7 +477,7 @@ export default function App() {
     appendTelemetryLog(logEntry);
   };
 
-  // Dive Resolution Callback — open the single end-of-dive report (no stats are
+  // Dive Resolution Callback â€” open the single end-of-dive report (no stats are
   // committed until the player acts on it, so a rescue can restore the haul).
   const handleDiveComplete = useCallback(
     (result: DiveResultPayload) => {
@@ -533,9 +533,9 @@ export default function App() {
   };
 
   return (
-    <div className="w-full h-screen bg-slate-950 flex items-center justify-center font-sans antialiased">
+    <div className="w-full min-h-[100dvh] bg-slate-950 flex items-center justify-center font-sans antialiased">
       {/* Mobile Portrait Device Frame Container (aspect ratio 9:19.5 with max constraints) */}
-      <div className="relative w-full max-w-md h-full max-h-[920px] bg-slate-900 shadow-2xl overflow-hidden md:rounded-3xl border-0 md:border-4 md:border-slate-800 flex flex-col">
+      <div className="relative h-[100dvh] w-full max-w-md bg-slate-900 shadow-2xl overflow-hidden md:h-[min(920px,100dvh)] md:rounded-[28px] border-0 md:border md:border-cyan-100/10 flex flex-col">
         {/* Splash Screen */}
         <AnimatePresence>
           {showSplash && <SplashScreen key="splash" onComplete={handleSplashComplete} />}
@@ -618,7 +618,7 @@ export default function App() {
 
         {/* OVERLAYS */}
         <AnimatePresence>
-          {/* Unified end-of-dive report — outcome, stats, and inline rescue offer */}
+          {/* Unified end-of-dive report â€” outcome, stats, and inline rescue offer */}
           {diveReport && (
             <DiveReportModal
               key="dive-report"
@@ -680,3 +680,5 @@ export default function App() {
     </div>
   );
 }
+
+
