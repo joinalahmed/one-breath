@@ -508,7 +508,13 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
           sub-screens never linger under the overlay. */}
       {!isPearl && (
       <div className={`relative z-10 flex-1 ${activeScreen === 'haven' || activeScreen === 'home' ? '' : 'overflow-y-auto'} no-scrollbar`}>
-        <AnimatePresence mode="wait">
+        {/* Screen switch — plain conditional render (no AnimatePresence). Each
+            screen keeps its mount/enter animation via initial→animate; there is
+            no exit animation. A previous AnimatePresence mode="wait" here
+            deadlocked (under React StrictMode + multiple conditional children the
+            exit never completed), which froze all sub-screen→sub-screen
+            navigation. Instant unmount avoids that entirely. */}
+        <>
           {/* 0. MAP SCREEN */}
           {activeScreen === 'home' && (
             <motion.div
@@ -809,9 +815,8 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
               <PhotoLibraryScreen photoLibrary={photoLibrary} />
             </motion.div>
           )}
-        </AnimatePresence>
+        </>
       </div>
-      )}
 
 
       {/* OVERLAY ANIMATION MODALS */}
