@@ -1148,13 +1148,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         <img src="/assets/coral-branching.png" alt="" ref={(el) => { spritesRef.current.wallDecor[0] = el; }} />
         <img src="/assets/coral-seafan.png" alt="" ref={(el) => { spritesRef.current.wallDecor[1] = el; }} />
         <img src="/assets/rock-seaweed.png" alt="" ref={(el) => { spritesRef.current.wallDecor[2] = el; }} />
-        <img src="/assets/ridge-coral-shelf.png" alt="" ref={(el) => { spritesRef.current.wallDecor[3] = el; }} />
-        {/* Stackable ridge tiles that build the canyon side walls (cap, straight, stepUp, stepDown, block) */}
-        <img src="/assets/ridge-cap.png" alt="" ref={(el) => { spritesRef.current.wallTiles[0] = el; }} />
-        <img src="/assets/ridge-straight.png" alt="" ref={(el) => { spritesRef.current.wallTiles[1] = el; }} />
-        <img src="/assets/ridge-step-up.png" alt="" ref={(el) => { spritesRef.current.wallTiles[2] = el; }} />
-        <img src="/assets/ridge-step-down.png" alt="" ref={(el) => { spritesRef.current.wallTiles[3] = el; }} />
-        <img src="/assets/ridge-block.png" alt="" ref={(el) => { spritesRef.current.wallTiles[4] = el; }} />
+        <img src="/assets/ocean-wall-light.png" alt="" ref={(el) => { spritesRef.current.wallDecor[3] = el; }} />
       </div>
 
       {/* Mark Bowley Ambient Floating Bubble Effect */}
