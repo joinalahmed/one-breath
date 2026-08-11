@@ -506,7 +506,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   // Keyboard controls listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (['Space', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'KeyS', 'KeyW', 'KeyA', 'KeyD', 'KeyX'].includes(e.code)) {
+      if (['Space', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'KeyS', 'KeyW', 'KeyA', 'KeyD', 'KeyX', 'KeyG'].includes(e.code)) {
         e.preventDefault();
       }
 
