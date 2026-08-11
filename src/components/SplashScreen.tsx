@@ -21,28 +21,42 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
           '/assets/splash-screen.png',
           '/assets/the_ascent_splash_loop_3s.gif',
           '/manifest.json',
+          '/assets/middle_eastern_fishing_village_actual_walking.gif',
+          '/assets/map_theme_animation_clean_3s_loop.gif',
+          '/assets/game-main-screen-bg.gif',
         ];
 
         let completed = 0;
-        for (const asset of criticalAssets) {
-          if (!isMounted) return;
+        const total = criticalAssets.length;
 
-          try {
-            await fetch(asset);
-            completed++;
-            setLoadProgress((completed / criticalAssets.length) * 100);
-          } catch {
-            // Asset failed but continue - don't block on preload errors
-            completed++;
-            setLoadProgress((completed / criticalAssets.length) * 100);
-          }
-        }
+        const preloadPromises = criticalAssets.map((asset) =>
+          fetch(asset)
+            .then(() => {
+              completed++;
+              if (isMounted) {
+                setLoadProgress((completed / total) * 100);
+              }
+            })
+            .catch(() => {
+              completed++;
+              if (isMounted) {
+                setLoadProgress((completed / total) * 100);
+              }
+            })
+        );
 
-        // After critical assets, wait minimum splash duration
+        // Wait for all assets to load (with timeout fallback)
+        await Promise.race([
+          Promise.all(preloadPromises),
+          new Promise(resolve => setTimeout(resolve, 8000)) // 8s max wait
+        ]);
+
+        // After assets load, wait minimum splash duration
         if (isMounted) {
-          await new Promise(resolve =>
-            setTimeout(resolve, reduceMotion ? 0 : 4400)
-          );
+          const minSplashDuration = reduceMotion ? 0 : 4400;
+          const elapsed = performance.now();
+          const remaining = Math.max(0, minSplashDuration - elapsed);
+          await new Promise(resolve => setTimeout(resolve, remaining));
           setIsReady(true);
         }
       } catch {
