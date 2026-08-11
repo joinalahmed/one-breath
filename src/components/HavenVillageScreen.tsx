@@ -446,20 +446,6 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Primary dive action stays reachable above the safe area. */}
-      {onStartDive && !selectedBuilding && (
-        <motion.button
-          whileTap={{ scale: 0.98, y: 1 }}
-          onClick={() => {
-            soundManager.playConfirm();
-            onStartDive();
-          }}
-          className="ocean-primary-button absolute bottom-[max(1rem,env(safe-area-inset-bottom))] left-4 right-4 z-30"
-        >
-          <Waves size={20} strokeWidth={1.6} aria-hidden="true" />
-          <span>Start dive</span>
-        </motion.button>
-      )}
     </div>
   );
 };

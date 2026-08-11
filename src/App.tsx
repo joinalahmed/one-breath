@@ -611,6 +611,10 @@ export default function App() {
                 streak={stats.streak}
                 onDiveComplete={handleDiveComplete}
                 onOpenDebug={() => setShowTuningOverlay(true)}
+                onExit={() => {
+                  soundManager.restoreBgMusic();
+                  setPhase('SURFACE');
+                }}
               />
             </motion.div>
           )}

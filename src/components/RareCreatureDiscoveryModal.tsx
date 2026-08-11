@@ -1,8 +1,15 @@
-﻿import React, { useEffect } from 'react';
-import { motion, useReducedMotion } from 'motion/react';
-import confetti from 'canvas-confetti';
-import { Camera, Sparkles } from 'lucide-react';
+import React, { useEffect, useMemo } from 'react';
+import { motion } from 'motion/react';
 import { soundManager } from '../audioAndHaptics';
+
+const CREATURE_GIFS: Record<string, string> = {
+  crab: '/assets/crab.gif',
+  seahorse: '/assets/fish-angelfish.gif',
+  eel: '/assets/fish-betta.gif',
+  octopus: '/assets/fish-pufferfish.gif',
+  squid: '/assets/fish-clownfish.gif',
+  angler: '/assets/shark.gif',
+};
 
 interface RareCreatureDiscoveryModalProps {
   itemType: string;
@@ -14,6 +21,35 @@ interface RareCreatureDiscoveryModalProps {
   onComplete: () => void;
 }
 
+function BurstParticles() {
+  const particles = useMemo(() =>
+    Array.from({ length: 16 }, (_, i) => {
+      const angle = (i / 16) * Math.PI * 2;
+      return {
+        id: i,
+        x: Math.cos(angle) * 60,
+        y: Math.sin(angle) * 60,
+        size: 3 + (i % 3) * 2,
+        color: ['#67e8f9', '#a78bfa', '#34d399', '#fbbf24', '#f472b6'][i % 5],
+      };
+    }), []);
+
+  return (
+    <>
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full left-1/2 top-1/2"
+          style={{ width: p.size, height: p.size, backgroundColor: p.color, marginLeft: -p.size / 2, marginTop: -p.size / 2 }}
+          initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+          animate={{ x: p.x, y: p.y, opacity: 0, scale: 0.3 }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+        />
+      ))}
+    </>
+  );
+}
+
 export const RareCreatureDiscoveryModal: React.FC<RareCreatureDiscoveryModalProps> = ({
   itemType,
   itemName,
@@ -22,77 +58,42 @@ export const RareCreatureDiscoveryModal: React.FC<RareCreatureDiscoveryModalProp
   value,
   onComplete,
 }) => {
-  const reduceMotion = useReducedMotion();
-
   useEffect(() => {
     soundManager.playLevelUp();
-
-    if (!reduceMotion) {
-      confetti({
-        particleCount: 34,
-        spread: 48,
-        scalar: 0.7,
-        origin: { y: 0.45 },
-        colors: ['#a5f3fc', '#67e8f9', '#a5b4fc'],
-      });
-    }
-
-    const timer = window.setTimeout(onComplete, 3500);
+    const timer = window.setTimeout(onComplete, 1500);
     return () => window.clearTimeout(timer);
-  }, [onComplete, reduceMotion]);
+  }, [onComplete]);
+
+  const gifSrc = CREATURE_GIFS[itemType.toLowerCase()] || CREATURE_GIFS[itemType];
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/78 p-5 backdrop-blur-md select-none pointer-events-none"
-      role="status"
-      aria-live="polite"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.25 }}
+      className="absolute top-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none"
     >
-      <motion.section
-        initial={reduceMotion ? false : { scale: 0.9, opacity: 0, y: 24 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 280, damping: 24 }}
-        className="relative w-full max-w-sm overflow-hidden rounded-[20px] border border-indigo-200/30 bg-slate-950/95 p-5 shadow-[0_24px_70px_rgba(30,58,138,0.38)]"
-      >
-        <div className="ocean-grain" aria-hidden="true" />
-        <header className="relative flex items-center justify-center gap-2 text-center text-xs font-bold uppercase tracking-[0.22em] text-cyan-200">
-          <Sparkles size={17} strokeWidth={1.5} aria-hidden="true" />
-          {rarity} discovery
-        </header>
-
-        <div className="relative my-5 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[16px] border border-cyan-100/15 bg-[radial-gradient(circle_at_50%_44%,rgba(99,102,241,0.26),rgba(2,8,23,0.15)_45%,rgba(2,8,23,0.9)_75%)]">
-          <motion.div
-            animate={reduceMotion ? undefined : { y: [0, -8, 0], rotate: [-2, 2, -2] }}
-            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="relative grid h-28 w-28 place-items-center rounded-full border border-cyan-200/20 bg-cyan-200/[0.07] text-5xl font-black text-cyan-100 shadow-[0_0_48px_rgba(34,211,238,0.12)]"
-            aria-hidden="true"
-          >
-            {itemName.slice(0, 1).toUpperCase()}
-          </motion.div>
-          <span className="absolute bottom-3 text-xs font-medium tracking-[0.16em] text-cyan-100/60">{itemType}</span>
+      <div className="relative bg-slate-900/60 backdrop-blur-sm border border-cyan-400/40 rounded-2xl px-4 py-2.5 flex items-center gap-3 shadow-lg">
+        <BurstParticles />
+        {gifSrc ? (
+          <motion.img
+            src={gifSrc}
+            alt={itemName}
+            className="w-12 h-12 object-contain"
+            animate={{ rotate: [-5, 5, -5], scale: [1, 1.1, 1] }}
+            transition={{ repeat: Infinity, duration: 1, ease: 'easeInOut' }}
+          />
+        ) : (
+          <div className="text-2xl">{itemName.slice(0, 1).toUpperCase()}</div>
+        )}
+        <div>
+          <div className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">✨ {rarity} Discovery</div>
+          <div className="text-sm font-black text-white">{itemName}</div>
+          <div className="text-[9px] text-slate-400 font-mono">{depth}m · +{value} 💎</div>
+          <div className="text-[8px] text-cyan-200/70 mt-0.5">📷 Added to Photo Library</div>
         </div>
-
-        <h2 className="text-center text-3xl font-extrabold leading-tight tracking-tight text-slate-50">{itemName}</h2>
-
-        <div className="mt-5 grid grid-cols-2 divide-x divide-cyan-100/10 border-y border-cyan-100/10 py-4 text-center">
-          <div>
-            <p className="text-xs text-slate-500">Depth</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-cyan-100">{depth} m</p>
-          </div>
-          <div>
-            <p className="text-xs text-slate-500">Value</p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-cyan-100">{value}</p>
-          </div>
-        </div>
-
-        <p className="mt-5 flex items-center justify-center gap-2 text-sm text-slate-300">
-          <Camera size={18} className="text-cyan-200" strokeWidth={1.5} />
-          Added to your Photo Library
-        </p>
-        <p className="mt-4 text-center text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Continuing dive</p>
-      </motion.section>
+      </div>
     </motion.div>
   );
 };

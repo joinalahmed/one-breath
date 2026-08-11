@@ -3,9 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { GameConfig, DiverState, CollectibleItem, SharkState, UpgradesState, ItemSize } from '../types';
 import { soundManager } from '../audioAndHaptics';
-import { BreathGauge } from './BreathGauge';
 import { BubbleOverlay } from './BubbleOverlay';
-import { DepthBandIndicator } from './DepthBandIndicator';
 import { RareCreatureDiscoveryModal } from './RareCreatureDiscoveryModal';
 import { TutorialTip } from './TutorialTip';
 import {
@@ -49,6 +47,7 @@ interface CanvasGameProps {
     rareCollected?: number;
   }) => void;
   onOpenDebug: () => void;
+  onExit?: () => void;
 }
 
 export const CanvasGame: React.FC<CanvasGameProps> = ({
@@ -57,6 +56,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   streak,
   onDiveComplete,
   onOpenDebug,
+  onExit,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -137,7 +137,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   const [hudBasket, setHudBasket] = useState<Array<{ type: 'shell' | 'fish'; value: number; size: ItemSize }>>([]);
   const [hudCarryingStone, setHudCarryingStone] = useState(true);
   const [grabProgress, setGrabProgress] = useState<{ targetId: string; progress: number } | null>(null);
-  const [isMuted, setIsMuted] = useState(() => soundManager.getMuted());
   const [sonarDistance, setSonarDistance] = useState<number | null>(null);
   const [currentDepthBand, setCurrentDepthBand] = useState<string | null>(null);
   const [showZoneBanner, setShowZoneBanner] = useState(false);
@@ -1086,15 +1085,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     }
   };
 
-  const currentDrainRate =
-    hudDepth > 0.1
-      ? config.AIR_BASE_DRAIN *
-        (1 + hudDepth / config.DEPTH_DRAIN_DIVISOR) *
-        (diverRef.current.isAscending || diverRef.current.isPanicAscent
-          ? config.ASCENT_TAX
-          : 1)
-      : 0;
-
   return (
     <div
       ref={containerRef}
@@ -1136,62 +1126,94 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       {/* Mark Bowley Ambient Floating Bubble Effect */}
       <BubbleOverlay count={18} />
 
-      {/* SLEEK FLOATING GLASS PILL HUD - Compact */}
+      {/* TOP HUD — home button + collected items */}
       <div
-        className="relative z-10 w-full px-2 flex justify-between items-center pointer-events-none gap-1"
+        className="relative z-10 w-full px-3 flex justify-between items-center pointer-events-none"
         style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
       >
-        {/* Top Left: Compact Depth Pill */}
-        <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-full px-2.5 py-1 flex items-center gap-1.5 shrink-0">
-          <span className="text-xs">🌊</span>
-          <div className="flex items-baseline gap-0.5 font-mono">
-            <span className="text-sm font-black text-white">{hudDepth}</span>
-            <span className="text-[9px] font-bold text-cyan-300">m</span>
+        {/* Top Left: Home button */}
+        <div className="pointer-events-auto">
+          {onExit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onExit();
+              }}
+              className="w-9 h-9 rounded-full bg-slate-900/70 border border-slate-600/50 flex items-center justify-center text-sm cursor-pointer active:scale-90 transition-all shadow-lg"
+              title="Back to Village"
+            >
+              🏠
+            </button>
+          )}
+        </div>
+
+        {/* Top Center: Collected items display */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 bg-slate-900/60 border border-slate-700/50 rounded-full px-2.5 py-1">
+            <img src="/assets/pearl.gif" alt="pearl" className="w-4 h-4" />
+            <span className="text-[10px] font-black text-white font-mono">{hudBasket.filter(b => b.type === 'shell').length}</span>
+          </div>
+          <div className="flex items-center gap-1 bg-slate-900/60 border border-slate-700/50 rounded-full px-2.5 py-1">
+            <span className="text-xs">🐟</span>
+            <span className="text-[10px] font-black text-white font-mono">{hudBasket.filter(b => b.type === 'fish').length}</span>
+          </div>
+          {hudBasket.some(b => !['shell', 'fish'].includes(b.type)) && (
+            <div className="flex items-center gap-1 bg-slate-900/60 border border-slate-700/50 rounded-full px-2.5 py-1">
+              <span className="text-xs">🦀</span>
+              <span className="text-[10px] font-black text-amber-300 font-mono">{hudBasket.filter(b => !['shell', 'fish'].includes(b.type)).length}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1 bg-slate-900/60 border border-slate-700/50 rounded-full px-2.5 py-1">
+            <span className="text-[10px] font-black text-emerald-300 font-mono">{hudBasket.length}/{capacity}</span>
           </div>
         </div>
 
-        {/* Top Center: Compact Glass Air Gauge */}
-        <div className="flex-1 flex justify-center min-w-0">
-          <BreathGauge
-            air={hudAir}
-            maxAir={maxAir}
-            depth={hudDepth}
+        <div className="w-9" />
+      </div>
+
+      {/* LEFT SIDE: Fixed depth scale — shows where the diver currently is */}
+      <div className="absolute left-0 top-14 bottom-16 z-10 flex flex-col items-start pointer-events-none w-14">
+        <div className="relative h-full w-full">
+          {[5, 10, 15, 20, 30, 40, 50, 60].map((mark) => {
+            const percent = (mark / config.MAX_DEPTH) * 100;
+            const isActive = Math.abs(hudDepth - mark) < 3;
+            return (
+              <div
+                key={mark}
+                className="absolute left-0 flex items-center"
+                style={{ top: `${percent}%` }}
+              >
+                <span className={`text-[9px] font-mono font-bold pl-1 ${isActive ? 'text-cyan-300' : 'text-slate-500'}`}>
+                  {mark}m
+                </span>
+                <div className={`w-3 h-px ml-0.5 ${isActive ? 'bg-cyan-400' : 'bg-slate-600'}`} />
+              </div>
+            );
+          })}
+          {/* Current depth indicator arrow */}
+          <motion.div
+            className="absolute left-0 right-0 flex items-center"
+            animate={{ top: `${(hudDepth / config.MAX_DEPTH) * 100}%` }}
+            transition={{ type: 'spring', stiffness: 80, damping: 15 }}
+          >
+            <div className="w-full h-px bg-cyan-400/40" />
+            <div className="absolute right-0 w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-r-[6px] border-r-cyan-400" />
+          </motion.div>
+        </div>
+      </div>
+
+      {/* RIGHT SIDE: Vertical depth meter tube */}
+      <div className="absolute right-3 top-16 bottom-24 z-10 flex flex-col items-center pointer-events-none">
+        {/* Tube cap */}
+        <div className="w-4 h-3 rounded-t-full border-2 border-slate-500 border-b-0 bg-slate-800/60" />
+        {/* Tube body */}
+        <div className="relative flex-1 w-4 border-2 border-slate-500 bg-slate-900/40 rounded-b-lg overflow-hidden">
+          {/* Air fill (top to bottom, empties from top) */}
+          <motion.div
+            className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-cyan-500 to-cyan-300"
+            animate={{ height: `${hudAir}%` }}
+            transition={{ type: 'spring', stiffness: 50, damping: 15 }}
           />
-        </div>
-
-        {/* Top Right: Compact Basket & Controls */}
-        <div className="flex items-center gap-1 pointer-events-auto shrink-0">
-          {/* Basket Pill */}
-          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 shadow-xl rounded-full px-2 py-1 flex items-center gap-1 font-mono text-xs">
-            <span>🧺</span>
-            <span className="font-extrabold text-emerald-300">{hudBasket.length}/{capacity}</span>
-          </div>
-
-          {/* Audio Toggle */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              const nextMuted = !isMuted;
-              soundManager.setMuted(nextMuted);
-              setIsMuted(nextMuted);
-            }}
-            className="w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-800/80 active:scale-95 text-slate-200 text-xs flex items-center justify-center border border-slate-700/50 backdrop-blur-md cursor-pointer shadow-lg transition-all"
-            title="Toggle Audio"
-          >
-            {isMuted ? '🔇' : '🔊'}
-          </button>
-
-          {/* Debug Settings */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenDebug();
-            }}
-            className="w-7 h-7 rounded-full bg-slate-900/60 hover:bg-slate-800/80 active:scale-95 text-slate-300 text-xs flex items-center justify-center border border-slate-700/50 backdrop-blur-md cursor-pointer shadow-lg transition-all"
-            title="Debug Settings"
-          >
-            ⚙️
-          </button>
         </div>
       </div>
 
@@ -1315,39 +1337,37 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         )}
       </AnimatePresence>
 
-      {/* CUT STONE BUTTON - Bottom center */}
+      {/* CUT STONE BUTTON - Bottom right circular */}
       <AnimatePresence>
         {hudCarryingStone && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            className="absolute left-1/2 -translate-x-1/2 z-20 pointer-events-auto"
+            className="absolute right-3 z-20 pointer-events-auto"
             style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
           >
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.92 }}
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+              whileTap={{ scale: 0.85 }}
               onClick={(e) => {
                 e.stopPropagation();
                 handleCutStone();
               }}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-black text-xs shadow-xl flex items-center space-x-1.5 border border-amber-300 transition-transform cursor-pointer animate-pulse"
+              className="w-14 h-14 rounded-full flex items-center justify-center cursor-pointer shadow-xl"
+              style={{
+                background: 'linear-gradient(135deg, #164e63 0%, #0e7490 100%)',
+                border: '3px solid #22d3ee',
+                boxShadow: '0 4px 20px rgba(34,211,238,0.4)',
+              }}
             >
-              <span>✂️ CUT ROPE</span>
-              <span className="bg-slate-950/30 px-1.5 py-0.5 rounded text-[10px] font-bold">[X]</span>
+              <span className="text-xl">✂️</span>
             </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* DEPTH BAND INDICATOR - Shows current zone on left */}
-      <DepthBandIndicator
-        currentDepth={hudDepth}
-        maxDepth={hudMaxDepth}
-        maxGameDepth={config.MAX_DEPTH}
-      />
     </div>
   );
 };
