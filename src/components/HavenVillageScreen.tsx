@@ -115,8 +115,8 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
               : 'text-amber-200/90 border-amber-700/60'
           }`}
           style={{
-            background: 'linear-gradient(180deg, #5c3d1e 0%, #3b2510 60%, #2a1a0b 100%)',
-            border: '2px solid #8b6914',
+            background: 'linear-gradient(180deg, #0a1a3a 0%, #071428 60%, #040d1f 100%)',
+            border: '2px solid rgba(212, 175, 55, 0.5)',
             borderRadius: '4px',
             boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.2), 0 3px 6px rgba(0,0,0,0.7), 0 1px 0 #1a0f05',
             textShadow: '0 1px 2px rgba(0,0,0,0.8)',
@@ -139,8 +139,8 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
               : 'text-amber-200/90 border-amber-700/60'
           }`}
           style={{
-            background: 'linear-gradient(180deg, #5c3d1e 0%, #3b2510 60%, #2a1a0b 100%)',
-            border: '2px solid #8b6914',
+            background: 'linear-gradient(180deg, #0a1a3a 0%, #071428 60%, #040d1f 100%)',
+            border: '2px solid rgba(212, 175, 55, 0.5)',
             borderRadius: '4px',
             boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.2), 0 3px 6px rgba(0,0,0,0.7), 0 1px 0 #1a0f05',
             textShadow: '0 1px 2px rgba(0,0,0,0.8)',
@@ -163,8 +163,8 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
               : 'text-amber-200/90 border-amber-700/60'
           }`}
           style={{
-            background: 'linear-gradient(180deg, #5c3d1e 0%, #3b2510 60%, #2a1a0b 100%)',
-            border: '2px solid #8b6914',
+            background: 'linear-gradient(180deg, #0a1a3a 0%, #071428 60%, #040d1f 100%)',
+            border: '2px solid rgba(212, 175, 55, 0.5)',
             borderRadius: '4px',
             boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.2), 0 3px 6px rgba(0,0,0,0.7), 0 1px 0 #1a0f05',
             textShadow: '0 1px 2px rgba(0,0,0,0.8)',
@@ -187,8 +187,8 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
               : 'text-amber-200/90 border-amber-700/60'
           }`}
           style={{
-            background: 'linear-gradient(180deg, #5c3d1e 0%, #3b2510 60%, #2a1a0b 100%)',
-            border: '2px solid #8b6914',
+            background: 'linear-gradient(180deg, #0a1a3a 0%, #071428 60%, #040d1f 100%)',
+            border: '2px solid rgba(212, 175, 55, 0.5)',
             borderRadius: '4px',
             boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.2), 0 3px 6px rgba(0,0,0,0.7), 0 1px 0 #1a0f05',
             textShadow: '0 1px 2px rgba(0,0,0,0.8)',
@@ -223,7 +223,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
           >
             {/* BULTEOK CAMPFIRE */}
             {selectedBuilding === 'campfire' && (
-              <div className="border border-amber-500/40 p-3 rounded-2xl space-y-2.5 shadow-xl bg-gradient-to-b from-amber-950/80 to-slate-950/90 backdrop-blur-lg">
+              <div className="border border-yellow-600/30 p-3 rounded-2xl space-y-2.5 shadow-xl bg-gradient-to-b from-[#0a1a3a]/95 to-[#040d1f]/95 backdrop-blur-lg">
                 <div className="flex justify-between items-start border-b border-amber-900/60 pb-2">
                   <div>
                     <h3 className="text-xs font-black text-amber-300 uppercase tracking-wider flex items-center space-x-1.5">
@@ -268,7 +268,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
 
             {/* SMOKEHOUSE */}
             {selectedBuilding === 'smokehouse' && (
-              <div className="border border-emerald-500/40 p-3 rounded-2xl space-y-2.5 shadow-xl bg-gradient-to-b from-emerald-950/80 to-slate-950/90 backdrop-blur-lg">
+              <div className="border border-yellow-600/30 p-3 rounded-2xl space-y-2.5 shadow-xl bg-gradient-to-b from-[#0a1a3a]/95 to-[#040d1f]/95 backdrop-blur-lg">
                 <div className="flex justify-between items-start border-b border-emerald-900/60 pb-2">
                   <div>
                     <h3 className="text-xs font-black text-emerald-300 uppercase tracking-wider flex items-center space-x-1.5">
@@ -332,7 +332,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
 
             {/* LIGHTHOUSE */}
             {selectedBuilding === 'lighthouse' && (
-              <div className="border border-cyan-500/40 p-3 rounded-2xl space-y-2.5 shadow-xl bg-gradient-to-b from-cyan-950/80 to-slate-950/90 backdrop-blur-lg">
+              <div className="border border-yellow-600/30 p-3 rounded-2xl space-y-2.5 shadow-xl bg-gradient-to-b from-[#0a1a3a]/95 to-[#040d1f]/95 backdrop-blur-lg">
                 <div className="flex justify-between items-start border-b border-cyan-900/60 pb-2">
                   <div>
                     <h3 className="text-xs font-black text-cyan-300 uppercase tracking-wider flex items-center space-x-1.5">
@@ -370,7 +370,7 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
 
             {/* COUNCIL */}
             {selectedBuilding === 'council' && (
-              <div className="border border-purple-500/40 p-3 rounded-2xl space-y-2 shadow-xl bg-gradient-to-b from-purple-950/80 to-slate-950/90 backdrop-blur-lg">
+              <div className="border border-yellow-600/30 p-3 rounded-2xl space-y-2 shadow-xl bg-gradient-to-b from-[#0a1a3a]/95 to-[#040d1f]/95 backdrop-blur-lg">
                 <div className="flex justify-between items-center border-b border-purple-900/60 pb-2">
                   <div>
                     <h3 className="text-xs font-black text-purple-300 uppercase tracking-wider">PEARL COUNCIL & DAILY QUESTS</h3>

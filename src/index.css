@@ -82,17 +82,17 @@ html, body, * {
   }
 
   .btn-scopely-gold {
-    background: linear-gradient(135deg, #fde047 0%, #eab308 50%, #ca8a04 100%);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 6px 0 #854d0e, 0 10px 15px rgba(2, 6, 23, 0.5);
-    border: 2px solid #fef08a;
+    background: linear-gradient(135deg, #f5d442 0%, #d4af37 50%, #8b6914 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(2, 6, 23, 0.4), 0 6px 0 #5c4a0e, 0 10px 15px rgba(2, 6, 23, 0.6);
+    border: 2px solid #f5d442;
     transition: all 200ms ease-out;
   }
   .btn-scopely-gold:hover {
-    background: linear-gradient(135deg, #fde047 0%, #facc15 50%, #eab308 100%);
+    background: linear-gradient(135deg, #f5d442 0%, #e8c430 50%, #d4af37 100%);
   }
   .btn-scopely-gold:active {
     transform: translateY(4px);
-    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -2px 4px rgba(2, 6, 23, 0.3), 0 2px 0 #854d0e, 0 4px 8px rgba(2, 6, 23, 0.4);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 4px rgba(2, 6, 23, 0.4), 0 2px 0 #5c4a0e, 0 4px 8px rgba(2, 6, 23, 0.5);
   }
   .btn-scopely-gold:disabled {
     opacity: 0.5;
@@ -139,17 +139,18 @@ html, body, * {
     cursor: not-allowed;
   }
 
-  /* Glossy Game Card Frame with tinted shadow */
+  /* Glossy Game Card Frame — dark navy with gold accent */
   .scopely-card {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), inset 0 -1px 2px rgba(2, 6, 23, 0.4), 0 12px 24px -6px rgba(2, 6, 23, 0.6);
+    background: linear-gradient(135deg, rgba(10, 26, 58, 0.95) 0%, rgba(4, 13, 31, 0.98) 100%);
+    box-shadow: inset 0 1px 0 rgba(212, 175, 55, 0.1), inset 0 -1px 2px rgba(2, 6, 23, 0.4), 0 12px 24px -6px rgba(2, 6, 23, 0.7);
+    border: 1px solid rgba(212, 175, 55, 0.2);
   }
 
   /* Gold Bevel Header Ribbon */
   .scopely-gold-ribbon {
-    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 2px rgba(2, 6, 23, 0.3), 0 4px 10px rgba(2, 6, 23, 0.4);
-    border: 2px solid #fef08a;
+    background: linear-gradient(135deg, #d4af37 0%, #8b6914 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 2px rgba(2, 6, 23, 0.3), 0 4px 10px rgba(2, 6, 23, 0.5);
+    border: 2px solid #f5d442;
   }
 
   /* Typography utilities for premium hierarchy */
@@ -268,15 +269,22 @@ html, body, * {
 }
 
 
-/* One Breath visual system: premium ocean, soft 14-16px geometry, cyan accent. */
+/* One Breath visual system: dark navy + gold Arabic aesthetic */
 :root {
   color-scheme: dark;
-  --ocean-ink: #020817;
-  --ocean-navy: #07182b;
-  --ocean-surface: rgba(8, 30, 50, 0.78);
-  --ocean-line: rgba(165, 243, 252, 0.16);
-  --ocean-accent: #a5f3fc;
-  --ocean-accent-strong: #22d3ee;
+  --ocean-ink: #020a18;
+  --ocean-navy: #071428;
+  --ocean-surface: rgba(6, 18, 40, 0.85);
+  --ocean-line: rgba(212, 175, 55, 0.2);
+  --ocean-accent: #d4af37;
+  --ocean-accent-strong: #f5d442;
+  --gold-primary: #d4af37;
+  --gold-light: #f5d442;
+  --gold-dark: #8b6914;
+  --gold-border: rgba(212, 175, 55, 0.4);
+  --navy-deep: #040d1f;
+  --navy-mid: #0a1a3a;
+  --navy-light: #122448;
 }
 html, body, #root { min-height: 100%; background: var(--ocean-ink); }
 .ocean-screen {

@@ -325,7 +325,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
 
   return (
     <div
-      className="relative w-full h-full max-w-lg mx-auto bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none p-3 sm:p-4 no-scrollbar"
+      className="relative w-full h-full max-w-lg mx-auto bg-[#020a18] text-slate-100 flex flex-col justify-between overflow-hidden select-none p-3 sm:p-4 no-scrollbar"
       style={{
         paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
         paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
@@ -359,43 +359,45 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50 pointer-events-none" />
       )}
 
-      {/* TOP NAV BAR — minimal: avatar + level left, settings right */}
+      {/* TOP NAV BAR — Arabic gold + navy style */}
       <div className="relative z-20 w-full flex justify-between items-center px-3 py-2">
-        {/* Left: PFP avatar + level & stats — tap to go back to village */}
+        {/* Left: PFP avatar + level & stats */}
         <div className="flex items-center space-x-2.5 cursor-pointer" onClick={() => setActiveScreen('haven')}>
-          {/* Avatar circles (PFP placeholder) */}
-          <div className="relative w-10 h-10">
-            <div className="absolute inset-0 rounded-full border-2 border-amber-600/70" />
-            <div className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full border-2 border-amber-600/70" />
+          {/* Avatar with gold ring */}
+          <div className="relative w-11 h-11">
+            <div className="absolute inset-0 rounded-full border-2 border-yellow-600 shadow-[0_0_8px_rgba(212,175,55,0.3)]" />
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-lg">{currentRank.badgeEmoji}</span>
             </div>
+            {/* Level badge */}
+            <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-yellow-700 to-yellow-500 text-[8px] font-black text-slate-900 px-1.5 py-0.5 rounded-full border border-yellow-400/60">
+              {Math.min(100, stats.totalDives + 1)}
+            </div>
           </div>
 
-          {/* Level + currency inline */}
+          {/* Level + currency */}
           <div className="flex flex-col leading-tight">
-            <span className="text-[11px] font-black text-white tracking-wide">
-              Lv.{Math.min(100, stats.totalDives + 1)} · Day {stats.totalDives + 1}
+            <span className="text-[11px] font-black text-yellow-100/90 tracking-wide">
+              DIVER
             </span>
             <div className="flex items-center space-x-2 mt-0.5">
-              <span className="text-[10px] font-bold text-amber-300">💎 {stats.coins}</span>
+              <span className="text-[10px] font-bold text-yellow-400">💎 {stats.coins}</span>
               <span className="text-[10px] font-bold text-emerald-300">🐟 {stats.food}</span>
             </div>
           </div>
         </div>
 
-        {/* Right: Settings hamburger */}
-        <div className="relative">
+        {/* Right: Settings + notifications */}
+        <div className="relative flex items-center gap-2">
           <button
             onClick={() => setShowSettings((v) => !v)}
-            className="w-9 h-9 rounded-lg border-2 border-cyan-400/60 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center cursor-pointer active:scale-95 transition-all"
+            className="w-9 h-9 rounded-lg border border-yellow-600/50 bg-[#0a1a3a]/80 backdrop-blur-sm flex items-center justify-center cursor-pointer active:scale-95 transition-all"
             title="Settings"
           >
-            <div className="flex flex-col items-center justify-center space-y-[3px]">
-              <span className="w-4 h-[2px] bg-cyan-300 rounded-full" />
-              <span className="w-4 h-[2px] bg-cyan-300 rounded-full" />
-              <span className="w-4 h-[2px] bg-cyan-300 rounded-full" />
-            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="2" strokeLinecap="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
           </button>
 
           <AnimatePresence>
@@ -407,9 +409,9 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.96 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-48 z-40 rounded-xl overflow-hidden border border-slate-700 shadow-2xl bg-slate-900"
+                  className="absolute right-0 mt-2 w-48 z-40 rounded-xl overflow-hidden border border-yellow-700/40 shadow-2xl bg-[#0a1a3a]"
                 >
-                  <div className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                  <div className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-yellow-400/70 border-b border-yellow-900/30">
                     Settings
                   </div>
 
@@ -525,12 +527,12 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
               {/* STORE HEADER + BALANCE */}
               <div className="flex items-end justify-between px-1">
                 <div>
-                  <h2 className="text-xl font-black text-amber-300 uppercase tracking-wide">Store</h2>
-                  <p className="text-[11px] text-slate-400">Upgrade your gear & trade your catch</p>
+                  <h2 className="text-xl font-black text-yellow-400 uppercase tracking-wide">Shop</h2>
+                  <p className="text-[11px] text-yellow-200/50">Upgrade your gear & trade your catch</p>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="bg-slate-950 border border-amber-500/60 px-2.5 py-1 rounded-xl text-xs font-black text-amber-300 font-mono flex items-center gap-1">
-                    <span className="text-amber-400">💎</span>
+                  <span className="bg-[#0a1a3a] border border-yellow-600/40 px-2.5 py-1 rounded-xl text-xs font-black text-yellow-300 font-mono flex items-center gap-1">
+                    <span className="text-yellow-400">💎</span>
                     {stats.coins}
                   </span>
                   <span className="bg-slate-950 border border-emerald-500/60 px-2.5 py-1 rounded-xl text-xs font-black text-emerald-300 font-mono flex items-center gap-1">
@@ -775,23 +777,30 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         )}
       </AnimatePresence>
 
-      {/* BOTTOM NAVIGATION BAR — text tabs */}
-      <div className="relative z-20 shrink-0 px-3 py-2 mt-auto">
-        <div className="flex justify-center items-stretch">
+      {/* BOTTOM NAVIGATION BAR — wooden port plank style */}
+      <div className="relative z-20 shrink-0 px-2 py-2 mt-auto">
+        <div
+          className="flex justify-center items-end gap-0.5 rounded-xl p-1.5"
+          style={{
+            background: 'linear-gradient(180deg, #3d2b1a 0%, #2a1d10 40%, #1a1008 100%)',
+            border: '2px solid #5c4020',
+            boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.15), 0 4px 12px rgba(0,0,0,0.6)',
+          }}
+        >
           {[
             { key: 'haven', label: 'Village' },
             { key: 'home', label: 'Map' },
             { key: 'shop', label: 'Shop' },
             { key: 'dive', label: 'Dive' },
             { key: 'leaderboard', label: 'Board' },
-            { key: 'collection', label: 'Collection' },
+            { key: 'collection', label: 'Album' },
           ].map((tab) => {
             const isActive = tab.key === 'dive' ? false : activeScreen === tab.key;
             const isDive = tab.key === 'dive';
             return (
               <motion.button
                 key={tab.key}
-                whileTap={{ scale: 0.93 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => {
                   if (isDive) {
                     onStartDive();
@@ -801,18 +810,27 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                     setActiveScreen(tab.key as any);
                   }
                 }}
-                className={`flex-1 text-[11px] font-bold tracking-wide cursor-pointer transition-all border border-amber-800/40 ${
+                className={`flex-1 flex items-center justify-center rounded-lg cursor-pointer transition-all ${
                   isDive
-                    ? 'flex-[1.4] py-4 text-sm bg-amber-600 text-white border-amber-400/80 rounded-lg shadow-[0_-2px_12px_rgba(217,119,6,0.4)] -mt-2 z-10'
+                    ? 'flex-[1.3] -mt-3 py-3 rounded-xl text-sm font-black text-[#1a1008] tracking-wide'
                     : isActive
-                    ? 'py-2.5 bg-amber-900/60 text-amber-200 border-amber-500/50'
-                    : 'py-2.5 bg-slate-900/60 text-slate-300 hover:bg-slate-800/60'
+                    ? 'py-2 text-[11px] font-bold text-amber-200'
+                    : 'py-2 text-[11px] font-bold text-stone-400 hover:text-stone-200'
                 }`}
-                style={{
-                  borderRight: 'none',
-                  ...(tab.key === 'haven' ? { borderTopLeftRadius: '8px', borderBottomLeftRadius: '8px' } : {}),
-                  ...(tab.key === 'collection' ? { borderTopRightRadius: '8px', borderBottomRightRadius: '8px', borderRight: '1px solid rgba(146,64,14,0.4)' } : {}),
-                }}
+                style={
+                  isDive
+                    ? {
+                        background: 'linear-gradient(180deg, #f5d442 0%, #c9952a 100%)',
+                        border: '2px solid #f5d442',
+                        boxShadow: '0 4px 0 #7a5a12, 0 6px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)',
+                      }
+                    : isActive
+                    ? {
+                        background: 'linear-gradient(180deg, #4a3520 0%, #2e2010 100%)',
+                        border: '1px solid #6b4c25',
+                      }
+                    : {}
+                }
               >
                 {tab.label}
               </motion.button>
