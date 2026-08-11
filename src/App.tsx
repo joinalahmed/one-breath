@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { GameConfig, PlayerStats, GamePhase, DiveTelemetryLog, DailyChallenge, PhotoLibrary } from './types';
 import { loadSavedConfig } from './config';
 import { getOrCreateSessionId, appendTelemetryLog, loadTelemetryLogs } from './telemetry';
@@ -671,6 +672,7 @@ export default function App() {
           )}
         </AnimatePresence>
       </div>
+      <SpeedInsights />
     </div>
   );
 }
