@@ -1224,8 +1224,14 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
         <div className="relative flex-1 w-4 border-2 border-slate-500 bg-slate-900/40 rounded-b-lg overflow-hidden">
           {/* Air fill (top to bottom, empties from top) */}
           <motion.div
-            className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-cyan-500 to-cyan-300"
-            animate={{ height: `${hudAir}%` }}
+            className={`absolute bottom-0 left-0 right-0 ${
+              hudAir / maxAir <= 0.25
+                ? 'bg-gradient-to-t from-red-600 to-orange-400'
+                : hudAir / maxAir <= 0.5
+                ? 'bg-gradient-to-t from-amber-500 to-yellow-300'
+                : 'bg-gradient-to-t from-cyan-500 to-cyan-300'
+            }`}
+            animate={{ height: `${Math.min(100, (hudAir / maxAir) * 100)}%` }}
             transition={{ type: 'spring', stiffness: 50, damping: 15 }}
           />
         </div>
@@ -1311,7 +1317,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
 
       {/* LOW AIR WARNING OVERLAY */}
       <AnimatePresence>
-        {hudAir <= 25 && hudAir > 0 && (
+        {hudAir / maxAir <= 0.25 && hudAir > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -15, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: [1, 1.05, 1] }}
@@ -1321,7 +1327,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
           >
             <div className="bg-rose-950/90 border border-rose-500/80 text-rose-200 px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider shadow-2xl flex items-center space-x-1.5 backdrop-blur-sm">
               <span className="text-sm">⚠️</span>
-              <span>LOW AIR ({hudAir}%) — RELEASE TO ASCEND!</span>
+              <span>LOW AIR ({Math.round((hudAir / maxAir) * 100)}%) — RELEASE TO ASCEND!</span>
             </div>
           </motion.div>
         )}
