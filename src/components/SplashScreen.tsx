@@ -7,12 +7,51 @@ interface SplashScreenProps {
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
   const [isReady, setIsReady] = useState(false);
+  const [loadProgress, setLoadProgress] = useState(0);
   const reduceMotion = useReducedMotion();
 
-  // Show the splash background for ~5s, then fade out and hand off.
+  // Preload all assets and track progress
   useEffect(() => {
-    const timer = window.setTimeout(() => setIsReady(true), reduceMotion ? 0 : 4400);
-    return () => window.clearTimeout(timer);
+    let isMounted = true;
+
+    const preloadAssets = async () => {
+      try {
+        // Critical assets needed before showing game
+        const criticalAssets = [
+          '/assets/splash-screen.png',
+          '/assets/the_ascent_splash_loop_3s.gif',
+          '/manifest.json',
+        ];
+
+        let completed = 0;
+        for (const asset of criticalAssets) {
+          if (!isMounted) return;
+
+          try {
+            await fetch(asset);
+            completed++;
+            setLoadProgress((completed / criticalAssets.length) * 100);
+          } catch {
+            // Asset failed but continue - don't block on preload errors
+            completed++;
+            setLoadProgress((completed / criticalAssets.length) * 100);
+          }
+        }
+
+        // After critical assets, wait minimum splash duration
+        if (isMounted) {
+          await new Promise(resolve =>
+            setTimeout(resolve, reduceMotion ? 0 : 4400)
+          );
+          setIsReady(true);
+        }
+      } catch {
+        if (isMounted) setIsReady(true);
+      }
+    };
+
+    preloadAssets();
+    return () => { isMounted = false; };
   }, [reduceMotion]);
 
   useEffect(() => {
@@ -43,6 +82,21 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         draggable={false}
         className="absolute inset-0 h-full w-full object-cover pointer-events-none"
       />
+
+      {/* Loading progress bar */}
+      <div className="absolute bottom-8 left-0 right-0 px-8">
+        <div className="h-1 w-full bg-slate-700/30 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: '5%' }}
+            animate={{ width: `${Math.min(loadProgress, 95)}%` }}
+            transition={{ type: 'spring', damping: 25, stiffness: 50 }}
+            className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full shadow-lg"
+          />
+        </div>
+        <p className="text-center text-xs text-slate-300 mt-2 font-mono">
+          {Math.round(Math.min(loadProgress, 100))}%
+        </p>
+      </div>
     </motion.section>
   );
 };
