@@ -1160,10 +1160,10 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       {/* Mark Bowley Ambient Floating Bubble Effect */}
       <BubbleOverlay count={18} />
 
-      {/* Village exit button — inside the game container but with z-[9999] and stopPropagation via native listener */}
+      {/* Control buttons — inside the game container but with z-[9999] and stopPropagation via native listener */}
       <div
         data-hud="true"
-        className="absolute top-3 right-14 z-[9999]"
+        className="absolute top-3 right-3 z-[9999] flex gap-2"
         style={{ touchAction: 'auto', pointerEvents: 'auto' }}
         ref={(el) => {
           if (el && !el.dataset.bound) {
@@ -1171,13 +1171,26 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             el.addEventListener('pointerdown', (e) => e.stopPropagation(), true);
             el.addEventListener('pointerup', (e) => e.stopPropagation(), true);
             el.addEventListener('touchstart', (e) => e.stopPropagation(), true);
-            el.addEventListener('click', (e) => { e.stopPropagation(); onExit?.(); }, true);
+            el.addEventListener('click', (e) => e.stopPropagation(), true);
           }
         }}
       >
+        {/* Settings/Debug button */}
         <button
-          className="px-3 py-1.5 rounded-full bg-slate-900/80 border border-cyan-500/50 flex items-center gap-1.5 cursor-pointer active:scale-90 transition-all shadow-lg"
+          onClick={() => onOpenDebug()}
+          className="w-9 h-9 rounded-full bg-slate-900/80 border border-amber-500/50 flex items-center justify-center cursor-pointer active:scale-90 transition-all shadow-lg hover:bg-slate-800/90"
           style={{ touchAction: 'auto', pointerEvents: 'auto' }}
+          title="Debug Menu (G)"
+        >
+          <span className="text-sm">⚙️</span>
+        </button>
+
+        {/* Village exit button */}
+        <button
+          onClick={() => onExit?.()}
+          className="px-3 py-1.5 rounded-full bg-slate-900/80 border border-cyan-500/50 flex items-center gap-1.5 cursor-pointer active:scale-90 transition-all shadow-lg hover:bg-slate-800/90"
+          style={{ touchAction: 'auto', pointerEvents: 'auto' }}
+          title="Return to Village"
         >
           <span className="text-sm">🏠</span>
           <span className="text-[10px] font-bold text-cyan-200">Village</span>
