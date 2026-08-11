@@ -11,7 +11,6 @@ import { TelemetryViewModal } from './components/TelemetryViewModal';
 import { SplashScreen } from './components/SplashScreen';
 import { OnboardingScreen } from './components/OnboardingScreen';
 import { DiveReportModal } from './components/DiveReportModal';
-import { PhotoLibraryModal } from './components/PhotoLibraryModal';
 import { ChallengeCompletionToast } from './components/ChallengeCompletionToast';
 import { soundManager } from './audioAndHaptics';
 import { preloadAssets } from './assetPreloader';
@@ -203,7 +202,6 @@ export default function App() {
   // Overlays
   const [showTuningOverlay, setShowTuningOverlay] = useState(false);
   const [showTelemetryModal, setShowTelemetryModal] = useState(false);
-  const [showPhotoLibrary, setShowPhotoLibrary] = useState(false);
   const [completedChallenge, setCompletedChallenge] = useState<{
     title: string;
     rewardCoins: number;
@@ -569,7 +567,7 @@ export default function App() {
                 onAddPearls={handleAddPearls}
                 onOpenTelemetryModal={() => setShowTelemetryModal(true)}
                 onOpenDebug={() => setShowTuningOverlay(true)}
-                onOpenPhotoLibrary={() => setShowPhotoLibrary(true)}
+                photoLibrary={photoLibrary}
                 photoLibraryCount={Object.keys(photoLibrary).length}
               />
             </motion.div>
@@ -659,14 +657,6 @@ export default function App() {
             <TelemetryViewModal
               key="telemetry-modal"
               onClose={() => setShowTelemetryModal(false)}
-            />
-          )}
-
-          {showPhotoLibrary && (
-            <PhotoLibraryModal
-              key="photo-library"
-              photoLibrary={photoLibrary}
-              onClose={() => setShowPhotoLibrary(false)}
             />
           )}
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { PlayerStats, UpgradesState, BotDiver, DailyChallenge } from '../types';
+import { PlayerStats, UpgradesState, BotDiver, DailyChallenge, PhotoLibrary } from '../types';
 import { simulateBotActivity } from '../bots';
 import { soundManager } from '../audioAndHaptics';
 import { getPlayerRank, getNextRank, DiverRankInfo } from '../ranks';
@@ -12,6 +12,7 @@ import { BubbleOverlay } from './BubbleOverlay';
 import { UpgradeImpactInfo } from './UpgradeImpactInfo';
 import { TopHud } from './TopHud';
 import { BottomNav } from './BottomNav';
+import { PhotoLibraryScreen } from './PhotoLibraryScreen';
 
 interface SurfaceScreenProps {
   stats: PlayerStats;
@@ -31,7 +32,7 @@ interface SurfaceScreenProps {
   onAddPearls?: (amount: number) => void;
   onOpenTelemetryModal: () => void;
   onOpenDebug: () => void;
-  onOpenPhotoLibrary?: () => void;
+  photoLibrary?: PhotoLibrary;
   photoLibraryCount?: number;
 }
 
@@ -54,10 +55,10 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   onAddPearls,
   onOpenTelemetryModal,
   onOpenDebug,
-  onOpenPhotoLibrary,
+  photoLibrary = {},
   photoLibraryCount = 0,
 }) => {
-  const [activeScreen, setActiveScreen] = useState<'pearlcoast' | 'home' | 'haven' | 'shop' | 'leaderboard'>('pearlcoast');
+  const [activeScreen, setActiveScreen] = useState<'pearlcoast' | 'home' | 'haven' | 'shop' | 'leaderboard' | 'photos'>('pearlcoast');
   const [currentBots] = useState<BotDiver[]>(() => simulateBotActivity(bots));
   const [isMuted, setIsMuted] = useState(() => soundManager.getMuted());
   const [showSettings, setShowSettings] = useState(false);
@@ -777,6 +778,20 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
               </div>
             </motion.div>
           )}
+
+          {/* 4. PHOTO LIBRARY SCREEN */}
+          {activeScreen === 'photos' && (
+            <motion.div
+              key="photos"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              className="h-full overflow-y-auto no-scrollbar pb-4"
+            >
+              <PhotoLibraryScreen photoLibrary={photoLibrary} />
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
       )}
@@ -799,7 +814,6 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       <BottomNav
         activeScreen={activeScreen}
         onNavigate={(screen) => setActiveScreen(screen)}
-        onOpenPhotos={() => onOpenPhotoLibrary?.()}
         ownedCount={ownedCount}
         photoCount={photoLibraryCount}
       />

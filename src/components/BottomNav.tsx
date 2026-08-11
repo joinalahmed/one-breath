@@ -16,7 +16,6 @@ const asset = (name: string) => `/assets/pearl-coast-clean-buttons-v2/${name}.pn
 interface BottomNavProps {
   activeScreen: HubScreen;
   onNavigate: (screen: HubScreen) => void;
-  onOpenPhotos: () => void;
   /** Owned-upgrade count → badge on the Store tile. */
   ownedCount?: number;
   /** Saved-photo count → badge on the Photos tile. */
@@ -26,7 +25,6 @@ interface BottomNavProps {
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeScreen,
   onNavigate,
-  onOpenPhotos,
   ownedCount = 0,
   photoCount = 0,
 }) => {
@@ -39,12 +37,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     badge: number | null;
   }> = [
     { key: 'home', art: 'button-map', label: 'Map', onClick: () => onNavigate('home'), active: activeScreen === 'home', badge: null },
-    { key: 'haven', art: 'button-quests', label: 'Village', onClick: () => onNavigate('haven'), active: activeScreen === 'haven', badge: null },
+    // NOTE: the art files carry their own baked-in labels. button-quests.png is the
+    // RANK (trophy) tile and button-board.png is the VILLAGE tile — so those two
+    // pair with the leaderboard and haven screens respectively, despite the names.
+    { key: 'leaderboard', art: 'button-quests', label: 'Rank', onClick: () => onNavigate('leaderboard'), active: activeScreen === 'leaderboard', badge: null },
     { key: 'shop', art: 'button-gear', label: 'Store', onClick: () => onNavigate('shop'), active: activeScreen === 'shop', badge: ownedCount },
-    { key: 'photo', art: 'button-photos', label: 'Photos', onClick: onOpenPhotos, active: false, badge: photoCount },
-    // Leaderboard uses a dedicated asset. Drop the final art in as button-board.png
-    // (same folder) to replace the current placeholder — no code change needed.
-    { key: 'leaderboard', art: 'button-board', label: 'Leaderboard', onClick: () => onNavigate('leaderboard'), active: activeScreen === 'leaderboard', badge: null },
+    { key: 'photo', art: 'button-photos', label: 'Photos', onClick: () => onNavigate('photos'), active: activeScreen === 'photos', badge: photoCount },
+    { key: 'haven', art: 'button-board', label: 'Village', onClick: () => onNavigate('haven'), active: activeScreen === 'haven', badge: null },
   ];
 
   return (
@@ -63,7 +62,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({
               src={asset(item.art)}
               alt={item.label}
               draggable={false}
-              className="w-full h-auto pointer-events-none transition-all duration-200"
+              // Square box + object-cover normalizes every tile to the same height:
+              // the wide 1536×1024 tiles (Rank, Village) get their transparent
+              // side-glow cropped so the tile art fills the square like the others.
+              className="w-full aspect-square object-cover pointer-events-none transition-all duration-200"
               style={{
                 filter: item.active
                   ? 'drop-shadow(0 5px 12px rgba(56,189,248,0.6)) saturate(1.05)'
