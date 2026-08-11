@@ -151,6 +151,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   } | null>(null);
   const discoveredRareRef = useRef<Set<string>>(new Set());
   const [showCutStoneTip, setShowCutStoneTip] = useState(false);
+  const cutStoneTipShownRef = useRef(false);
   const depthReachedRef = useRef(0);
 
   // Floating text popups & Juice effects
@@ -708,8 +709,9 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       if (diver.y > diver.maxDepthReached) {
         diver.maxDepthReached = diver.y;
         depthReachedRef.current = diver.y;
-        // Show cut stone tip when reaching ~15m depth
-        if (diver.y > 14 && !showCutStoneTip && diver.carryingStone) {
+        // Show cut stone tip when reaching ~15m depth (only once per dive)
+        if (diver.y > 14 && !cutStoneTipShownRef.current && diver.carryingStone) {
+          cutStoneTipShownRef.current = true;
           setShowCutStoneTip(true);
         }
       }
