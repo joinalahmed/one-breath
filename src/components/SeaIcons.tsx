@@ -1085,6 +1085,7 @@ export function drawVectorShipAndCrewCanvas(
 
   ctx.translate(shipX, surfaceY + floatY);
   ctx.rotate(rollAngle);
+  ctx.scale(1.3, 1.3);
 
   // SHIP HULL (Mahogany Wood Vessel)
   // Waterline foam reflection

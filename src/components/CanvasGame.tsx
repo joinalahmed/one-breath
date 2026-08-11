@@ -2269,7 +2269,7 @@ function renderCanvas(
   }
 
   // Diver Vector Character
-  drawVectorDiverCanvas(ctx, diverSx, diverSy, 60, 60, {
+  drawVectorDiverCanvas(ctx, diverSx, diverSy, 78, 78, {
     isDescending: diver.isDescending,
     isAscending: diver.isAscending,
     carryingStone: diver.carryingStone,
