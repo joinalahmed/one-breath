@@ -448,6 +448,15 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
           </motion.div>
       )}
 
+      {/* DIVE NOW BUTTON — bottom-right corner */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={onStartDive}
+        className="absolute bottom-3 right-3 z-20 px-4 py-2.5 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-black text-sm uppercase tracking-wide shadow-lg hover:shadow-xl transition-all border border-cyan-400/50"
+      >
+        🤿 Dive Now
+      </motion.button>
     </div>
   );
 };
