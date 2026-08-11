@@ -4,8 +4,12 @@ const ASSET_URLS = [
   // Video
   '/assets/village_boat_departure_3s_fast.mp4',
 
-  // Audio
+  // Audio — ambient and in-game tracks
   '/assets/96459__123a4567__ambience_maltese_fishing_village_seafront_winter.wav',
+  '/assets/ingame.wav',
+  '/assets/map.wav',
+  '/assets/gettingInWater.wav',
+  '/assets/catchingFish.mp3',
 
   // GIFs
   '/assets/pearl.gif',
