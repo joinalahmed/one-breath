@@ -817,7 +817,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
           )}
         </>
       </div>
-
+      )}
 
       {/* OVERLAY ANIMATION MODALS */}
       <AnimatePresence>
