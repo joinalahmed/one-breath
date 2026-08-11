@@ -1,20 +1,7 @@
 {
   "short_name": "One Breath",
   "name": "One Breath: Freediver Haven",
-  "icons": [
-    {
-      "src": "/pwa-icon-192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/pwa-icon-512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    }
-  ],
+  "icons": [],
   "start_url": "/",
   "background_color": "#020617",
   "theme_color": "#020617",

@@ -37,6 +37,12 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
+  // Only cache GET requests
+  if (request.method !== 'GET') {
+    event.respondWith(fetch(request));
+    return;
+  }
+
   // Navigation requests: network first, fallback to cache
   if (request.mode === 'navigate') {
     event.respondWith(
