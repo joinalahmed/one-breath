@@ -252,7 +252,7 @@ export default function App() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden && phase === 'DIVING') {
-        soundManager.restoreBgMusic();
+        soundManager.stopIngameMusic();
         setPhase('SURFACE');
       }
     };
@@ -295,7 +295,8 @@ export default function App() {
 
   // Start Dive Handler â€” plays boat departure video then enters dive
   const handleStartDive = () => {
-    soundManager.dimBgMusic();
+    soundManager.stopBgMusic();
+    soundManager.stopMapMusic();
     setPhase('DIVE_TRANSITION');
   };
 
@@ -480,6 +481,7 @@ export default function App() {
   // committed until the player acts on it, so a rescue can restore the haul).
   const handleDiveComplete = useCallback(
     (result: DiveResultPayload) => {
+      soundManager.stopIngameMusic();
       const failed = result.outcome !== 'surfaced';
       const treasure = result.potentialCoins || 0;
       // Offer a rescue only when there's a haul worth saving or a streak on the line.
@@ -502,7 +504,7 @@ export default function App() {
     if (!diveReport) return;
     commitDiveResult(settledResult(diveReport.result));
     setDiveReport(null);
-    soundManager.restoreBgMusic();
+    soundManager.stopIngameMusic();
     setPhase('SURFACE');
   };
 
@@ -511,7 +513,6 @@ export default function App() {
     commitDiveResult(settledResult(diveReport.result));
     setDiveReport(null);
     setDiveKey((k) => k + 1); // force a fresh CanvasGame mount
-    soundManager.dimBgMusic();
     setPhase('DIVING');
   };
 
@@ -527,7 +528,7 @@ export default function App() {
       foodEarned: result.potentialFood || 0,
     });
     setDiveReport(null);
-    soundManager.restoreBgMusic();
+    soundManager.stopIngameMusic();
     setPhase('SURFACE');
   };
 
@@ -587,8 +588,8 @@ export default function App() {
                 autoPlay
                 muted
                 playsInline
-                onEnded={() => setPhase('DIVING')}
-                onClick={() => setPhase('DIVING')}
+                onEnded={() => { setPhase('DIVING'); }}
+                onClick={() => { setPhase('DIVING'); }}
                 className="w-full h-full object-cover cursor-pointer"
                 src="/assets/village_boat_departure_3s_fast.mp4"
               />
@@ -611,7 +612,7 @@ export default function App() {
                 onDiveComplete={handleDiveComplete}
                 onOpenDebug={() => setShowTuningOverlay(true)}
                 onExit={() => {
-                  soundManager.restoreBgMusic();
+                  soundManager.stopIngameMusic();
                   setPhase('SURFACE');
                 }}
               />

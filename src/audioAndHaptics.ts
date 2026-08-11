@@ -8,6 +8,10 @@ class AudioAndHapticsController {
   private lastHeartbeatTime: number = 0;
   private bgMusic: HTMLAudioElement | null = null;
   private bgMusicStarted: boolean = false;
+  private ingameMusic: HTMLAudioElement | null = null;
+  private ingameMusicStarted: boolean = false;
+  private mapMusic: HTMLAudioElement | null = null;
+  private mapMusicStarted: boolean = false;
 
   constructor() {
     // Lazily initialized on first touch
@@ -31,9 +35,9 @@ class AudioAndHapticsController {
 
   public setMuted(muted: boolean) {
     this.isMuted = muted;
-    if (this.bgMusic) {
-      this.bgMusic.muted = muted;
-    }
+    if (this.bgMusic) this.bgMusic.muted = muted;
+    if (this.ingameMusic) this.ingameMusic.muted = muted;
+    if (this.mapMusic) this.mapMusic.muted = muted;
   }
 
   public getMuted(): boolean {
@@ -68,6 +72,62 @@ class AudioAndHapticsController {
       this.bgMusic.pause();
       this.bgMusic.currentTime = 0;
       this.bgMusicStarted = false;
+    }
+  }
+
+  public startIngameMusic() {
+    if (this.ingameMusicStarted) return;
+    this.stopMapMusic();
+    this.stopBgMusic();
+    this.ingameMusicStarted = true;
+
+    this.ingameMusic = new Audio('/assets/ingame.wav');
+    this.ingameMusic.loop = true;
+    this.ingameMusic.volume = 0.4;
+    this.ingameMusic.muted = this.isMuted;
+    this.ingameMusic.play().catch(() => {});
+  }
+
+  public playWaterSplashThenIngame() {
+    this.stopMapMusic();
+    this.stopBgMusic();
+    const splash = new Audio('/assets/gettingInWater.wav');
+    splash.volume = 0.6;
+    splash.muted = this.isMuted;
+    splash.play().catch(() => {});
+    splash.onended = () => {
+      this.startIngameMusic();
+    };
+    setTimeout(() => {
+      if (!this.ingameMusicStarted) this.startIngameMusic();
+    }, 5000);
+  }
+
+  public stopIngameMusic() {
+    if (this.ingameMusic) {
+      this.ingameMusic.pause();
+      this.ingameMusic.currentTime = 0;
+      this.ingameMusicStarted = false;
+    }
+  }
+
+  public startMapMusic() {
+    if (this.mapMusicStarted) return;
+    this.stopIngameMusic();
+    this.mapMusicStarted = true;
+
+    this.mapMusic = new Audio('/assets/map.wav');
+    this.mapMusic.loop = true;
+    this.mapMusic.volume = 0.35;
+    this.mapMusic.muted = this.isMuted;
+    this.mapMusic.play().catch(() => {});
+  }
+
+  public stopMapMusic() {
+    if (this.mapMusic) {
+      this.mapMusic.pause();
+      this.mapMusic.currentTime = 0;
+      this.mapMusicStarted = false;
     }
   }
 
