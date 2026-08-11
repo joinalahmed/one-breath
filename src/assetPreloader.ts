@@ -30,7 +30,30 @@ const ASSET_URLS = [
   '/assets/ridge-step-up-m.png',
   '/assets/ridge-step-down-m.png',
   '/assets/ridge-block.png',
-  '/assets/ChatGPT Image Aug 10, 2026, 02_57_33 PM.png',
+
+  // Splash — static poster + animated loop (plays on every app load)
+  '/assets/splash-screen.png',
+  '/assets/the_ascent_splash_loop_3s.gif',
+
+  // Map screen — animated theme loop
+  '/assets/map_theme_animation_clean_3s_loop.gif',
+
+  // Pearl Coast landing — animated village background
+  '/assets/game-main-screen-bg.gif',
+
+  // Pearl Coast landing — HUD + button assets (transparent PNGs)
+  '/assets/pearl-coast-clean-buttons-v2/hud-level-ring.png',
+  '/assets/pearl-coast-clean-buttons-v2/hud-pearl-counter.png',
+  '/assets/pearl-coast-clean-buttons-v2/hud-fish-counter.png',
+  '/assets/pearl-coast-clean-buttons-v2/hud-streak-counter.png',
+  '/assets/pearl-coast-clean-buttons-v2/button-start-dive.png',
+  '/assets/pearl-coast-clean-buttons-v2/button-gear.png',
+  '/assets/pearl-coast-clean-buttons-v2/button-quests.png',
+  '/assets/pearl-coast-clean-buttons-v2/button-photos.png',
+  '/assets/pearl-coast-clean-buttons-v2/button-map.png',
+  '/assets/pearl-coast-clean-buttons-v2/button-board.png',
+  '/assets/pearl-coast-clean-buttons-v2/home-removebg-preview.png',
+  '/assets/pearl-coast-clean-buttons-v2/setting-removebg-preview.png',
 ];
 
 export const preloadAssets = async (): Promise<void> => {

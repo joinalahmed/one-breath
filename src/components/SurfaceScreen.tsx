@@ -4,11 +4,14 @@ import { PlayerStats, UpgradesState, BotDiver, DailyChallenge } from '../types';
 import { simulateBotActivity } from '../bots';
 import { soundManager } from '../audioAndHaptics';
 import { getPlayerRank, getNextRank, DiverRankInfo } from '../ranks';
-import { RankUpModal, StreakComboBanner } from './AnimatedOverlayEffects';
+import { RankUpModal } from './AnimatedOverlayEffects';
 import { HavenVillageScreen } from './HavenVillageScreen';
 import { MapScreen } from './MapScreen';
+import { PearlCoastHomeScreen } from './PearlCoastHomeScreen';
 import { BubbleOverlay } from './BubbleOverlay';
 import { UpgradeImpactInfo } from './UpgradeImpactInfo';
+import { TopHud } from './TopHud';
+import { BottomNav } from './BottomNav';
 
 interface SurfaceScreenProps {
   stats: PlayerStats;
@@ -54,7 +57,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   onOpenPhotoLibrary,
   photoLibraryCount = 0,
 }) => {
-  const [activeScreen, setActiveScreen] = useState<'home' | 'haven' | 'shop' | 'leaderboard'>('haven');
+  const [activeScreen, setActiveScreen] = useState<'pearlcoast' | 'home' | 'haven' | 'shop' | 'leaderboard'>('pearlcoast');
   const [currentBots] = useState<BotDiver[]>(() => simulateBotActivity(bots));
   const [isMuted, setIsMuted] = useState(() => soundManager.getMuted());
   const [showSettings, setShowSettings] = useState(false);
@@ -119,14 +122,6 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   const currentRank = getPlayerRank(stats.bestDepth, stats.coins);
   const nextRank = getNextRank(currentRank.level);
   const [unlockedRankModal, setUnlockedRankModal] = useState<DiverRankInfo | null>(null);
-  const [streakBannerDismissed, setStreakBannerDismissed] = useState(false);
-  const streakRef = useRef(stats.streak);
-  useEffect(() => {
-    if (stats.streak !== streakRef.current) {
-      streakRef.current = stats.streak;
-      setStreakBannerDismissed(false);
-    }
-  }, [stats.streak]);
 
   const prevRankLevelRef = useRef(currentRank.level);
 
@@ -140,10 +135,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.code === 'Space' || e.code === 'Enter')) {
-        if (activeScreen === 'home') {
-          e.preventDefault();
-          onStartDive();
-        } else if (activeScreen === 'haven') {
+        if (activeScreen === 'pearlcoast' || activeScreen === 'home' || activeScreen === 'haven') {
           e.preventDefault();
           onStartDive();
         }
@@ -323,16 +315,24 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
     },
   ];
 
+  const isPearl = activeScreen === 'pearlcoast';
+
   return (
     <div
-      className="relative w-full h-full max-w-lg mx-auto bg-[#020a18] text-slate-100 flex flex-col justify-between overflow-hidden select-none p-3 sm:p-4 no-scrollbar"
-      style={{
-        paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
-        paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
-      }}
+      className={`relative w-full h-full max-w-lg mx-auto bg-slate-950 text-slate-100 flex flex-col justify-between overflow-hidden select-none no-scrollbar ${
+        isPearl ? '' : 'p-3 sm:p-4'
+      }`}
+      style={
+        isPearl
+          ? undefined
+          : {
+              paddingTop: 'max(0.75rem, env(safe-area-inset-top))',
+              paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))',
+            }
+      }
     >
       {/* Dynamic Background Atmosphere */}
-      {activeScreen === 'haven' ? (
+      {isPearl ? null : activeScreen === 'haven' ? (
         <img
           src="/assets/middle_eastern_fishing_village_actual_walking.gif"
           alt=""
@@ -342,7 +342,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         />
       ) : activeScreen === 'home' ? (
         <img
-          src="/assets/ChatGPT Image Aug 10, 2026, 02_57_33 PM.png"
+          src="/assets/map_theme_animation_clean_3s_loop.gif"
           alt=""
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
           draggable={false}
@@ -359,113 +359,136 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50 pointer-events-none" />
       )}
 
-      {/* TOP NAV BAR — Arabic gold + navy style */}
-      <div className="relative z-20 w-full flex justify-between items-center px-3 py-2">
-        {/* Left: PFP avatar + level & stats */}
-        <div className="flex items-center space-x-2.5 cursor-pointer" onClick={() => setActiveScreen('haven')}>
-          {/* Avatar with gold ring — diver silhouette */}
-          <div className="relative w-11 h-11">
-            <div className="absolute inset-0 rounded-full border-2 border-yellow-600 shadow-[0_0_8px_rgba(212,175,55,0.3)] bg-[#0a1a3a]" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="7" r="4" fill="#d4af37"/>
-                <path d="M5 21c0-3.87 3.13-7 7-7s7 3.13 7 7" fill="#d4af37"/>
-              </svg>
-            </div>
-            {/* Level badge */}
-            <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-yellow-700 to-yellow-500 text-[8px] font-black text-slate-900 px-1.5 py-0.5 rounded-full border border-yellow-400/60">
-              {Math.min(100, stats.totalDives + 1)}
-            </div>
-          </div>
-
-          {/* Level + currency */}
-          <div className="flex flex-col leading-tight">
-            <span className="text-[11px] font-black text-yellow-100/90 tracking-wide">
-              DIVER
-            </span>
-            <div className="flex items-center space-x-2 mt-0.5">
-              <span className="text-[10px] font-bold text-yellow-400">💎 {stats.coins}</span>
-              <span className="text-[10px] font-bold text-emerald-300">🐟 {stats.food}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Settings + notifications */}
-        <div className="relative flex items-center gap-2">
-          <button
-            onClick={() => setShowSettings((v) => !v)}
-            className="w-9 h-9 rounded-lg border border-yellow-600/50 bg-[#0a1a3a]/80 backdrop-blur-sm flex items-center justify-center cursor-pointer active:scale-95 transition-all"
-            title="Settings"
+      {/* TOP HUD — no container box; icon controls + counters float over the
+          screen background. Rendered on every hub screen (z-40 so it floats above
+          the Pearl Coast landing overlay at z-30); never shown during a dive. */}
+      <div className="relative z-40 w-full px-2 pt-[max(0.5rem,env(safe-area-inset-top))] mb-2 flex items-center gap-2">
+        {/* Single line: home (back to the Pearl Coast landing) · HUD counters ·
+            settings (audio lives inside the settings menu). The home button is
+            hidden on the home screen itself; the level ring shows only there. */}
+          {!isPearl && (
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setActiveScreen('pearlcoast')}
+            aria-label="Home"
+            title="Home"
+            className="w-9 h-9 shrink-0 cursor-pointer focus:outline-none"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4af37" strokeWidth="2" strokeLinecap="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-          </button>
+            <img
+              src="/assets/pearl-coast-clean-buttons-v2/home-removebg-preview.png"
+              alt="Home"
+              draggable={false}
+              className="w-full h-full object-contain pointer-events-none"
+              style={{ filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.5))' }}
+            />
+          </motion.button>
+          )}
 
-          <AnimatePresence>
-            {showSettings && (
-              <>
-                <div className="fixed inset-0 z-30" onClick={() => setShowSettings(false)} />
-                <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.96 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute right-0 mt-2 w-48 z-40 rounded-xl overflow-hidden border border-yellow-700/40 shadow-2xl bg-[#0a1a3a]"
-                >
-                  <div className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-yellow-400/70 border-b border-yellow-900/30">
-                    Settings
-                  </div>
+          {/* HUD counters — fill the space between the home and settings icons. */}
+          <TopHud stats={stats} height={28} showLevel={isPearl} className="flex-1 min-w-0" />
 
-                  <button
-                    onClick={() => {
-                      const nextMuted = !isMuted;
-                      soundManager.setMuted(nextMuted);
-                      setIsMuted(nextMuted);
-                      setShowSettings(false);
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 transition-colors cursor-pointer"
+          {/* Settings (audio, install, records) */}
+          <div className="relative shrink-0">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setShowSettings((v) => !v)}
+              aria-label="Settings"
+              title="Settings"
+              className="w-9 h-9 cursor-pointer focus:outline-none"
+            >
+              <img
+                src="/assets/pearl-coast-clean-buttons-v2/setting-removebg-preview.png"
+                alt="Settings"
+                draggable={false}
+                className="w-full h-full object-contain pointer-events-none"
+                style={{ filter: 'drop-shadow(0 2px 5px rgba(0,0,0,0.5))' }}
+              />
+            </motion.button>
+
+            <AnimatePresence>
+              {showSettings && (
+                <>
+                  {/* Click-away backdrop */}
+                  <div className="fixed inset-0 z-30" onClick={() => setShowSettings(false)} />
+
+                  <motion.div
+                    initial={{ opacity: 0, y: -8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 mt-2 w-48 z-40 rounded-xl overflow-hidden border border-slate-700 shadow-2xl bg-slate-900"
                   >
-                    <span className="text-sm">{isMuted ? '🔇' : '🔊'}</span>
-                    <span>{isMuted ? 'Unmute Audio' : 'Mute Audio'}</span>
-                  </button>
+                    <div className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                      Settings
+                    </div>
 
-                  <button
-                    onClick={() => {
-                      handleInstallPWA();
-                      setShowSettings(false);
-                    }}
-                    disabled={isPwaInstalled}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 transition-colors border-t border-slate-800 disabled:opacity-60 disabled:cursor-default cursor-pointer"
-                  >
-                    <span className="text-sm">📱</span>
-                    <span>{isPwaInstalled ? 'App Installed ✓' : 'Install App'}</span>
-                  </button>
+                    {/* Audio Mute — toggles in place, keeps the menu open */}
+                    <button
+                      onClick={() => {
+                        const nextMuted = !isMuted;
+                        soundManager.setMuted(nextMuted);
+                        setIsMuted(nextMuted);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 transition-colors cursor-pointer"
+                    >
+                      <span className="text-sm">{isMuted ? '🔇' : '🔊'}</span>
+                      <span>{isMuted ? 'Sound Off' : 'Sound On'}</span>
+                    </button>
 
-                  <button
-                    onClick={() => {
-                      onOpenTelemetryModal();
-                      setShowSettings(false);
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 transition-colors border-t border-slate-800 cursor-pointer"
-                  >
-                    <span className="text-sm">📊</span>
-                    <span>Records &amp; Data</span>
-                  </button>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-        </div>
+                    {/* Install App */}
+                    <button
+                      onClick={() => {
+                        handleInstallPWA();
+                        setShowSettings(false);
+                      }}
+                      disabled={isPwaInstalled}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 transition-colors border-t border-slate-800 disabled:opacity-60 disabled:cursor-default cursor-pointer"
+                    >
+                      <span className="text-sm">📱</span>
+                      <span>{isPwaInstalled ? 'App Installed ✓' : 'Install App'}</span>
+                    </button>
+
+                    {/* Records & Telemetry */}
+                    <button
+                      onClick={() => {
+                        onOpenTelemetryModal();
+                        setShowSettings(false);
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-800 transition-colors border-t border-slate-800 cursor-pointer"
+                    >
+                      <span className="text-sm">📊</span>
+                      <span>Records &amp; Data</span>
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
       </div>
 
-      {/* STREAK COMBO BANNER */}
-      <AnimatePresence>
-        {stats.streak > 1 && !streakBannerDismissed && <StreakComboBanner streak={stats.streak} onDismiss={() => setStreakBannerDismissed(true)} />}
-      </AnimatePresence>
+      {/* PEARL COAST HOME — full-screen landing overlay with its own self-contained
+          chrome (title, currency chips, START DIVE, bottom nav). Mounted/unmounted
+          directly (no AnimatePresence exit) so it never lingers as an invisible
+          click-blocking layer over the sub-screens. */}
+      {isPearl && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.25 }}
+          className="absolute inset-0 z-30"
+        >
+          <PearlCoastHomeScreen
+            stats={stats}
+            onStartDive={onStartDive}
+          />
+        </motion.div>
+      )}
 
-      {/* DYNAMIC SCREEN CONTENT */}
+      {/* DYNAMIC SCREEN CONTENT — fully unmounted on the Pearl Coast landing so the
+          sub-screens never linger under the overlay. */}
+      {!isPearl && (
       <div className={`relative z-10 flex-1 ${activeScreen === 'haven' || activeScreen === 'home' ? '' : 'overflow-y-auto'} no-scrollbar`}>
         <AnimatePresence mode="wait">
           {/* 0. MAP SCREEN */}
@@ -527,22 +550,10 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
               transition={{ duration: 0.2 }}
               className="space-y-3 no-scrollbar pb-4"
             >
-              {/* STORE HEADER + BALANCE */}
-              <div className="flex items-end justify-between px-1">
-                <div>
-                  <h2 className="text-xl font-black text-yellow-400 uppercase tracking-wide">Shop</h2>
-                  <p className="text-[11px] text-yellow-200/50">Upgrade your gear & trade your catch</p>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="bg-[#0a1a3a] border border-yellow-600/40 px-2.5 py-1 rounded-xl text-xs font-black text-yellow-300 font-mono flex items-center gap-1">
-                    <span className="text-yellow-400">💎</span>
-                    {stats.coins}
-                  </span>
-                  <span className="bg-slate-950 border border-emerald-500/60 px-2.5 py-1 rounded-xl text-xs font-black text-emerald-300 font-mono flex items-center gap-1">
-                    <span className="text-emerald-400">🐟</span>
-                    {stats.food}
-                  </span>
-                </div>
+              {/* STORE HEADER — HUD/balance now lives in the shared top bar. */}
+              <div className="px-1">
+                <h2 className="text-xl font-black text-amber-300 uppercase tracking-wide">Store</h2>
+                <p className="text-[11px] text-slate-400">Upgrade your gear &amp; trade your catch</p>
               </div>
 
               {/* TRADE FISH */}
@@ -768,6 +779,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
           )}
         </AnimatePresence>
       </div>
+      )}
 
 
       {/* OVERLAY ANIMATION MODALS */}
@@ -780,67 +792,17 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
         )}
       </AnimatePresence>
 
-      {/* BOTTOM NAVIGATION BAR — wooden port plank style */}
-      <div className="relative z-20 shrink-0 px-2 py-2 mt-auto">
-        <div
-          className="flex justify-center items-end gap-0.5 rounded-xl p-1.5"
-          style={{
-            background: 'linear-gradient(180deg, #3d2b1a 0%, #2a1d10 40%, #1a1008 100%)',
-            border: '2px solid #5c4020',
-            boxShadow: 'inset 0 1px 0 rgba(255,200,100,0.15), 0 4px 12px rgba(0,0,0,0.6)',
-          }}
-        >
-          {[
-            { key: 'haven', label: 'Village' },
-            { key: 'home', label: 'Map' },
-            { key: 'shop', label: 'Shop' },
-            { key: 'dive', label: 'Dive' },
-            { key: 'leaderboard', label: 'Board' },
-            { key: 'collection', label: 'Album' },
-          ].map((tab) => {
-            const isActive = tab.key === 'dive' ? false : activeScreen === tab.key;
-            const isDive = tab.key === 'dive';
-            return (
-              <motion.button
-                key={tab.key}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => {
-                  if (isDive) {
-                    onStartDive();
-                  } else if (tab.key === 'collection') {
-                    onOpenPhotoLibrary?.();
-                  } else {
-                    setActiveScreen(tab.key as any);
-                  }
-                }}
-                className={`flex-1 flex items-center justify-center rounded-lg cursor-pointer transition-all ${
-                  isDive
-                    ? 'flex-[1.3] -mt-3 py-3 rounded-xl text-sm font-black text-[#1a1008] tracking-wide'
-                    : isActive
-                    ? 'py-2 text-[11px] font-bold text-amber-200'
-                    : 'py-2 text-[11px] font-bold text-stone-400 hover:text-stone-200'
-                }`}
-                style={
-                  isDive
-                    ? {
-                        background: 'linear-gradient(180deg, #f5d442 0%, #c9952a 100%)',
-                        border: '2px solid #f5d442',
-                        boxShadow: '0 4px 0 #7a5a12, 0 6px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.4)',
-                      }
-                    : isActive
-                    ? {
-                        background: 'linear-gradient(180deg, #4a3520 0%, #2e2010 100%)',
-                        border: '1px solid #6b4c25',
-                      }
-                    : {}
-                }
-              >
-                {tab.label}
-              </motion.button>
-            );
-          })}
-        </div>
-      </div>
+      {/* BOTTOM NAVIGATION BAR — shared Pearl Coast button assets. Rendered on every
+          hub screen (including the Pearl Coast landing) at z-40 so it floats above
+          the landing overlay (z-30). Never appears during a dive, which is a
+          separate app phase outside this surface hub. */}
+      <BottomNav
+        activeScreen={activeScreen}
+        onNavigate={(screen) => setActiveScreen(screen)}
+        onOpenPhotos={() => onOpenPhotoLibrary?.()}
+        ownedCount={ownedCount}
+        photoCount={photoLibraryCount}
+      />
     </div>
   );
 };
