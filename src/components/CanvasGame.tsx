@@ -1171,7 +1171,6 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             el.addEventListener('pointerdown', (e) => e.stopPropagation(), true);
             el.addEventListener('pointerup', (e) => e.stopPropagation(), true);
             el.addEventListener('touchstart', (e) => e.stopPropagation(), true);
-            el.addEventListener('click', (e) => e.stopPropagation(), true);
           }
         }}
       >
