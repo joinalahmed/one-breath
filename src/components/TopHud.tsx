@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { HudCounter } from './HudCounter';
 import { PlayerStats } from '../types';
 
@@ -18,10 +18,22 @@ interface TopHudProps {
   className?: string;
 }
 
-export const TopHud: React.FC<TopHudProps> = ({ stats, height = 34, showLevel = true, className }) => {
+export const TopHud: React.FC<TopHudProps> = ({ stats, showLevel = true, className }) => {
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 400);
+
+  useEffect(() => {
+    const handleResize = () => setIsSmallScreen(window.innerWidth < 400);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Responsive height: smaller on mobile, larger on desktop
+  const height = isSmallScreen ? 24 : 34;
+  const gap = isSmallScreen ? 'gap-1' : 'gap-2';
   const level = Math.min(100, stats.totalDives + 1);
+
   return (
-    <div className={`flex items-center justify-between gap-2 w-full ${className ?? ''}`}>
+    <div className={`flex items-center justify-between ${gap} w-full ${className ?? ''}`}>
       {showLevel && (
         <HudCounter art="hud-level-ring" value={level} height={height} labelLeft={50} color="#0f766e" fontSize={Math.round(height * 0.42)} />
       )}
