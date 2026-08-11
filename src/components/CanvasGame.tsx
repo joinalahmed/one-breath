@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import confetti from 'canvas-confetti';
 import { GameConfig, DiverState, CollectibleItem, SharkState, UpgradesState, ItemSize } from '../types';
@@ -1041,6 +1042,10 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
 
   // Handle Input (Pointer events)
   const handlePointerDown = (e: React.PointerEvent) => {
+    // Ignore if the event originated from a UI button
+    const target = e.target as HTMLElement;
+    if (target.closest('[data-hud]')) return;
+
     soundManager.enableAudio();
 
     // Check double tap for stone cut
@@ -1088,7 +1093,8 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full select-none overflow-hidden bg-slate-900 touch-none flex flex-col justify-between"
+      className="relative w-full h-full select-none overflow-hidden bg-slate-900 flex flex-col justify-between"
+      style={{ touchAction: 'none' }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -1096,7 +1102,7 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       onTouchStart={handleTouchStart}
     >
       {/* 2D HTML5 Canvas for Render */}
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block" />
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full block pointer-events-none" />
 
       {/* Hidden animated GIF sprites — kept in the DOM so the browser advances
           their frames; the canvas samples the current frame each render. */}
@@ -1126,28 +1132,35 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       {/* Mark Bowley Ambient Floating Bubble Effect */}
       <BubbleOverlay count={18} />
 
-      {/* TOP HUD — home button + collected items */}
+      {/* Village exit button — inside the game container but with z-[9999] and stopPropagation via native listener */}
       <div
-        className="relative z-10 w-full px-3 flex justify-between items-center pointer-events-none"
+        data-hud="true"
+        className="absolute top-3 right-14 z-[9999]"
+        style={{ touchAction: 'auto', pointerEvents: 'auto' }}
+        ref={(el) => {
+          if (el && !el.dataset.bound) {
+            el.dataset.bound = 'true';
+            el.addEventListener('pointerdown', (e) => e.stopPropagation(), true);
+            el.addEventListener('pointerup', (e) => e.stopPropagation(), true);
+            el.addEventListener('touchstart', (e) => e.stopPropagation(), true);
+            el.addEventListener('click', (e) => { e.stopPropagation(); onExit?.(); }, true);
+          }
+        }}
+      >
+        <button
+          className="px-3 py-1.5 rounded-full bg-slate-900/80 border border-cyan-500/50 flex items-center gap-1.5 cursor-pointer active:scale-90 transition-all shadow-lg"
+          style={{ touchAction: 'auto', pointerEvents: 'auto' }}
+        >
+          <span className="text-sm">🏠</span>
+          <span className="text-[10px] font-bold text-cyan-200">Village</span>
+        </button>
+      </div>
+
+      {/* TOP HUD — collected items on the left */}
+      <div
+        className="relative z-10 w-full px-3 flex items-center pointer-events-none"
         style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}
       >
-        {/* Top Left: Home button */}
-        <div className="pointer-events-auto">
-          {onExit && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onExit();
-              }}
-              className="w-9 h-9 rounded-full bg-slate-900/70 border border-slate-600/50 flex items-center justify-center text-sm cursor-pointer active:scale-90 transition-all shadow-lg"
-              title="Back to Village"
-            >
-              🏠
-            </button>
-          )}
-        </div>
-
-        {/* Top Center: Collected items display */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 bg-slate-900/60 border border-slate-700/50 rounded-full px-2.5 py-1">
             <img src="/assets/pearl.gif" alt="pearl" className="w-4 h-4" />
@@ -1164,11 +1177,10 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
             </div>
           )}
           <div className="flex items-center gap-1 bg-slate-900/60 border border-slate-700/50 rounded-full px-2.5 py-1">
+            <span className="text-xs">🧺</span>
             <span className="text-[10px] font-black text-emerald-300 font-mono">{hudBasket.length}/{capacity}</span>
           </div>
         </div>
-
-        <div className="w-9" />
       </div>
 
       {/* LEFT SIDE: Fixed depth scale — shows where the diver currently is */}

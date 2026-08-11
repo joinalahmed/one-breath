@@ -779,6 +779,7 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       <div className="relative z-20 shrink-0 px-3 py-2 mt-auto">
         <div className="flex justify-center items-stretch">
           {[
+            { key: 'haven', label: 'Village' },
             { key: 'home', label: 'Map' },
             { key: 'shop', label: 'Shop' },
             { key: 'dive', label: 'Dive' },
@@ -800,16 +801,16 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
                     setActiveScreen(tab.key as any);
                   }
                 }}
-                className={`flex-1 py-2.5 text-[11px] font-bold tracking-wide cursor-pointer transition-all border border-amber-800/40 ${
+                className={`flex-1 text-[11px] font-bold tracking-wide cursor-pointer transition-all border border-amber-800/40 ${
                   isDive
-                    ? 'bg-amber-700/80 text-amber-100 border-amber-500/60'
+                    ? 'flex-[1.4] py-4 text-sm bg-amber-600 text-white border-amber-400/80 rounded-lg shadow-[0_-2px_12px_rgba(217,119,6,0.4)] -mt-2 z-10'
                     : isActive
-                    ? 'bg-amber-900/60 text-amber-200 border-amber-500/50'
-                    : 'bg-slate-900/60 text-slate-300 hover:bg-slate-800/60'
+                    ? 'py-2.5 bg-amber-900/60 text-amber-200 border-amber-500/50'
+                    : 'py-2.5 bg-slate-900/60 text-slate-300 hover:bg-slate-800/60'
                 }`}
                 style={{
                   borderRight: 'none',
-                  ...(tab.key === 'home' ? { borderTopLeftRadius: '8px', borderBottomLeftRadius: '8px' } : {}),
+                  ...(tab.key === 'haven' ? { borderTopLeftRadius: '8px', borderBottomLeftRadius: '8px' } : {}),
                   ...(tab.key === 'collection' ? { borderTopRightRadius: '8px', borderBottomRightRadius: '8px', borderRight: '1px solid rgba(146,64,14,0.4)' } : {}),
                 }}
               >
