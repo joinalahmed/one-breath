@@ -128,6 +128,11 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
     seabedFloor: null,
     wallDecor: [null, null, null, null],
     wallTiles: [null, null, null, null, null],
+    cliffLeft: null,
+    cliffRight: null,
+    oceanWalls: [null, null, null, null],
+    oceanPlant: null,
+    bgFish: [null, null],
   });
 
   // UI state overlays
@@ -1109,6 +1114,15 @@ export const CanvasGame: React.FC<CanvasGameProps> = ({
       {/* Hidden animated GIF sprites — kept in the DOM so the browser advances
           their frames; the canvas samples the current frame each render. */}
       <div aria-hidden className="absolute pointer-events-none" style={{ width: 1, height: 1, left: 0, top: 0, opacity: 0, overflow: 'hidden' }}>
+        <img src="/assets/cliff-redstar.png" alt="" ref={(el) => { spritesRef.current.cliffLeft = el; }} />
+        <img src="/assets/cliff-purplestar.png" alt="" ref={(el) => { spritesRef.current.cliffRight = el; }} />
+        <img src="/assets/ocean-wall-light.png" alt="" ref={(el) => { spritesRef.current.oceanWalls[0] = el; }} />
+        <img src="/assets/ocean-wall-med.png" alt="" ref={(el) => { spritesRef.current.oceanWalls[1] = el; }} />
+        <img src="/assets/ocean-wall-fixed.png" alt="" ref={(el) => { spritesRef.current.oceanWalls[2] = el; }} />
+        <img src="/assets/ocean-wall-dark.png" alt="" ref={(el) => { spritesRef.current.oceanWalls[3] = el; }} />
+        <img src="/assets/ocean-plant.png" alt="" ref={(el) => { spritesRef.current.oceanPlant = el; }} />
+        <img src="/assets/greenfish.png" alt="" ref={(el) => { spritesRef.current.bgFish[0] = el; }} />
+        <img src="/assets/bluefush-patcheye.png" alt="" ref={(el) => { spritesRef.current.bgFish[1] = el; }} />
         <img src="/assets/pearl.gif" alt="" ref={(el) => { spritesRef.current.pearl = el; }} />
         {/* Fish variants — order must match FISH_FACES_RIGHT */}
         <img src="/assets/fish-clownfish.gif" alt="" ref={(el) => { spritesRef.current.fishVariants[0] = el; }} />
@@ -1436,6 +1450,11 @@ interface SpriteSet {
   // Stackable ridge tiles that build the canyon side walls, top to bottom:
   // [cap, straight, stepUp, stepDown, block].
   wallTiles: (HTMLImageElement | null)[];
+  cliffLeft: HTMLImageElement | null;
+  cliffRight: HTMLImageElement | null;
+  oceanWalls: (HTMLImageElement | null)[];
+  oceanPlant: HTMLImageElement | null;
+  bgFish: (HTMLImageElement | null)[];
 }
 
 // Default facing of each fish variant art (true = the fish's head points right),
@@ -1557,46 +1576,189 @@ function renderCanvas(
     return (worldX / config.WORLD_WIDTH) * width;
   };
 
-  // 1. Continuous Depth Background Gradient (Smooth Interpolation)
-  const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-  const numStops = 8;
-  for (let i = 0; i <= numStops; i++) {
-    const ratio = i / numStops;
-    const currentMeter = topMeterInView + ratio * 18;
-    const col = getOceanColorAtDepth(currentMeter);
-    bgGrad.addColorStop(ratio, `rgb(${col.r}, ${col.g}, ${col.b})`);
-  }
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, width, height);
-
-  // 2. Canyon Walls on Left & Right Margins for Depth Framing.
   const wallWidth = width * WALL_FRAC;
   const now = Date.now();
 
-  // Subtle procedural dark-rock canyon walls — a plain edge marking the collision
-  // boundary. (Ridge-tile art and coral decorations were removed by request.)
+  // 1. Ocean depth background — tiled images by depth zone with blended transitions
+  const depthZones = [0, 15, 30, 45];
+  const blendMeters = 3;
+  const oceanWalls = sprites.oceanWalls;
+  let bgDrawn = false;
+  if (oceanWalls[0] && oceanWalls[0].naturalWidth > 0) {
+    for (let z = 0; z < 4; z++) {
+      const img = oceanWalls[z];
+      if (!img || img.naturalWidth === 0) continue;
+      const zoneStartM = depthZones[z];
+      const zoneEndM = z < 3 ? depthZones[z + 1] + blendMeters : config.MAX_DEPTH;
+      const zoneStartPx = toScreenY(zoneStartM);
+      const zoneEndPx = toScreenY(zoneEndM);
+      if (zoneEndPx < 0 || zoneStartPx > height) continue;
+      const scale = width / img.naturalWidth;
+      const scaledH = img.naturalHeight * scale;
+      const clipTop = Math.max(0, zoneStartPx);
+      const clipBot = Math.min(height, zoneEndPx);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, clipTop, width, clipBot - clipTop);
+      ctx.clip();
+      if (z > 0) {
+        const fadeStartPx = toScreenY(depthZones[z]);
+        const fadeEndPx = toScreenY(depthZones[z] + blendMeters);
+        const grad = ctx.createLinearGradient(0, fadeStartPx, 0, fadeEndPx);
+        grad.addColorStop(0, 'rgba(0,0,0,0)');
+        grad.addColorStop(1, 'rgba(0,0,0,1)');
+        ctx.fillStyle = grad;
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.fillRect(0, fadeStartPx, width, fadeEndPx - fadeStartPx);
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      const offsetY = zoneStartPx;
+      const startTile = Math.floor((clipTop - offsetY) / scaledH);
+      const endTile = Math.ceil((clipBot - offsetY) / scaledH);
+      for (let t = startTile; t <= endTile; t++) {
+        ctx.drawImage(img, 0, offsetY + t * scaledH, width, scaledH);
+      }
+      if (z > 0) {
+        const fadeStartPx = toScreenY(depthZones[z]);
+        const fadeEndPx = toScreenY(depthZones[z] + blendMeters);
+        const fadeGrad = ctx.createLinearGradient(0, fadeStartPx, 0, fadeEndPx);
+        fadeGrad.addColorStop(0, 'rgba(0,0,0,1)');
+        fadeGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.fillStyle = fadeGrad;
+        ctx.fillRect(0, fadeStartPx, width, fadeEndPx - fadeStartPx);
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      ctx.restore();
+    }
+    bgDrawn = true;
+  }
+  if (!bgDrawn) {
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+    const numStops = 8;
+    for (let i = 0; i <= numStops; i++) {
+      const ratio = i / numStops;
+      const currentMeter = topMeterInView + ratio * 18;
+      const col = getOceanColorAtDepth(currentMeter);
+      bgGrad.addColorStop(ratio, `rgb(${col.r}, ${col.g}, ${col.b})`);
+    }
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  // 1b. Scattered ocean plants throughout the level
+  const plantImg = sprites.oceanPlant;
+  if (plantImg && plantImg.naturalWidth > 0) {
+    const plantCount = 25;
+    const plantAspect = plantImg.naturalHeight / plantImg.naturalWidth;
+    for (let i = 0; i < plantCount; i++) {
+      const seed = i * 6131;
+      const h1 = Math.abs(Math.sin(seed) * 10000) % 1;
+      const h2 = Math.abs(Math.sin(seed + 1) * 10000) % 1;
+      const h3 = Math.abs(Math.sin(seed + 2) * 10000) % 1;
+      const h4 = Math.abs(Math.sin(seed + 3) * 10000) % 1;
+      const plantDepth = h1 * config.MAX_DEPTH;
+      const plantX = wallWidth + h2 * (width - wallWidth * 2 - 120);
+      const plantScale = 1.2 + h3 * 1.3;
+      const plantW = 120 * plantScale;
+      const plantH = plantW * plantAspect;
+      const sy = toScreenY(plantDepth);
+      if (sy < -plantH || sy > height + plantH) continue;
+      ctx.save();
+      ctx.globalAlpha = 0.6 + h4 * 0.35;
+      ctx.drawImage(plantImg, plantX, sy, plantW, plantH);
+      ctx.restore();
+    }
+  }
+
+  // 1c. Scattered decorative background fish
+  const bgFishSprites = sprites.bgFish;
+  if (bgFishSprites[0] && bgFishSprites[0].naturalWidth > 0) {
+    const fishCount = 18;
+    for (let i = 0; i < fishCount; i++) {
+      const seed = i * 4729 + 331;
+      const h1 = Math.abs(Math.sin(seed) * 10000) % 1;
+      const h2 = Math.abs(Math.sin(seed + 1) * 10000) % 1;
+      const h3 = Math.abs(Math.sin(seed + 2) * 10000) % 1;
+      const h4 = Math.abs(Math.sin(seed + 3) * 10000) % 1;
+      const h5 = Math.abs(Math.sin(seed + 4) * 10000) % 1;
+      const fishIdx = h1 < 0.7 ? 0 : 1;
+      const fishImg = bgFishSprites[fishIdx];
+      if (!fishImg || fishImg.naturalWidth === 0) continue;
+      const fishAspect = fishImg.naturalHeight / fishImg.naturalWidth;
+      const fishDepth = h2 * config.MAX_DEPTH;
+      const fishX = wallWidth + h3 * (width - wallWidth * 2 - 80);
+      const fishScale = 0.6 + h4 * 0.7;
+      const fishW = 70 * fishScale;
+      const fishH = fishW * fishAspect;
+      const sy = toScreenY(fishDepth);
+      if (sy < -fishH || sy > height + fishH) continue;
+      ctx.save();
+      ctx.globalAlpha = 0.6 + h5 * 0.35;
+      if (h5 > 0.5) {
+        ctx.translate(fishX + fishW, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(fishImg, 0, sy, fishW, fishH);
+      } else {
+        ctx.drawImage(fishImg, fishX, sy, fishW, fishH);
+      }
+      ctx.restore();
+    }
+  }
+
+  // 2. Cliff walls on Left (RedStar) & Right (PurpleStar) — varied sizes
+  const cliffL = sprites.cliffLeft;
+  const cliffR = sprites.cliffRight;
   for (let side = 0; side < 2; side++) {
     const isLeft = side === 0;
-    const startM = Math.floor(topMeterInView);
-    const endM = Math.ceil(topMeterInView + 19);
-    ctx.save();
-    for (let m = startM; m <= endM; m++) {
-      const sy1 = toScreenY(m);
-      const sy2 = toScreenY(m + 1);
-      const col = getOceanColorAtDepth(m);
-      const rockR = Math.max(10, Math.floor(col.r * 0.4));
-      const rockG = Math.max(15, Math.floor(col.g * 0.4));
-      const rockB = Math.max(25, Math.floor(col.b * 0.5));
-      ctx.fillStyle = `rgb(${rockR}, ${rockG}, ${rockB})`;
-      const jitter = Math.sin(m * 12.3) * 6;
-      const w = wallWidth + (isLeft ? jitter : -jitter);
-      if (isLeft) {
-        ctx.fillRect(0, sy1, Math.max(8, w), sy2 - sy1 + 1);
-      } else {
-        ctx.fillRect(width - Math.max(8, w), sy1, Math.max(8, w), sy2 - sy1 + 1);
+    const img = isLeft ? cliffL : cliffR;
+    if (img && img.naturalWidth > 0) {
+      const aspectRatio = img.naturalHeight / img.naturalWidth;
+      const sizes = [0.5, 0.35, 0.25];
+      const spacingM = 8;
+      const startIdx = Math.floor(topMeterInView / spacingM) - 1;
+      const endIdx = Math.ceil((topMeterInView + 20) / spacingM) + 1;
+      ctx.save();
+      for (let t = startIdx; t <= endIdx; t++) {
+        const seed = t * 7919 + (isLeft ? 0 : 3571);
+        const hash1 = Math.abs(Math.sin(seed) * 10000) % 1;
+        const hash2 = Math.abs(Math.sin(seed + 1) * 10000) % 1;
+        const hash3 = Math.abs(Math.sin(seed + 2) * 10000) % 1;
+        const sizeIdx = Math.floor(hash1 * 3);
+        const drawW = width * sizes[sizeIdx];
+        const drawH = drawW * aspectRatio;
+        const meterPos = t * spacingM + (hash2 - 0.5) * spacingM * 0.5;
+        const dy = toScreenY(meterPos);
+        const xJitter = hash3 * wallWidth * 0.4;
+        if (isLeft) {
+          ctx.drawImage(img, -drawW * 0.1 + xJitter, dy, drawW, drawH);
+        } else {
+          ctx.drawImage(img, width - drawW + drawW * 0.1 - xJitter, dy, drawW, drawH);
+        }
       }
+      ctx.restore();
+    } else {
+      const startM = Math.floor(topMeterInView);
+      const endM = Math.ceil(topMeterInView + 19);
+      ctx.save();
+      for (let m = startM; m <= endM; m++) {
+        const sy1 = toScreenY(m);
+        const sy2 = toScreenY(m + 1);
+        const col = getOceanColorAtDepth(m);
+        const rockR = Math.max(10, Math.floor(col.r * 0.4));
+        const rockG = Math.max(15, Math.floor(col.g * 0.4));
+        const rockB = Math.max(25, Math.floor(col.b * 0.5));
+        ctx.fillStyle = `rgb(${rockR}, ${rockG}, ${rockB})`;
+        const jitter = Math.sin(m * 12.3) * 6;
+        const w = wallWidth + (isLeft ? jitter : -jitter);
+        if (isLeft) {
+          ctx.fillRect(0, sy1, Math.max(8, w), sy2 - sy1 + 1);
+        } else {
+          ctx.fillRect(width - Math.max(8, w), sy1, Math.max(8, w), sy2 - sy1 + 1);
+        }
+      }
+      ctx.restore();
     }
-    ctx.restore();
   }
 
   // 3. Depth Strata Gridlines & Depth Zone Markers (Every 5m & 10m)
