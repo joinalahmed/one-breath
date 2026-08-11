@@ -6,9 +6,16 @@ const CREATURE_GIFS: Record<string, string> = {
   crab: '/assets/crab.gif',
   seahorse: '/assets/fish-angelfish.gif',
   eel: '/assets/fish-betta.gif',
-  octopus: '/assets/fish-pufferfish.gif',
-  squid: '/assets/fish-clownfish.gif',
   angler: '/assets/shark.gif',
+};
+
+const CREATURE_EMOJIS: Record<string, string> = {
+  octopus: '🐙',
+  squid: '🦑',
+  crab: '🦀',
+  seahorse: '🐠',
+  eel: '🐍',
+  angler: '🐟',
 };
 
 interface RareCreatureDiscoveryModalProps {
@@ -85,7 +92,13 @@ export const RareCreatureDiscoveryModal: React.FC<RareCreatureDiscoveryModalProp
             transition={{ repeat: Infinity, duration: 1, ease: 'easeInOut' }}
           />
         ) : (
-          <div className="text-2xl">{itemName.slice(0, 1).toUpperCase()}</div>
+          <motion.span
+            className="text-4xl"
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 1, ease: 'easeInOut' }}
+          >
+            {CREATURE_EMOJIS[itemType.toLowerCase()] || '🐠'}
+          </motion.span>
         )}
         <div>
           <div className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">✨ {rarity} Discovery</div>
