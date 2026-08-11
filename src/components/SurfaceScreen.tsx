@@ -363,11 +363,14 @@ export const SurfaceScreen: React.FC<SurfaceScreenProps> = ({
       <div className="relative z-20 w-full flex justify-between items-center px-3 py-2">
         {/* Left: PFP avatar + level & stats */}
         <div className="flex items-center space-x-2.5 cursor-pointer" onClick={() => setActiveScreen('haven')}>
-          {/* Avatar with gold ring */}
+          {/* Avatar with gold ring — diver silhouette */}
           <div className="relative w-11 h-11">
-            <div className="absolute inset-0 rounded-full border-2 border-yellow-600 shadow-[0_0_8px_rgba(212,175,55,0.3)]" />
+            <div className="absolute inset-0 rounded-full border-2 border-yellow-600 shadow-[0_0_8px_rgba(212,175,55,0.3)] bg-[#0a1a3a]" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-lg">{currentRank.badgeEmoji}</span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="7" r="4" fill="#d4af37"/>
+                <path d="M5 21c0-3.87 3.13-7 7-7s7 3.13 7 7" fill="#d4af37"/>
+              </svg>
             </div>
             {/* Level badge */}
             <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-yellow-700 to-yellow-500 text-[8px] font-black text-slate-900 px-1.5 py-0.5 rounded-full border border-yellow-400/60">
