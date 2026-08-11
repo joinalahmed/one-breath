@@ -1,6 +1,6 @@
 // Preload all game assets (images, audio, video) on app startup
 
-const ASSET_URLS = [
+export const ASSET_URLS = [
   // Video
   '/assets/village_boat_departure_3s_fast.mp4',
 
