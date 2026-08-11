@@ -448,14 +448,22 @@ export const HavenVillageScreen: React.FC<HavenVillageScreenProps> = ({
           </motion.div>
       )}
 
-      {/* DIVE NOW BUTTON — bottom-right corner */}
+      {/* START DIVE BUTTON — use the same asset as Pearl Coast landing */}
       <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.96 }}
         onClick={onStartDive}
-        className="absolute bottom-3 right-3 z-20 px-4 py-2.5 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-black text-sm uppercase tracking-wide shadow-lg hover:shadow-xl transition-all border border-cyan-400/50"
+        aria-label="Start Dive"
+        className="absolute z-20 left-1/2 -translate-x-1/2 bottom-3 cursor-pointer focus:outline-none"
+        style={{ width: '100px' }}
       >
-        🤿 Dive Now
+        <img
+          src="/assets/pearl-coast-clean-buttons-v2/button-start-dive.png"
+          alt="Start Dive"
+          className="w-full h-auto pointer-events-none"
+          draggable={false}
+          style={{ filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.4))' }}
+        />
       </motion.button>
     </div>
   );
